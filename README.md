@@ -3,7 +3,7 @@
 A Julia Protocol for Geospatial Data
 
 ## Motivation
-To support operations or visualization of multiple (but similar) implementations of vector data (across `GeoJSON.jl`, `LibGEOS.jl`, etc). As a starting point, it will follow the GEO interface [1] in Python (which in turn borrows its design from the GeoJSON specification [2]).
+To support operations or visualization of multiple (but similar) implementations of vector data (across `GeoJSON.jl`, `LibGEOS.jl`, etc). As a starting point, it will follow the [GEO interface](https://gist.github.com/sgillies/2217756) [1] in Python (which in turn borrows its design from the [GeoJSON specification](http://geojson.org/) [2]).
 
 ## GEO Interface
 
