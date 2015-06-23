@@ -36,17 +36,38 @@ Represents a geometry with additional attributes, and requires the following met
 - `geometry(::AbstractFeature)::AbstractGeometry` returns the corresponding geometry
 - `properties(::AbstractFeature)::Dict{String,Any}` returns a dictionary of the properties
 
+Optionally, you can also provide the following methods
+
+- `bbox(::AbstractFeature)::AbstractGeometry` returns the bounding box for that feature
+- `crs(::AbstractFeature)::Dict{String,Any}` returns the coordinate reference system
+
+## Geospatial Geometries
+If you don't need to provide your own user types, GeoInterface also provides a set of geometries (below), which implements the GEO Interface:
+
+- `CRS`
+- `Position`
+- `Geometry <: AbstractGeometry`
+  - `Point <: AbstractPoint <: AbstractGeometry`
+  - `MultiPoint <: AbstractMultiPoint <: AbstractGeometry`
+  - `LineString <: AbstractLineString <: AbstractGeometry`
+  - `MultiLineString <: AbstractMultiLineString <: AbstractGeometry`
+  - `Polygon <: AbstractPolygon <: AbstractGeometry`
+  - `MultiPolygon <: AbstractMultiPolygon <: AbstractGeometry`
+  - `GeometryCollection <: AbstractGeometryCollection <: AbstractGeometry`
+- `Feature <: AbstractFeature`
+- `FeatureCollection <: AbstractFeatureCollection`
+
 ## Remarks
 
 Conceptually,
 
 - an `::AbstractGeometryCollection` maps to a `DataArray{::AbstractGeometry}`, and
-- a `::Vector{::AbstractFeature}` maps to a `DataFrame`, where each row is an `AbstractFeature`
+- an `::AbstractFeatureCollection` maps to a `DataFrame`, where each row is an `AbstractFeature`
 
 The design of the types in GeoInterface differs from the GeoJSON specification in the following ways:
 
-- Geometries no longer provide a `bbox` and `crs` method. If you wish to provide a `bbox` or `crs` attribute, wrap the geometry into a `Feature` type
-- Features do not have special fields for `id`, `bbox`, and `crs`. These are to be provided (or found) in the `properties` field, under the keys `featureid`, `bbox`, and `crs` respectively (if they exist). 
+- Julia Geometries do not provide a `bbox` and `crs` method. If you wish to provide a `bbox` or `crs` attribute, wrap the geometry into a `Feature` or `FeatureCollection`.
+- Features do not have special fields for `id`, `bbox`, and `crs`. These are to be provided (or found) in the `properties` field, under the keys `featureid`, `bbox`, and `crs` respectively (if they exist).
 
 ## References
 
