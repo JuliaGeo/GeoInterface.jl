@@ -5,7 +5,7 @@ module GeoInterface
             AbstractPoint, Point,
             AbstractMultiPoint, MultiPoint,
             AbstractLineString, LineString,
-            AbstractMutliLineString, MultiLineString,
+            AbstractMultiLineString, MultiLineString,
             AbstractPolygon, Polygon,
             AbstractMultiPolygon, MultiPolygon,
             AbstractFeature, Feature,
