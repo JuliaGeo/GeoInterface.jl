@@ -34,12 +34,12 @@ Represents a collection of geometries, and requires the `geometries` method, whi
 Represents a geometry with additional attributes, and requires the following methods
 
 - `geometry(::AbstractFeature)::AbstractGeometry` returns the corresponding geometry
-- `properties(::AbstractFeature)::Dict{String,Any}` returns a dictionary of the properties
+- `properties(::AbstractFeature)::Dict{AbstractString,Any}` returns a dictionary of the properties
 
 Optionally, you can also provide the following methods
 
 - `bbox(::AbstractFeature)::AbstractGeometry` returns the bounding box for that feature
-- `crs(::AbstractFeature)::Dict{String,Any}` returns the coordinate reference system
+- `crs(::AbstractFeature)::Dict{AbstractString,Any}` returns the coordinate reference system
 
 ## Geospatial Geometries
 If you don't need to provide your own user types, GeoInterface also provides a set of geometries (below), which implements the GEO Interface:
