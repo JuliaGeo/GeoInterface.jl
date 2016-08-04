@@ -1,3 +1,5 @@
+__precompile__()
+
 module GeoInterface
 
     using Compat
@@ -40,25 +42,25 @@ module GeoInterface
 
     abstract AbstractGeometry
     coordinates(obj::AbstractGeometry) = error("coordinates(::AbstractGeometry) not defined.")
-        
+
         abstract AbstractPoint <: AbstractGeometry
         geotype(::AbstractPoint) = :Point
-        
+
         abstract AbstractMultiPoint <: AbstractGeometry
         geotype(::AbstractMultiPoint) = :MultiPoint
-        
+
         abstract AbstractLineString <: AbstractGeometry
         geotype(::AbstractLineString) = :LineString
-        
+
         abstract AbstractMultiLineString <: AbstractGeometry
         geotype(::AbstractMultiLineString) = :MultiLineString
-        
+
         abstract AbstractPolygon <: AbstractGeometry
         geotype(::AbstractPolygon) = :Polygon
-        
+
         abstract AbstractMultiPolygon <: AbstractGeometry
         geotype(::AbstractMultiPolygon) = :MultiPolygon
-        
+
         abstract AbstractGeometryCollection <: AbstractGeometry
         geotype(::AbstractGeometryCollection) = :GeometryCollection
         geometries(obj::AbstractGeometryCollection) = error("geometries(::AbstractGeometryCollection) not defined.")
