@@ -1,7 +1,7 @@
 # Coordinate Reference System Objects
 # (has keys "type" and "properties")
 # TODO: Handle full CRS spec
-typealias CRS Dict{@compat(AbstractString),Any}
+typealias CRS Dict{AbstractString,Any}
 
 # Bounding Boxes
 # The value of the bbox member must be a 2*n array,
@@ -124,11 +124,11 @@ end
 geometries(collection::GeometryCollection) = collection.geometries
 
 type Feature <: AbstractFeature
-    geometry::@compat(Union{Void, AbstractGeometry})
-    properties::@compat(Union{Void, Dict{@compat(AbstractString),Any}})
+    geometry::Union{Void, AbstractGeometry}
+    properties::Union{Void, Dict{AbstractString,Any}}
 end
-Feature(geometry::@compat(Union{Void,GeoInterface.AbstractGeometry})) = Feature(geometry, Dict{@compat(AbstractString),Any}())
-Feature(properties::Dict{@compat(AbstractString),Any}) = Feature(nothing, properties)
+Feature(geometry::Union{Void,GeoInterface.AbstractGeometry}) = Feature(geometry, Dict{AbstractString,Any}())
+Feature(properties::Dict{AbstractString,Any}) = Feature(nothing, properties)
 geometry(feature::Feature) = feature.geometry
 properties(feature::Feature) = feature.properties
 bbox(feature::Feature) = get(feature.properties, "bbox", nothing)
@@ -136,11 +136,10 @@ crs(feature::Feature) = get(feature.properties, "crs", nothing)
 
 type FeatureCollection{T <: AbstractFeature} <: AbstractFeatureCollection
     features::Vector{T}
-    bbox::@compat(Union{Void, BBox})
-    crs::@compat(Union{Void, CRS})
+    bbox::Union{Void, BBox}
+    crs::Union{Void, CRS}
 end
 FeatureCollection{T <: AbstractFeature}(fc::Vector{T}) = FeatureCollection(fc, nothing, nothing)
 features(fc::FeatureCollection) = fc.features
 bbox(fc::FeatureCollection) = fc.bbox
 crs(fc::FeatureCollection) = fc.crs
-
