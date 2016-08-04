@@ -69,7 +69,7 @@ module GeoInterface
     geotype(::AbstractFeature) = :Feature
     geometry(obj::AbstractFeature) = error("geometry(::AbstractFeature) not defined.")
     # optional
-    properties(obj::AbstractFeature) = Dict{String,Any}()
+    properties(obj::AbstractFeature) = Dict{AbstractString,Any}()
     bbox(obj::AbstractFeature) = nothing
     crs(obj::AbstractFeature) = nothing
 
