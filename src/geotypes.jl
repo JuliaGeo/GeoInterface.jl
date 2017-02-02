@@ -16,12 +16,17 @@ typealias BBox Vector{Float64}
 typealias Position Vector{Float64}
 # (x, y, [z, ...]) - meaning of additional elements undefined.
 # In an object's contained geometries, Positions must have uniform dimensions.
+
 geotype(::Position) = :Position
-x(p::Position) = p[1]
-y(p::Position) = p[2]
-z(p::Position) = hasz(p) ? p[3] : zero(T)
-hasz(p::Position) = length(p) >= 3
-coordinates(obj::Position) = obj
+@traitimpl TPosition{Position} begin
+    x(p::Position) = p[1]
+    y(p::Position) = p[2]
+    z(p::Position) = hasz(p) ? p[3] : zero(T)
+    hasz(p::Position) = length(p) >= 3
+    coordinates(obj::Position) = obj
+end
+
+@traitfn dist_from_origin{X, Y; TPosition{X} }(p::X) = sqrt(x(p)^2 + y(p)^2 + z(p)^2)
 
 coordinates(obj::Vector{Position}) = obj
 coordinates{T <: AbstractPosition}(obj::Vector{T}) =                    Position[map(coordinates, obj)...]
