@@ -2,8 +2,6 @@ __precompile__()
 
 module GeoInterface
 
-    using Compat
-
     export  AbstractPosition, Position,
             AbstractGeometry, AbstractGeometryCollection, GeometryCollection,
             AbstractPoint, Point,
@@ -69,7 +67,7 @@ module GeoInterface
     geotype(::AbstractFeature) = :Feature
     geometry(obj::AbstractFeature) = error("geometry(::AbstractFeature) not defined.")
     # optional
-    properties(obj::AbstractFeature) = Dict{AbstractString,Any}()
+    properties(obj::AbstractFeature) = Dict{String,Any}()
     bbox(obj::AbstractFeature) = nothing
     crs(obj::AbstractFeature) = nothing
 

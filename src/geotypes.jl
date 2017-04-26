@@ -1,7 +1,7 @@
 # Coordinate Reference System Objects
 # (has keys "type" and "properties")
 # TODO: Handle full CRS spec
-typealias CRS Dict{AbstractString,Any}
+typealias CRS Dict{String,Any}
 
 # Bounding Boxes
 # The value of the bbox member must be a 2*n array,
@@ -125,10 +125,10 @@ geometries(collection::GeometryCollection) = collection.geometries
 
 type Feature <: AbstractFeature
     geometry::Union{Void, AbstractGeometry}
-    properties::Union{Void, Dict{AbstractString,Any}}
+    properties::Union{Void, Dict{String,Any}}
 end
-Feature(geometry::Union{Void,GeoInterface.AbstractGeometry}) = Feature(geometry, Dict{AbstractString,Any}())
-Feature(properties::Dict{AbstractString,Any}) = Feature(nothing, properties)
+Feature(geometry::Union{Void,GeoInterface.AbstractGeometry}) = Feature(geometry, Dict{String,Any}())
+Feature(properties::Dict{String,Any}) = Feature(nothing, properties)
 geometry(feature::Feature) = feature.geometry
 properties(feature::Feature) = feature.properties
 bbox(feature::Feature) = get(feature.properties, "bbox", nothing)
