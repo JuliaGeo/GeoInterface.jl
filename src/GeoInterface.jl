@@ -14,7 +14,7 @@ module GeoInterface
             AbstractFeatureCollection, FeatureCollection,
 
             geotype, # methods
-            x, y, z, hasz,
+            xcoord, ycoord, zcoord, hasz,
             coordinates,
             geometries,
             geometry, bbox, crs, properties,
@@ -22,10 +22,10 @@ module GeoInterface
 
     abstract AbstractPosition{T <: Real} <: AbstractVector{T}
     geotype(::AbstractPosition) = :Position
-    x(::AbstractPosition) = error("x(::AbstractPosition) not defined.")
-    y(::AbstractPosition) = error("y(::AbstractPosition) not defined.")
+    xcoord(::AbstractPosition) = error("x(::AbstractPosition) not defined.")
+    ycoord(::AbstractPosition) = error("y(::AbstractPosition) not defined.")
     # optional
-    z(::AbstractPosition) = error("z(::AbstractPosition) not defined.")
+    zcoord(::AbstractPosition) = error("z(::AbstractPosition) not defined.")
     hasz(::AbstractPosition) = false
     coordinates(p::AbstractPosition) = hasz(p) ? Float64[x(p),y(p),z(p)] : Float64[x(p),y(p)]
     # (Array-like indexing # http://julia.readthedocs.org/en/latest/manual/arrays/#arrays)

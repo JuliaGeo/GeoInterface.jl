@@ -17,9 +17,9 @@ typealias Position Vector{Float64}
 # (x, y, [z, ...]) - meaning of additional elements undefined.
 # In an object's contained geometries, Positions must have uniform dimensions.
 geotype(::Position) = :Position
-x(p::Position) = p[1]
-y(p::Position) = p[2]
-z(p::Position) = hasz(p) ? p[3] : zero(T)
+xcoord(p::Position) = p[1]
+ycoord(p::Position) = p[2]
+zcoord(p::Position) = hasz(p) ? p[3] : zero(T)
 hasz(p::Position) = length(p) >= 3
 coordinates(obj::Position) = obj
 
