@@ -1,7 +1,7 @@
 # Coordinate Reference System Objects
 # (has keys "type" and "properties")
 # TODO: Handle full CRS spec
-typealias CRS Dict{AbstractString,Any}
+typealias CRS Dict{String,Any}
 
 # Bounding Boxes
 # The value of the bbox member must be a 2*n array,
@@ -17,9 +17,9 @@ typealias Position Vector{Float64}
 # (x, y, [z, ...]) - meaning of additional elements undefined.
 # In an object's contained geometries, Positions must have uniform dimensions.
 geotype(::Position) = :Position
-x(p::Position) = p[1]
-y(p::Position) = p[2]
-z(p::Position) = hasz(p) ? p[3] : zero(T)
+xcoord(p::Position) = p[1]
+ycoord(p::Position) = p[2]
+zcoord(p::Position) = hasz(p) ? p[3] : zero(T)
 hasz(p::Position) = length(p) >= 3
 coordinates(obj::Position) = obj
 
@@ -125,10 +125,10 @@ geometries(collection::GeometryCollection) = collection.geometries
 
 type Feature <: AbstractFeature
     geometry::Union{Void, AbstractGeometry}
-    properties::Union{Void, Dict{AbstractString,Any}}
+    properties::Union{Void, Dict{String,Any}}
 end
-Feature(geometry::Union{Void,GeoInterface.AbstractGeometry}) = Feature(geometry, Dict{AbstractString,Any}())
-Feature(properties::Dict{AbstractString,Any}) = Feature(nothing, properties)
+Feature(geometry::Union{Void,GeoInterface.AbstractGeometry}) = Feature(geometry, Dict{String,Any}())
+Feature(properties::Dict{String,Any}) = Feature(nothing, properties)
 geometry(feature::Feature) = feature.geometry
 properties(feature::Feature) = feature.properties
 bbox(feature::Feature) = get(feature.properties, "bbox", nothing)

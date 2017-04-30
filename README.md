@@ -8,14 +8,14 @@ To support operations or visualization of multiple (but similar) implementations
 ## GEO Interface
 
 ### AbstractPosition
-A position can be thought of as a tuple of numbers. There must be at least two elements, and may be more. The order of elements must follow `x`, `y`, `z` order (e.g. easting, northing, altitude for coordinates in a projected coordinate reference system, or longitude, latitude, altitude for coordinates in a geographic coordinate reference system). Hence it requires the following methods:
+A position can be thought of as a tuple of numbers. There must be at least two elements, and may be more. The order of elements must follow `x`, `y`, `z` order (e.g. easting, northing, altitude for coordinates in a projected coordinate reference system, or longitude, latitude, altitude for coordinates in a geographic coordinate reference system). It requires the following methods:
 
-- `x(::AbstractPosition)::Float64`
-- `y(::AbstractPosition)::Float64`
-- `z(::AbstractPosition)::Float64`
+- `xcoord(::AbstractPosition)::Float64`
+- `ycoord(::AbstractPosition)::Float64`
+- `zcoord(::AbstractPosition)::Float64`
 - `hasz(::AbstractPosition)::Bool` (`false` by default)
 
-Remark: Although the specification allows the representation of up to 3 dimensions, not all algorithms support require all 3 dimensions. Also, if you are working with an arbitrary `obj::AbstractPosition`, you should call `hasz(obj)` before calling `z(obj)`.
+Remark: Although the specification allows the representation of up to 3 dimensions, not all algorithms support require all 3 dimensions. Also, if you are working with an arbitrary `obj::AbstractPosition`, you should call `hasz(obj)` before calling `zcoord(obj)`.
 
 ### AbstractGeometry
 Represents vector geometry, and encompasses the following abstract types: `AbstractPoint, AbstractMultiPoint, AbstractLineString, AbstractMultiLineString, AbstractMultiPolygon, AbstractPolygon`. It requires the `coordinates` method, where

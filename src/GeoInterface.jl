@@ -2,8 +2,6 @@ __precompile__()
 
 module GeoInterface
 
-    using Compat
-
     export  AbstractPosition, Position,
             AbstractGeometry, AbstractGeometryCollection, GeometryCollection,
             AbstractPoint, Point,
@@ -16,7 +14,7 @@ module GeoInterface
             AbstractFeatureCollection, FeatureCollection,
 
             geotype, # methods
-            x, y, z, hasz,
+            xcoord, ycoord, zcoord, hasz,
             coordinates,
             geometries,
             geometry, bbox, crs, properties,
@@ -24,19 +22,19 @@ module GeoInterface
 
     abstract AbstractPosition{T <: Real} <: AbstractVector{T}
     geotype(::AbstractPosition) = :Position
-    x(::AbstractPosition) = error("x(::AbstractPosition) not defined.")
-    y(::AbstractPosition) = error("y(::AbstractPosition) not defined.")
+    xcoord(::AbstractPosition) = error("xcoord(::AbstractPosition) not defined.")
+    ycoord(::AbstractPosition) = error("ycoord(::AbstractPosition) not defined.")
     # optional
-    z(::AbstractPosition) = error("z(::AbstractPosition) not defined.")
+    zcoord(::AbstractPosition) = error("zcoord(::AbstractPosition) not defined.")
     hasz(::AbstractPosition) = false
-    coordinates(p::AbstractPosition) = hasz(p) ? Float64[x(p),y(p),z(p)] : Float64[x(p),y(p)]
+    coordinates(p::AbstractPosition) = hasz(p) ? Float64[xcoord(p),ycoord(p),zcoord(p)] : Float64[xcoord(p),ycoord(p)]
     # (Array-like indexing # http://julia.readthedocs.org/en/latest/manual/arrays/#arrays)
     Base.eltype{T <: Real}(p::AbstractPosition{T}) = T
     Base.ndims(AbstractPosition) = 1
     Base.length(p::AbstractPosition) = hasz(p) ? 3 : 2
     Base.size(p::AbstractPosition) = (length(p),)
     Base.size(p::AbstractPosition, n::Int) = (n == 1) ? length(p) : 1
-    Base.getindex(p::AbstractPosition, i::Int) = (i==1) ? x(p) : (i==2) ? y(p) : (i==3) ? z(p) : nothing
+    Base.getindex(p::AbstractPosition, i::Int) = (i==1) ? xcoord(p) : (i==2) ? ycoord(p) : (i==3) ? zcoord(p) : nothing
     Base.convert(::Type{Vector{Float64}}, p::AbstractPosition) = coordinates(p)
     # Base.linearindexing{T <: AbstractPosition}(::Type{T}) = LinearFast()
 
@@ -69,7 +67,7 @@ module GeoInterface
     geotype(::AbstractFeature) = :Feature
     geometry(obj::AbstractFeature) = error("geometry(::AbstractFeature) not defined.")
     # optional
-    properties(obj::AbstractFeature) = Dict{AbstractString,Any}()
+    properties(obj::AbstractFeature) = Dict{String,Any}()
     bbox(obj::AbstractFeature) = nothing
     crs(obj::AbstractFeature) = nothing
 
