@@ -1,7 +1,7 @@
 # Coordinate Reference System Objects
 # (has keys "type" and "properties")
 # TODO: Handle full CRS spec
-typealias CRS Dict{String,Any}
+const CRS = Dict{String,Any}
 
 # Bounding Boxes
 # The value of the bbox member must be a 2*n array,
@@ -11,9 +11,9 @@ typealias CRS Dict{String,Any}
 # The axes order of a bbox follows the axes order of geometries.
 # In addition, the coordinate reference system for the bbox is assumed to match
 # the coordinate reference system of the GeoJSON object of which it is a member.
-typealias BBox Vector{Float64}
+const BBox = Vector{Float64}
 
-typealias Position Vector{Float64}
+const Position = Vector{Float64}
 # (x, y, [z, ...]) - meaning of additional elements undefined.
 # In an object's contained geometries, Positions must have uniform dimensions.
 geotype(::Position) = :Position
