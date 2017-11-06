@@ -24,21 +24,21 @@ hasz(p::Position) = length(p) >= 3
 coordinates(obj::Position) = obj
 
 coordinates(obj::Vector{Position}) = obj
-coordinates{T <: AbstractPosition}(obj::Vector{T}) =                    Position[map(coordinates, obj)...]
-coordinates{T <: AbstractPoint}(obj::Vector{T}) =                       Position[map(coordinates, obj)...]
+coordinates(obj::Vector{T}) where {T <: AbstractPosition} =                    Position[map(coordinates, obj)...]
+coordinates(obj::Vector{T}) where {T <: AbstractPoint} =                       Position[map(coordinates, obj)...]
 
 coordinates(obj::Vector{Vector{Position}}) = obj
-coordinates{T <: AbstractPosition}(obj::Vector{Vector{T}}) =            Vector{Position}[map(coordinates, obj)...]
-coordinates{T <: AbstractPoint}(obj::Vector{Vector{T}}) =               Vector{Position}[map(coordinates, obj)...]
-coordinates{T <: AbstractLineString}(obj::Vector{T}) =                  Vector{Position}[map(coordinates, obj)...]
+coordinates(obj::Vector{Vector{T}}) where {T <: AbstractPosition} =            Vector{Position}[map(coordinates, obj)...]
+coordinates(obj::Vector{Vector{T}}) where {T <: AbstractPoint} =               Vector{Position}[map(coordinates, obj)...]
+coordinates(obj::Vector{T}) where {T <: AbstractLineString} =                  Vector{Position}[map(coordinates, obj)...]
 
 coordinates(obj::Vector{Vector{Vector{Position}}}) = obj
-coordinates{T <: AbstractPosition}(obj::Vector{Vector{Vector{T}}}) =    Vector{Vector{Position}}[map(coordinates, obj)...]
-coordinates{T <: AbstractPoint}(obj::Vector{Vector{Vector{T}}}) =       Vector{Vector{Position}}[map(coordinates, obj)...]
-coordinates{T <: AbstractLineString}(obj::Vector{Vector{T}}) =          Vector{Vector{Position}}[map(coordinates, obj)...]
-coordinates{T <: AbstractPolygon}(obj::Vector{T}) =                     Vector{Vector{Position}}[map(coordinates, obj)...]
+coordinates(obj::Vector{Vector{Vector{T}}}) where {T <: AbstractPosition} =    Vector{Vector{Position}}[map(coordinates, obj)...]
+coordinates(obj::Vector{Vector{Vector{T}}}) where {T <: AbstractPoint} =       Vector{Vector{Position}}[map(coordinates, obj)...]
+coordinates(obj::Vector{Vector{T}}) where {T <: AbstractLineString} =          Vector{Vector{Position}}[map(coordinates, obj)...]
+coordinates(obj::Vector{T}) where {T <: AbstractPolygon} =                     Vector{Vector{Position}}[map(coordinates, obj)...]
 
-type Point <: AbstractPoint
+mutable struct Point <: AbstractPoint
     coordinates::Position
 end
 Point(x::Float64,y::Float64) = Point([x,y])
@@ -46,84 +46,84 @@ Point(x::Float64,y::Float64,z::Float64) = Point([x,y,z])
 Point(point::AbstractPosition) = Point(coordinates(point))
 Point(point::AbstractPoint) = Point(coordinates(point))
 
-type MultiPoint <: AbstractMultiPoint
+mutable struct MultiPoint <: AbstractMultiPoint
     coordinates::Vector{Position}
 end
 MultiPoint(point::Position) = MultiPoint(Position[point])
 MultiPoint(point::AbstractPosition) = MultiPoint(Position[coordinates(point)])
 MultiPoint(point::AbstractPoint) = MultiPoint(Position[coordinates(point)])
 
-MultiPoint{T <: AbstractPosition}(points::Vector{T}) = MultiPoint(coordinates(points))
-MultiPoint{T <: AbstractPoint}(points::Vector{T}) = MultiPoint(coordinates(points))
+MultiPoint(points::Vector{T}) where {T <: AbstractPosition} = MultiPoint(coordinates(points))
+MultiPoint(points::Vector{T}) where {T <: AbstractPoint} = MultiPoint(coordinates(points))
 MultiPoint(points::AbstractMultiPoint) = MultiPoint(coordinates(points))
 MultiPoint(line::AbstractLineString) = MultiPoint(coordinates(line))
 
-type LineString <: AbstractLineString
+mutable struct LineString <: AbstractLineString
     coordinates::Vector{Position}
 end
-LineString{T <: AbstractPosition}(points::Vector{T}) = LineString(coordinates(points))
-LineString{T <: AbstractPoint}(points::Vector{T}) = LineString(coordinates(points))
+LineString(points::Vector{T}) where {T <: AbstractPosition} = LineString(coordinates(points))
+LineString(points::Vector{T}) where {T <: AbstractPoint} = LineString(coordinates(points))
 LineString(points::AbstractMultiPoint) = LineString(coordinates(points))
 LineString(line::AbstractLineString) = LineString(coordinates(line))
 
-type MultiLineString <: AbstractMultiLineString
+mutable struct MultiLineString <: AbstractMultiLineString
     coordinates::Vector{Vector{Position}}
 end
 MultiLineString(line::Vector{Position}) = MultiLineString(Vector{Position}[line])
-MultiLineString{T <: AbstractPosition}(line::Vector{T}) = MultiLineString(Vector{Position}[coordinates(line)])
-MultiLineString{T <: AbstractPoint}(line::Vector{T}) = MultiLineString(Vector{Position}[coordinates(line)])
+MultiLineString(line::Vector{T}) where {T <: AbstractPosition} = MultiLineString(Vector{Position}[coordinates(line)])
+MultiLineString(line::Vector{T}) where {T <: AbstractPoint} = MultiLineString(Vector{Position}[coordinates(line)])
 MultiLineString(line::AbstractLineString) = MultiLineString(Vector{Position}[coordinates(line)])
 
-MultiLineString{T <: AbstractPosition}(lines::Vector{Vector{T}}) = MultiLineString(coordinates(lines))
-MultiLineString{T <: AbstractPoint}(lines::Vector{Vector{T}}) = MultiLineString(coordinates(lines))
-MultiLineString{T <: AbstractLineString}(lines::Vector{T}) = MultiLineString(Vector{Position}[map(coordinates,lines)])
+MultiLineString(lines::Vector{Vector{T}}) where {T <: AbstractPosition} = MultiLineString(coordinates(lines))
+MultiLineString(lines::Vector{Vector{T}}) where {T <: AbstractPoint} = MultiLineString(coordinates(lines))
+MultiLineString(lines::Vector{T}) where {T <: AbstractLineString} = MultiLineString(Vector{Position}[map(coordinates,lines)])
 MultiLineString(lines::AbstractMultiLineString) = MultiLineString(coordinates(line))
 MultiLineString(poly::AbstractPolygon) = MultiLineString(coordinates(poly))
 
-type Polygon <: AbstractPolygon
+mutable struct Polygon <: AbstractPolygon
     coordinates::Vector{Vector{Position}}
 end
 Polygon(line::Vector{Position}) = Polygon(Vector{Position}[line])
-Polygon{T <: AbstractPosition}(line::Vector{T}) = Polygon(Vector{Position}[coordinates(line)])
-Polygon{T <: AbstractPoint}(line::Vector{T}) = Polygon(Vector{Position}[coordinates(line)])
+Polygon(line::Vector{T}) where {T <: AbstractPosition} = Polygon(Vector{Position}[coordinates(line)])
+Polygon(line::Vector{T}) where {T <: AbstractPoint} = Polygon(Vector{Position}[coordinates(line)])
 Polygon(line::AbstractLineString) = Polygon(Vector{Position}[coordinates(line)])
 
-Polygon{T <: AbstractPosition}(lines::Vector{Vector{T}}) = Polygon(coordinates(lines))
-Polygon{T <: AbstractPoint}(lines::Vector{Vector{T}}) = Polygon(coordinates(lines))
-Polygon{T <: AbstractLineString}(lines::Vector{T}) = Polygon(coordinates(lines))
+Polygon(lines::Vector{Vector{T}}) where {T <: AbstractPosition} = Polygon(coordinates(lines))
+Polygon(lines::Vector{Vector{T}}) where {T <: AbstractPoint} = Polygon(coordinates(lines))
+Polygon(lines::Vector{T}) where {T <: AbstractLineString} = Polygon(coordinates(lines))
 Polygon(lines::AbstractMultiLineString) = Polygon(coordinates(lines))
 Polygon(poly::AbstractPolygon) = Polygon(coordinates(poly))
 
-type MultiPolygon <: AbstractMultiPolygon
+mutable struct MultiPolygon <: AbstractMultiPolygon
     coordinates::Vector{Vector{Vector{Position}}}
 end
 MultiPolygon(line::Vector{Position}) = MultiPolygon(Vector{Vector{Position}}[Vector{Position}[line]])
-MultiPolygon{T <: AbstractPosition}(line::Vector{T}) = MultiPolygon(Vector{Vector{Position}}[Vector{Position}[coordinates(line)]])
-MultiPolygon{T <: AbstractPoint}(line::Vector{T}) = MultiPolygon(Vector{Vector{Position}}[Vector{Position}[coordinates(line)]])
+MultiPolygon(line::Vector{T}) where {T <: AbstractPosition} = MultiPolygon(Vector{Vector{Position}}[Vector{Position}[coordinates(line)]])
+MultiPolygon(line::Vector{T}) where {T <: AbstractPoint} = MultiPolygon(Vector{Vector{Position}}[Vector{Position}[coordinates(line)]])
 MultiPolygon(line::AbstractLineString) = MultiPolygon(Vector{Vector{Position}}[Vector{Position}[coordinates(line)]])
 
-MultiPolygon{T <: AbstractPosition}(poly::Vector{Vector{T}}) = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
-MultiPolygon{T <: AbstractPoint}(poly::Vector{Vector{T}}) = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
-MultiPolygon{T <: AbstractLineString}(poly::Vector{T}) = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
+MultiPolygon(poly::Vector{Vector{T}}) where {T <: AbstractPosition} = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
+MultiPolygon(poly::Vector{Vector{T}}) where {T <: AbstractPoint} = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
+MultiPolygon(poly::Vector{T}) where {T <: AbstractLineString} = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
 MultiPolygon(poly::AbstractMultiLineString) = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
 MultiPolygon(poly::AbstractPolygon) = MultiPolygon(Vector{Vector{Position}}[coordinates(poly)])
 
-MultiPolygon{T <: AbstractPosition}(polys::Vector{Vector{Vector{T}}}) = MultiPolygon(coordinates(polys))
-MultiPolygon{T <: AbstractPoint}(polys::Vector{Vector{Vector{T}}}) = MultiPolygon(coordinates(polys))
-MultiPolygon{T <: AbstractLineString}(polys::Vector{Vector{T}}) = MultiPolygon(coordinates(polys))
-MultiPolygon{T <: AbstractPolygon}(polys::Vector{T}) = MultiPolygon(coordinates(polys))
+MultiPolygon(polys::Vector{Vector{Vector{T}}}) where {T <: AbstractPosition} = MultiPolygon(coordinates(polys))
+MultiPolygon(polys::Vector{Vector{Vector{T}}}) where {T <: AbstractPoint} = MultiPolygon(coordinates(polys))
+MultiPolygon(polys::Vector{Vector{T}}) where {T <: AbstractLineString} = MultiPolygon(coordinates(polys))
+MultiPolygon(polys::Vector{T}) where {T <: AbstractPolygon} = MultiPolygon(coordinates(polys))
 MultiPolygon(polys::AbstractMultiPolygon) = MultiPolygon(coordinates(polys))
 
 for geom in (:MultiPolygon, :Polygon, :MultiLineString, :LineString, :MultiPoint, :Point)
     @eval coordinates(obj::$geom) = obj.coordinates
 end
 
-type GeometryCollection <: AbstractGeometryCollection
+mutable struct GeometryCollection <: AbstractGeometryCollection
     geometries::Vector
 end
 geometries(collection::GeometryCollection) = collection.geometries
 
-type Feature <: AbstractFeature
+mutable struct Feature <: AbstractFeature
     geometry::Union{Void, AbstractGeometry}
     properties::Union{Void, Dict{String,Any}}
 end
@@ -134,12 +134,12 @@ properties(feature::Feature) = feature.properties
 bbox(feature::Feature) = get(feature.properties, "bbox", nothing)
 crs(feature::Feature) = get(feature.properties, "crs", nothing)
 
-type FeatureCollection{T <: AbstractFeature} <: AbstractFeatureCollection
+mutable struct FeatureCollection{T <: AbstractFeature} <: AbstractFeatureCollection
     features::Vector{T}
     bbox::Union{Void, BBox}
     crs::Union{Void, CRS}
 end
-FeatureCollection{T <: AbstractFeature}(fc::Vector{T}) = FeatureCollection(fc, nothing, nothing)
+FeatureCollection(fc::Vector{T}) where {T <: AbstractFeature} = FeatureCollection(fc, nothing, nothing)
 features(fc::FeatureCollection) = fc.features
 bbox(fc::FeatureCollection) = fc.bbox
 crs(fc::FeatureCollection) = fc.crs
