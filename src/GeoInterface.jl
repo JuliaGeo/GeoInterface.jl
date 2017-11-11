@@ -2,8 +2,6 @@ __precompile__()
 
 module GeoInterface
 
-    using Compat
-
     export  AbstractPosition, Position,
             AbstractGeometry, AbstractGeometryCollection, GeometryCollection,
             AbstractPoint, Point,
