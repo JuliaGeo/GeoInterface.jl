@@ -2,6 +2,8 @@ __precompile__()
 
 module GeoInterface
 
+    import RecipesBase
+
     export  AbstractPosition, Position,
             AbstractGeometry, AbstractGeometryCollection, GeometryCollection,
             AbstractPoint, Point,
@@ -79,4 +81,5 @@ module GeoInterface
     crs(obj::AbstractFeatureCollection) = nothing
 
     include("geotypes.jl")
+    include("plotrecipes.jl")
 end
