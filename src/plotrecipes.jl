@@ -3,19 +3,20 @@ RecipesBase.@recipe f(geom::AbstractPoint) = (seriestype --> :scatter; legend --
 
 function shapecoords(geom::AbstractMultiPoint)
     coords = coordinates(geom)
-    first.(coordinates(geom)), last.(coordinates(geom))
+    first.(coords), last.(coords)
 end
 RecipesBase.@recipe f(geom::AbstractMultiPoint) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractLineString)
     coords = coordinates(geom)
-    first.(coordinates(geom)), last.(coordinates(geom))
+    first.(coords), last.(coords)
 end
 RecipesBase.@recipe f(geom::AbstractLineString) = (seriestype --> :line; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractMultiLineString)
-    x = Vector{Float64}[first.(line) for line in coordinates(geom)]
-    y = Vector{Float64}[last.(line) for line in coordinates(geom)]
+    coords = coordinates(geom)
+    x = Vector{Float64}[first.(line) for line in coords]
+    y = Vector{Float64}[last.(line) for line in coords]
     x, y
 end
 RecipesBase.@recipe f(geom::AbstractMultiLineString) = (seriestype --> :line; legend --> :false; shapecoords(geom))
