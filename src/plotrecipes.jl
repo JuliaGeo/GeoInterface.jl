@@ -1,8 +1,8 @@
 shapecoords(geom::AbstractPoint) = [tuple(coordinates(geom)...)]
 RecipesBase.@recipe f(geom::AbstractPoint) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
-shapecoords{T <: AbstractPoint}(geom::AbstractVector{T}) = Tuple{Float64,Float64}[tuple(coordinates(g)...) for g in geom]
-RecipesBase.@recipe f{T <: AbstractPoint}(geom::AbstractVector{T}) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
+shapecoords(geom::AbstractVector{<:AbstractPoint}) = Tuple{Float64,Float64}[tuple(coordinates(g)...) for g in geom]
+RecipesBase.@recipe f(geom::AbstractVector{<:AbstractPoint}) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractMultiPoint)
     coords = coordinates(geom)
@@ -10,7 +10,7 @@ function shapecoords(geom::AbstractMultiPoint)
 end
 RecipesBase.@recipe f(geom::AbstractMultiPoint) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
-function shapecoords{T <: AbstractMultiPoint}(geom::Vector{T})
+function shapecoords(geom::Vector{<:AbstractMultiPoint})
     x = Float64[]; y = Float64[]
     for g in geom
         coords = coordinates(g)
@@ -18,7 +18,7 @@ function shapecoords{T <: AbstractMultiPoint}(geom::Vector{T})
     end
     x, y
 end
-RecipesBase.@recipe f{T <: AbstractMultiPoint}(geom::Vector{T}) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::Vector{<:AbstractMultiPoint}) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractLineString)
     coords = coordinates(geom)
@@ -26,7 +26,7 @@ function shapecoords(geom::AbstractLineString)
 end
 RecipesBase.@recipe f(geom::AbstractLineString) = (seriestype --> :line; legend --> :false; shapecoords(geom))
 
-function shapecoords{T <: AbstractLineString}(geom::Vector{T})
+function shapecoords(geom::Vector{<:AbstractLineString})
     x = Vector{Float64}[]; y = Vector{Float64}[]
     for line in geom
         coords = coordinates(geom)
@@ -34,7 +34,7 @@ function shapecoords{T <: AbstractLineString}(geom::Vector{T})
     end
     x, y
 end
-RecipesBase.@recipe f{T <: AbstractLineString}(geom::Vector{T}) = (seriestype --> :line; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::Vector{<:AbstractLineString}) = (seriestype --> :line; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractMultiLineString)
     coords = coordinates(geom)
@@ -44,14 +44,14 @@ function shapecoords(geom::AbstractMultiLineString)
 end
 RecipesBase.@recipe f(geom::AbstractMultiLineString) = (seriestype --> :line; legend --> :false; shapecoords(geom))
 
-function shapecoords{T <: AbstractMultiLineString}(geom::Vector{T})
+function shapecoords(geom::Vector{<:AbstractMultiLineString})
     x = Vector{Float64}[]; y = Vector{Float64}[]
     for g in geom, line in coordinates(g)
         push!(x, first.(line)); push!(y, last.(line))
     end
     x, y
 end
-RecipesBase.@recipe f{T <: AbstractMultiLineString}(geom::Vector{T}) = (seriestype --> :line; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::Vector{<:AbstractMultiLineString}) = (seriestype --> :line; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractPolygon)
     ring = first(coordinates(geom)) # currently doesn't plot holes
@@ -59,7 +59,7 @@ function shapecoords(geom::AbstractPolygon)
 end
 RecipesBase.@recipe f(geom::AbstractPolygon) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
 
-function shapecoords{T <: AbstractPolygon}(geom::Vector{T})
+function shapecoords(geom::Vector{<:AbstractPolygon})
     x = Vector{Float64}[]; y = Vector{Float64}[]
     for g in geom
         ring = first(coordinates(g)) # currently doesn't plot holes
@@ -67,7 +67,7 @@ function shapecoords{T <: AbstractPolygon}(geom::Vector{T})
     end
     x, y
 end
-RecipesBase.@recipe f{T <: AbstractPolygon}(geom::Vector{T}) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::Vector{<:AbstractPolygon}) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractMultiPolygon)
     x, y = Vector{Float64}[], Vector{Float64}[]
@@ -79,7 +79,7 @@ function shapecoords(geom::AbstractMultiPolygon)
 end
 RecipesBase.@recipe f(geom::AbstractMultiPolygon) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
 
-function shapecoords{T <: AbstractMultiPolygon}(geom::Vector{T})
+function shapecoords(geom::Vector{<:AbstractMultiPolygon})
     x, y = Vector{Float64}[], Vector{Float64}[]
     for g in geom, poly in coordinates(g)
         ring = first(coordinates(poly)) # currently doesn't plot holes
@@ -87,4 +87,4 @@ function shapecoords{T <: AbstractMultiPolygon}(geom::Vector{T})
     end
     x, y
 end
-RecipesBase.@recipe f{T <: AbstractMultiPolygon}(geom::Vector{T}) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::Vector{<:AbstractMultiPolygon}) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
