@@ -62,7 +62,7 @@ RecipesBase.@recipe f(geom::AbstractPolygon) = (seriestype --> :shape; legend --
 function shapecoords{T <: AbstractPolygon}(geom::Vector{T})
     x = Vector{Float64}[]; y = Vector{Float64}[]
     for g in geom
-        ring = first(coordinates(geom)) # currently doesn't plot holes
+        ring = first(coordinates(g)) # currently doesn't plot holes
         push!(x, first.(ring)); push!(y, last.(ring))
     end
     x, y
