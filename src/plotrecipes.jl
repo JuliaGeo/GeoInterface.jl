@@ -2,7 +2,6 @@ shapecoords(geom::AbstractPoint) = [tuple(coordinates(geom)...)]
 RecipesBase.@recipe f(geom::AbstractPoint) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
 shapecoords(geom::AbstractVector{<:AbstractPoint}) = Tuple{Float64,Float64}[tuple(coordinates(g)...) for g in geom]
-RecipesBase.@recipe f(geom::AbstractVector{<:AbstractPoint}) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractMultiPoint)
     coords = coordinates(geom)
@@ -18,7 +17,6 @@ function shapecoords(geom::Vector{<:AbstractMultiPoint})
     end
     x, y
 end
-RecipesBase.@recipe f(geom::Vector{<:AbstractMultiPoint}) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractLineString)
     coords = coordinates(geom)
@@ -34,7 +32,6 @@ function shapecoords(geom::Vector{<:AbstractLineString})
     end
     x, y
 end
-RecipesBase.@recipe f(geom::Vector{<:AbstractLineString}) = (seriestype --> :line; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractMultiLineString)
     coords = coordinates(geom)
@@ -51,7 +48,6 @@ function shapecoords(geom::Vector{<:AbstractMultiLineString})
     end
     x, y
 end
-RecipesBase.@recipe f(geom::Vector{<:AbstractMultiLineString}) = (seriestype --> :line; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractPolygon)
     ring = first(coordinates(geom)) # currently doesn't plot holes
@@ -67,7 +63,6 @@ function shapecoords(geom::Vector{<:AbstractPolygon})
     end
     x, y
 end
-RecipesBase.@recipe f(geom::Vector{<:AbstractPolygon}) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
 
 function shapecoords(geom::AbstractMultiPolygon)
     x, y = Vector{Float64}[], Vector{Float64}[]
@@ -87,4 +82,24 @@ function shapecoords(geom::Vector{<:AbstractMultiPolygon})
     end
     x, y
 end
-RecipesBase.@recipe f(geom::Vector{<:AbstractMultiPolygon}) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
+
+RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry})
+    legend --> :false
+    for g in geom
+        @series begin
+            if g isa AbstractPoint || g isa AbstractMultiPoint
+                seriestype := :scatter
+            elseif g isa AbstractLineString || g isa AbstractMultiLineString
+                seriestype := :line
+            elseif g isa AbstractPolygon || g isa AbstractMultiPolygon
+                seriestype := :shape
+            end
+            shapecoords(g)
+        end
+    end
+end
+
+RecipesBase.@recipe f(feature::AbstractFeature) = geometry(feature)
+RecipesBase.@recipe f(features::Vector{<:AbstractFeature}) = geometry.(features)
+RecipesBase.@recipe f(collection::AbstractFeatureCollection) = features(collection)
+RecipesBase.@recipe f(collection::AbstractGeometryCollection) = geometries(collection)

@@ -2,7 +2,7 @@ __precompile__()
 
 module GeoInterface
 
-    import RecipesBase
+    using RecipesBase
 
     export  AbstractPosition, Position,
             AbstractGeometry, AbstractGeometryCollection, GeometryCollection,
