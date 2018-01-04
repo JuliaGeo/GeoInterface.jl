@@ -1,13 +1,25 @@
 shapecoords(geom::AbstractPoint) = [tuple(coordinates(geom)...)]
-RecipesBase.@recipe f(geom::AbstractPoint) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::AbstractPoint) = (
+    aspect_ratio := 1;
+    seriestype --> :scatter;
+    legend --> :false;
+    shapecoords(geom)
+)
 
-shapecoords(geom::AbstractVector{<:AbstractPoint}) = Tuple{Float64,Float64}[tuple(coordinates(g)...) for g in geom]
+shapecoords(geom::AbstractVector{<:AbstractPoint}) = Tuple{Float64,Float64}[
+    tuple(coordinates(g)...) for g in geom
+]
 
 function shapecoords(geom::AbstractMultiPoint)
     coords = coordinates(geom)
     first.(coords), last.(coords)
 end
-RecipesBase.@recipe f(geom::AbstractMultiPoint) = (seriestype --> :scatter; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::AbstractMultiPoint) = (
+    aspect_ratio := 1;
+    seriestype --> :scatter;
+    legend --> :false;
+    shapecoords(geom)
+)
 
 function shapecoords(geom::Vector{<:AbstractMultiPoint})
     x = Float64[]; y = Float64[]
@@ -22,7 +34,12 @@ function shapecoords(geom::AbstractLineString)
     coords = coordinates(geom)
     first.(coords), last.(coords)
 end
-RecipesBase.@recipe f(geom::AbstractLineString) = (seriestype --> :line; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::AbstractLineString) = (
+    aspect_ratio := 1;
+    seriestype --> :path;
+    legend --> :false;
+    shapecoords(geom)
+)
 
 function shapecoords(geom::Vector{<:AbstractLineString})
     x = Vector{Float64}[]; y = Vector{Float64}[]
@@ -39,7 +56,12 @@ function shapecoords(geom::AbstractMultiLineString)
     y = Vector{Float64}[last.(line) for line in coords]
     x, y
 end
-RecipesBase.@recipe f(geom::AbstractMultiLineString) = (seriestype --> :line; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::AbstractMultiLineString) = (
+    aspect_ratio := 1;
+    seriestype --> :path;
+    legend --> :false;
+    shapecoords(geom)
+)
 
 function shapecoords(geom::Vector{<:AbstractMultiLineString})
     x = Vector{Float64}[]; y = Vector{Float64}[]
@@ -53,7 +75,12 @@ function shapecoords(geom::AbstractPolygon)
     ring = first(coordinates(geom)) # currently doesn't plot holes
     first.(ring), last.(ring)
 end
-RecipesBase.@recipe f(geom::AbstractPolygon) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::AbstractPolygon) = (
+    aspect_ratio := 1;
+    seriestype --> :shape;
+    legend --> :false;
+    shapecoords(geom)
+)
 
 function shapecoords(geom::Vector{<:AbstractPolygon})
     x = Vector{Float64}[]; y = Vector{Float64}[]
@@ -72,7 +99,12 @@ function shapecoords(geom::AbstractMultiPolygon)
     end
     x, y
 end
-RecipesBase.@recipe f(geom::AbstractMultiPolygon) = (seriestype --> :shape; legend --> :false; shapecoords(geom))
+RecipesBase.@recipe f(geom::AbstractMultiPolygon) = (
+    aspect_ratio := 1;
+    seriestype --> :shape;
+    legend --> :false;
+    shapecoords(geom)
+)
 
 function shapecoords(geom::Vector{<:AbstractMultiPolygon})
     x, y = Vector{Float64}[], Vector{Float64}[]
@@ -84,13 +116,14 @@ function shapecoords(geom::Vector{<:AbstractMultiPolygon})
 end
 
 RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry})
+    aspect_ratio := 1
     legend --> :false
     for g in geom
         @series begin
             if g isa AbstractPoint || g isa AbstractMultiPoint
                 seriestype := :scatter
             elseif g isa AbstractLineString || g isa AbstractMultiLineString
-                seriestype := :line
+                seriestype := :path
             elseif g isa AbstractPolygon || g isa AbstractMultiPolygon
                 seriestype := :shape
             end
