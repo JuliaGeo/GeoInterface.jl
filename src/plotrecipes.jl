@@ -11,11 +11,10 @@ shapecoords(geom::AbstractVector{<:AbstractPoint}) = Tuple{Float64,Float64}[
 ]
 
 function shapecoords(geom::AbstractMultiPoint)
-    coords = coordinates(geom)
     x, y = Float64[], Float64[]
-    for pt in coords
+    for pt in coordinates(geom)
         push!(x, pt[1]); push!(x, NaN)
-        append!(y, pt[2]); push!(y, NaN)
+        push!(y, pt[2]); push!(y, NaN)
     end
     x, y
 end
