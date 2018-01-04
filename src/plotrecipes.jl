@@ -17,7 +17,7 @@ function shapecoords(geom::AbstractMultiPoint)
         push!(x, pt[1]); push!(x, NaN)
         append!(y, pt[2]); push!(y, NaN)
     end
-    first.(coords), last.(coords)
+    x, y
 end
 RecipesBase.@recipe f(geom::AbstractMultiPoint) = (
     aspect_ratio := 1;
