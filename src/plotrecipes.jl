@@ -27,9 +27,9 @@ RecipesBase.@recipe f(geom::AbstractMultiPoint) = (
 
 function shapecoords(geom::Vector{<:AbstractMultiPoint})
     x = Float64[]; y = Float64[]
-    for g in geom
-        coords = coordinates(g)
-        append!(x, first.(coords)); append!(y, last.(coords))
+    for g in geom, pt in coordinates(g)
+        push!(x, pt[1]); push!(x, NaN)
+        push!(y, pt[2]); push!(y, NaN)
     end
     x, y
 end
@@ -55,9 +55,8 @@ function shapecoords(geom::Vector{<:AbstractLineString})
 end
 
 function shapecoords(geom::AbstractMultiLineString)
-    coords = coordinates(geom)
     x, y = Float64[], Float64[]
-    for line in coords
+    for line in coordinates(geom)
         append!(x, first.(line)); push!(x, NaN)
         append!(y, last.(line)); push!(y, NaN)
     end
@@ -71,9 +70,10 @@ RecipesBase.@recipe f(geom::AbstractMultiLineString) = (
 )
 
 function shapecoords(geom::Vector{<:AbstractMultiLineString})
-    x = Vector{Float64}[]; y = Vector{Float64}[]
+    x = Float64[]; y = Float64[]
     for g in geom, line in coordinates(g)
-        push!(x, first.(line)); push!(y, last.(line))
+        append!(x, first.(line)); push!(x, NaN)
+        append!(y, last.(line)); push!(y, NaN)
     end
     x, y
 end
@@ -115,10 +115,11 @@ RecipesBase.@recipe f(geom::AbstractMultiPolygon) = (
 )
 
 function shapecoords(geom::Vector{<:AbstractMultiPolygon})
-    x, y = Vector{Float64}[], Vector{Float64}[]
+    x, y = Float64[], Float64[]
     for g in geom, poly in coordinates(g)
         ring = first(coordinates(poly)) # currently doesn't plot holes
-        push!(x, first.(ring)); push!(y, last.(ring))
+        append!(x, first.(ring)); push!(x, NaN)
+        append!(y, last.(ring)); push!(y, NaN)
     end
     x, y
 end
