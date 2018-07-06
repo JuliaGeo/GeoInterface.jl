@@ -124,10 +124,10 @@ end
 geometries(collection::GeometryCollection) = collection.geometries
 
 mutable struct Feature <: AbstractFeature
-    geometry::Union{Void, AbstractGeometry}
-    properties::Union{Void, Dict{String,Any}}
+    geometry::Union{Nothing, AbstractGeometry}
+    properties::Union{Nothing, Dict{String,Any}}
 end
-Feature(geometry::Union{Void,GeoInterface.AbstractGeometry}) = Feature(geometry, Dict{String,Any}())
+Feature(geometry::Union{Nothing,GeoInterface.AbstractGeometry}) = Feature(geometry, Dict{String,Any}())
 Feature(properties::Dict{String,Any}) = Feature(nothing, properties)
 geometry(feature::Feature) = feature.geometry
 properties(feature::Feature) = feature.properties
@@ -136,8 +136,8 @@ crs(feature::Feature) = get(feature.properties, "crs", nothing)
 
 mutable struct FeatureCollection{T <: AbstractFeature} <: AbstractFeatureCollection
     features::Vector{T}
-    bbox::Union{Void, BBox}
-    crs::Union{Void, CRS}
+    bbox::Union{Nothing, BBox}
+    crs::Union{Nothing, CRS}
 end
 FeatureCollection(fc::Vector{T}) where {T <: AbstractFeature} = FeatureCollection(fc, nothing, nothing)
 features(fc::FeatureCollection) = fc.features
