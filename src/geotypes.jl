@@ -77,7 +77,7 @@ MultiLineString(line::AbstractLineString) = MultiLineString(Vector{Position}[coo
 MultiLineString(lines::Vector{Vector{T}}) where {T <: AbstractPosition} = MultiLineString(coordinates(lines))
 MultiLineString(lines::Vector{Vector{T}}) where {T <: AbstractPoint} = MultiLineString(coordinates(lines))
 MultiLineString(lines::Vector{T}) where {T <: AbstractLineString} = MultiLineString(Vector{Position}[map(coordinates,lines)])
-MultiLineString(lines::AbstractMultiLineString) = MultiLineString(coordinates(line))
+MultiLineString(lines::AbstractMultiLineString) = MultiLineString(coordinates(lines))
 MultiLineString(poly::AbstractPolygon) = MultiLineString(coordinates(poly))
 
 mutable struct Polygon <: AbstractPolygon
