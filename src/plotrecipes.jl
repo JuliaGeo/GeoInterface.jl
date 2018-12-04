@@ -1,116 +1,126 @@
-function pointcoords(geom::AbstractGeometry)
+const AxesCoord = Tuple{Int8,Int8,Int8}
+const global axescoord_default = AxesCoord([1,2,0])  #default to ignore the z axis
+
+
+function pointcoords(geom::AbstractGeometry,axes::AxesCoord)
     @assert geotype(geom) == :Point
-    [tuple(coordinates(geom)...)]
+    axes[3]==0 ? [tuple(coordinates(geom)[[axes[1:2]...]]...)] :
+                [tuple(coordinates(geom)[[axes...]]...)]
 end
 
-function multipointcoords(geom::AbstractGeometry)
+function multipointcoords(geom::AbstractGeometry,axes::AxesCoord)
     @assert geotype(geom) == :MultiPoint
     coords = coordinates(geom)
-    first.(coords), last.(coords)
+    if axes[3]==0 (getindex.(coords,axes[1]), getindex.(coords,axes[2]))
+    else (getindex.(coords,axes[1]), getindex.(coords,axes[2]), getindex.(coords,axes[3])) end
+
 end
 
-function linestringcoords(geom::AbstractGeometry)
+function linestringcoords(geom::AbstractGeometry,axes::AxesCoord)
     @assert geotype(geom) == :LineString
     coords = coordinates(geom)
-    first.(coords), last.(coords)
+    if axes[3]==0 (getindex.(coords,axes[1]), getindex.(coords,axes[2]))
+    else (getindex.(coords,axes[1]), getindex.(coords,axes[2]), getindex.(coords,axes[3])) end
 end
 
-function multilinestringcoords(geom::AbstractGeometry)
+function multilinestringcoords(geom::AbstractGeometry,axes::AxesCoord)
     @assert geotype(geom) == :MultiLineString
     x, y = Float64[], Float64[]
     for line in coordinates(geom)
-        append!(x, first.(line)); push!(x, NaN)
-        append!(y, last.(line)); push!(y, NaN)
+        append!(x, getindex.(line,axes[1])); push!(x, NaN)
+        append!(y, getindex.(line,axes[2])); push!(y, NaN)
+        axes[3]==0 ? true : (append!(z, getindex.(line,axes[3])); push!(3, NaN))
     end
-    x, y
+    axes[3]==0 ? (x, y) : (x,y,z)
 end
 
-function polygoncoords(geom::AbstractGeometry)
+function polygoncoords(geom::AbstractGeometry,axes::AxesCoord)
     @assert geotype(geom) == :Polygon
     ring = first(coordinates(geom)) # currently doesn't plot holes
-    first.(ring), last.(ring)
+    if axes[3]==0  (getindex.(ring,axes[1]), getindex.(ring,axes[2]))
+    else (getindex.(ring,axes[1]), getindex.(ring,axes[2]), getindex.(ring,axes[3])) end
 end
 
-function multipolygoncoords(geom::AbstractGeometry)
+function multipolygoncoords(geom::AbstractGeometry,axes::AxesCoord)
     @assert geotype(geom) == :MultiPolygon
-    x, y = Float64[], Float64[]
+    x, y, z = Float64[], Float64[], Float64[]
     for poly in coordinates(geom)
         ring = first(coordinates(poly)) # currently doesn't plot holes
-        append!(x, first.(ring)); push!(x, NaN)
-        append!(y, last.(ring)); push!(y, NaN)
+        append!(x, getindex.(ring,axes[1])); push!(x, NaN)
+        append!(y, getindex.(ring,axes[2])); push!(y, NaN)
+        axes[3]==0 ? true : (append!(z, getindex.(ring,axes[3])); push!(3, NaN))
     end
-    x, y
+    axes[3]==0 ? (x, y) : (x,y,z)
 end
+shapecoords(geom::AbstractGeometry,axes::Tuple) = shapecoords(geom,Int8.(axes))
+shapecoords(geom::AbstractPoint,axes::AxesCoord) = pointcoords(geom,axes)
+shapecoords(geom::AbstractMultiPoint,axes::AxesCoord) = multipointcoords(geom,axes)
+shapecoords(geom::AbstractLineString,axes::AxesCoord) = linestringcoords(geom,axes)
+shapecoords(geom::AbstractMultiLineString,axes::AxesCoord) = multilinestringcoords(geom,axes)
+shapecoords(geom::AbstractPolygon,axes::AxesCoord) = polygoncoords(geom,axes)
+shapecoords(geom::AbstractMultiPolygon,axes::AxesCoord) = multipolygoncoords(geom,axes)
 
-shapecoords(geom::AbstractPoint) = pointcoords(geom)
-shapecoords(geom::AbstractMultiPoint) = multipointcoords(geom)
-shapecoords(geom::AbstractLineString) = linestringcoords(geom)
-shapecoords(geom::AbstractMultiLineString) = multilinestringcoords(geom)
-shapecoords(geom::AbstractPolygon) = polygoncoords(geom)
-shapecoords(geom::AbstractMultiPolygon) = multipolygoncoords(geom)
-
-function shapecoords(geom::AbstractGeometry)
+function shapecoords(geom::AbstractGeometry,axes::AxesCoord)
     gtype = geotype(geom)
     if gtype == :Point
-        return pointcoords(geom)
+        return pointcoords(geom,axes)
     elseif gtype == :MultiPoint
-        return multipointcoords(geom)
+        return multipointcoords(geom,axes)
     elseif gtype == :LineString
-        return linestringcoords(geom)
+        return linestringcoords(geom,axes)
     elseif gtype == :MultiLineString
-        return multilinestringcoords(geom)
+        return multilinestringcoords(geom,axes)
     elseif gtype == :Polygon
-        return polygoncoords(geom)
+        return polygoncoords(geom,axes)
     elseif gtype == :MultiPolygon
-        return multipolygoncoords(geom)
+        return multipolygoncoords(geom,axes)
     else
         warn("unknown geometry type: $gtype")
     end
 end
 
-RecipesBase.@recipe f(geom::AbstractPoint) = (
+RecipesBase.@recipe f(geom::AbstractPoint;axescoord::AxesCoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :scatter;
     legend --> :false;
-    shapecoords(geom)
+    shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractMultiPoint) = (
+RecipesBase.@recipe f(geom::AbstractMultiPoint;axescoord::AxesCoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :scatter;
     legend --> :false;
-    shapecoords(geom)
+    shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractLineString) = (
+RecipesBase.@recipe f(geom::AbstractLineString;axescoord::AxesCoord=axescoord_default) =    (
     aspect_ratio := 1;
     seriestype --> :path;
     legend --> :false;
-    shapecoords(geom)
+    shapecoords(geom,axescoord)
 )
-
-RecipesBase.@recipe f(geom::AbstractMultiLineString) = (
+RecipesBase.@recipe f(geom::AbstractMultiLineString;axescoord::AxesCoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :path;
     legend --> :false;
-    shapecoords(geom)
+    shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractPolygon) = (
+RecipesBase.@recipe f(geom::AbstractPolygon;axescoord::AxesCoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :shape;
     legend --> :false;
-    shapecoords(geom)
+    shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractMultiPolygon) = (
+RecipesBase.@recipe f(geom::AbstractMultiPolygon;axescoord::AxesCoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :shape;
     legend --> :false;
-    shapecoords(geom)
+    shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe function f(geom::AbstractGeometry)
+RecipesBase.@recipe function f(geom::AbstractGeometry;axescoord::AxesCoord=axescoord_default)
     aspect_ratio := 1
     legend --> :false
     gtype = geotype(geom)
@@ -123,10 +133,10 @@ RecipesBase.@recipe function f(geom::AbstractGeometry)
     else
         warn("unknown geometry type: $gtype")
     end
-    shapecoords(geom)
+    shapecoords(geom,axescoord)
 end
 
-RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry})
+RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry};axescoord::AxesCoord=axescoord_default)
     aspect_ratio := 1
     legend --> :false
     for g in geom
@@ -141,10 +151,14 @@ RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry})
             else
                 warn("unknown geometry type: $gtype")
             end
-            shapecoords(g)
+            shapecoords(g,axescoord)
         end
     end
 end
+
+
+
+
 
 RecipesBase.@recipe f(feature::AbstractFeature) = geometry(feature)
 RecipesBase.@recipe f(features::Vector{<:AbstractFeature}) = geometry.(features)
