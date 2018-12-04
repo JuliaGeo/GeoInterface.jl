@@ -84,48 +84,48 @@ function shapecoords(geom::AbstractGeometry,axes::AxesCoord)
     end
 end
 
-RecipesBase.@recipe f(geom::AbstractPoint;axescoord::AxesCoord=axescoord_default) = (
+RecipesBase.@recipe f(geom::AbstractPoint;axescoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :scatter;
     legend --> :false;
     shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractMultiPoint;axescoord::AxesCoord=axescoord_default) = (
+RecipesBase.@recipe f(geom::AbstractMultiPoint;axescoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :scatter;
     legend --> :false;
     shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractLineString;axescoord::AxesCoord=axescoord_default) =    (
+RecipesBase.@recipe f(geom::AbstractLineString;axescoord=axescoord_default) =    (
     aspect_ratio := 1;
     seriestype --> :path;
     legend --> :false;
     shapecoords(geom,axescoord)
 )
-RecipesBase.@recipe f(geom::AbstractMultiLineString;axescoord::AxesCoord=axescoord_default) = (
+RecipesBase.@recipe f(geom::AbstractMultiLineString;axescoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :path;
     legend --> :false;
     shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractPolygon;axescoord::AxesCoord=axescoord_default) = (
+RecipesBase.@recipe f(geom::AbstractPolygon;axescoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :shape;
     legend --> :false;
     shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe f(geom::AbstractMultiPolygon;axescoord::AxesCoord=axescoord_default) = (
+RecipesBase.@recipe f(geom::AbstractMultiPolygon;axescoord=axescoord_default) = (
     aspect_ratio := 1;
     seriestype --> :shape;
     legend --> :false;
     shapecoords(geom,axescoord)
 )
 
-RecipesBase.@recipe function f(geom::AbstractGeometry;axescoord::AxesCoord=axescoord_default)
+RecipesBase.@recipe function f(geom::AbstractGeometry;axescoord=axescoord_default)
     aspect_ratio := 1
     legend --> :false
     gtype = geotype(geom)
@@ -141,7 +141,7 @@ RecipesBase.@recipe function f(geom::AbstractGeometry;axescoord::AxesCoord=axesc
     shapecoords(geom,axescoord)
 end
 
-RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry};axescoord::AxesCoord=axescoord_default)
+RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry};axescoord=axescoord_default)
     aspect_ratio := 1
     legend --> :false
     for g in geom
