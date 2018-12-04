@@ -1,6 +1,11 @@
 const AxesCoord = Tuple{Int8,Int8,Int8}
 const global axescoord_default = AxesCoord([1,2,0])  #default to ignore the z axis
 
+shapecoords(geom::AbstractGeometry,axes::Tuple{Any,Any,Any})=shapecoords(geom,convert(AxesCoord,axes))
+function shapecoords(geom::AbstractGeometry,axes::Tuple) #This is to catch tuples with the wrond number of elements
+    new_axes= length(axes) >= 3  ? Int8.(axes[1:3]) : Int8.((axes[1],axes[2],0))
+    shapecoords(geom,new_axes)
+end
 
 function pointcoords(geom::AbstractGeometry,axes::AxesCoord)
     @assert geotype(geom) == :Point
