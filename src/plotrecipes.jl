@@ -1,3 +1,7 @@
+
+#Axescoord is a tuple used to select which Coordinated maps to which plot axis
+#for Example    (1,2,3)  would map x to x, y to y, and z to z
+#               (3,2)     would map z coord to x axis, and y to y.
 const AxesCoord = Tuple{Int8,Int8,Int8}
 const global axescoord_default = AxesCoord([1,2,0])  #default to ignore the z axis
 
