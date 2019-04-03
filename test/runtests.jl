@@ -18,6 +18,13 @@ using Test
     @test isequal(pt1, pt2)
     @test !isequal(pt1, pt3)
 
+    # Can also do approximate comparisons
+    pt4 = Point([0.0, 1.001])
+    @test pt3 != pt4
+    @test pt3 ≉ pt4  atol=0.0001
+    @test pt3 ≉ pt4  rtol=0.0001
+    @test pt3 ≈ pt4  atol=0.001
+    @test pt3 ≈ pt4  rtol=0.001
 
     # The same is not true for other geometry types: The representation is not
     # unique, so comparing the coordinates directly might be misleading.
