@@ -80,6 +80,7 @@ module GeoInterface
     bbox(obj::AbstractFeatureCollection) = nothing
     crs(obj::AbstractFeatureCollection) = nothing
 
+    include("operations.jl")
     include("geotypes.jl")
     include("plotrecipes.jl")
 end
