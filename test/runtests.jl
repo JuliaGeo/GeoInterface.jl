@@ -1,7 +1,35 @@
 using GeoInterface
 using Test
 
+struct TestPosition{T} <: AbstractPosition{T} 
+
+end
+
 @testset "Comparison operators" begin
+
+    @test coordinates([1.0, 2.0]) == [1.0, 2.0]
+    @test coordinates(Any[1.0, 2.0]) == [1.0, 2.0]
+
+    @test coordinates([1, 2.0]) == [1.0, 2.0]
+    @test coordinates([[1, 2.0]]) == [[1.0, 2.0]]
+    @test coordinates([[[1, 2.0]]]) == [[[1.0, 2.0]]]
+    @test coordinates([[[[1, 2.0]]]]) == [[[[1.0, 2.0]]]]
+
+    @test coordinates(Point([1.0, 2.0])) == [1.0, 2.0]
+    @test coordinates([Point([1.0, 2.0])]) == [[1.0, 2.0]]
+    @test coordinates([[Point([1.0, 2.0])]]) == [[[1.0, 2.0]]]
+    @test coordinates([[[Point([1.0, 2.0])]]]) == [[[[1.0, 2.0]]]]
+
+    Point([1.0, 2.0]) == Point(Any[1.0, 2.0])
+    MultiPoint([[1.0, 2.0]])
+    == 
+    MultiPoint([Any[1.0, 2.0]])
+
+    Polygon([[Point([1.0, 2.0])]])
+    Polygon([[1.0, 2.0]])
+    Polygon([[Any[1.0, 2.0]]])
+    Polygon([[[1, 2.0]]])
+
     # Points are now compared by value:
     pt1, pt2, pt3 = Point([0.0, 0.0]), Point([0.0, 0.0]), Point([0.0, 1.0])
     @test pt1 == pt1

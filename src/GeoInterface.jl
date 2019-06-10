@@ -15,15 +15,16 @@ export  AbstractPosition, Position,
         AbstractFeature, Feature,
         AbstractFeatureCollection, FeatureCollection,
 
-        geotype, # methods
+        geotype,
         xcoord, ycoord, zcoord, hasz,
         coordinates,
         geometries,
         geometry, bbox, crs, properties,
         features
 
-include("operations.jl")
 include("geotypes.jl")
+include("features.jl")
+include("operations.jl")
 include("plotrecipes.jl")
 
 end
