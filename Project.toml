@@ -1,0 +1,17 @@
+name = "GeoInterface"
+uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
+license = "MIT"
+version = "0.5.0"
+
+[deps]
+RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
+
+[compat]
+RecipesBase = "0.6, 0.7"
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
