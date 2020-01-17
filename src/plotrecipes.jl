@@ -121,7 +121,7 @@ RecipesBase.@recipe function f(geom::AbstractGeometry)
     elseif gtype == :Polygon || gtype == :MultiPolygon
         seriestype := :shape
     else
-        warn("unknown geometry type: $gtype")
+        @warn("unknown geometry type: $gtype")
     end
     shapecoords(geom)
 end
@@ -139,7 +139,7 @@ RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry})
             elseif gtype == :Polygon || gtype == :MultiPolygon
                 seriestype := :shape
             else
-                warn("unknown geometry type: $gtype")
+                @warn("unknown geometry type: $gtype")
             end
             shapecoords(g)
         end
