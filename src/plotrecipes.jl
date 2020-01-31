@@ -126,7 +126,7 @@ RecipesBase.@recipe function f(geom::AbstractGeometry)
     shapecoords(geom)
 end
 
-RecipesBase.@recipe function f(geom::Vector{<:AbstractGeometry})
+RecipesBase.@recipe function f(geom::Vector{<:Union{Missing, AbstractGeometry}})
     aspect_ratio := 1
     legend --> :false
     for g in geom
