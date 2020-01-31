@@ -129,7 +129,7 @@ end
 RecipesBase.@recipe function f(geom::Vector{<:Union{Missing, AbstractGeometry}})
     aspect_ratio := 1
     legend --> :false
-    for g in geom
+    for g in skipmissing(geom)
         @series begin
             gtype = geotype(g)
             if gtype == :Point || gtype == :MultiPoint
