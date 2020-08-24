@@ -1,76 +1,202 @@
-# GeoInterface.jl
+# GeoInterface
+An interface for geospatial vector data in Julia
 
-A Julia Protocol for Geospatial Data
+This Package describe a set of traits based on the [Simple Features standard (SF)](https://www.opengeospatial.org/standards/sfa)
+for geospatial vector data, including the SQL/MM extension with support for circular geometry. 
 
-## Motivation
-To support operations or visualization of multiple (but similar) implementations of vector data (across `GeoJSON.jl`, `LibGEOS.jl`, etc). As a starting point, it will follow the [GEO interface](https://gist.github.com/sgillies/2217756) [1] in Python (which in turn borrows its design from the [GeoJSON specification](http://geojson.org/) [2]).
+Packages which support the GeoInterfaceRFC.jl interface can be found in [INTEGRATIONS.md](INTEGRATIONS.md).
 
-## GEO Interface
+## Changes with respect to SF
+While we try to adhere to SF, there are changes and extensions to make it more Julian.
 
-### AbstractPosition
-A position can be thought of as a tuple of numbers. There must be at least two elements, and may be more. The order of elements must follow `x`, `y`, `z` order (e.g. easting, northing, altitude for coordinates in a projected coordinate reference system, or longitude, latitude, altitude for coordinates in a geographic coordinate reference system). It requires the following methods:
+### Function names
+All function names are without the `ST_` prefix and are lowercased. In some cases the names have changed as well, to be inline with common Julia functions. `NumX` becomes `nx` and `Xn` becomes `getX`:
+```julia
+GeometryType -> geomtype
+NumGeometries -> ngeom
+GeometryN -> getgeom
+NumPatches -> npatch
+# etc
+```
 
-- `xcoord(::AbstractPosition)::Float64`
-- `ycoord(::AbstractPosition)::Float64`
-- `zcoord(::AbstractPosition)::Float64`
-- `hasz(::AbstractPosition)::Bool` (`false` by default)
+We also simplified the dimension functions. From the three original (`dimension`, `coordinateDimension`, `spatialDimension`) there's now only the coordinate dimension, so not to overlap with the Julia `ndims`.
+```julia
+coordinateDimension -> ncoords
+```
 
-Remark: Although the specification allows the representation of up to 3 dimensions, not all algorithms support require all 3 dimensions. Also, if you are working with an arbitrary `obj::AbstractPosition`, you should call `hasz(obj)` before calling `zcoord(obj)`.
+We've generalized the some functions:
+```julia
+SRID -> crs
+envelope -> extent
+```
 
-### AbstractGeometry
-Represents vector geometry, and encompasses the following abstract types: `AbstractPoint, AbstractMultiPoint, AbstractLineString, AbstractMultiLineString, AbstractMultiPolygon, AbstractPolygon`. It requires the `coordinates` method, where
+And added a helper method to clarify the naming of coordinates.
+```julia
+coordnames = (:X, :Y, :Z, :M)
+```
 
-- `coordinates(::AbstractPoint)` returns a single position.
-- `coordinates(::AbstractMultiPoint)` returns a vector of positions.
-- `coordinates(::AbstractLineString)` returns a vector of positions.
-- `coordinates(::AbstractMultiLineString)` returns a vector of linestrings.
-- `coordinates(::AbstractPolygon)` returns a vector of linestrings.
-- `coordinates(::AbstractMultiPolygon)` returns a vector of polygons.
+### Coverage
+Not all SF functions are implemented, either as a possibly slower fallback or empty descriptor or not at all. The following SF functions are not (yet) available.
 
-### AbstractGeometryCollection
-Represents a collection of geometries, and requires the `geometries` method, which returns a vector of geometries. Is also a subtype of `AbstractGeometry`.
+```julia
+dimension
+spatialDimension
+asText
+asBinary
+is3D
+isMeasured
+boundary
 
-### AbstractFeature
-Represents a geometry with additional attributes, and requires the following methods
+locateAlong
+locateBetween
 
-- `geometry(::AbstractFeature)::AbstractGeometry` returns the corresponding geometry
-- `properties(::AbstractFeature)::Dict{AbstractString,Any}` returns a dictionary of the properties
+distance
+buffer
+convexHull
 
-Optionally, you can also provide the following methods
+```
+While the following functions have no implementation:
+```julia
+equals
+disjoint
+touches
+within
+overlaps
+crosses
+intersects
+contains
+relate
 
-- `bbox(::AbstractFeature)::AbstractGeometry` returns the bounding box for that feature
-- `crs(::AbstractFeature)::Dict{AbstractString,Any}` returns the coordinate reference system
+intersection
+union
+difference
+symdifference
+```
 
-## Geospatial Geometries
-If you don't need to provide your own user types, GeoInterface also provides a set of geometries (below), which implements the GEO Interface:
 
-- `CRS`
-- `Position`
-- `Geometry <: AbstractGeometry`
-  - `Point <: AbstractPoint <: AbstractGeometry`
-  - `MultiPoint <: AbstractMultiPoint <: AbstractGeometry`
-  - `LineString <: AbstractLineString <: AbstractGeometry`
-  - `MultiLineString <: AbstractMultiLineString <: AbstractGeometry`
-  - `Polygon <: AbstractPolygon <: AbstractGeometry`
-  - `MultiPolygon <: AbstractMultiPolygon <: AbstractGeometry`
-  - `GeometryCollection <: AbstractGeometryCollection <: AbstractGeometry`
-- `Feature <: AbstractFeature`
-- `FeatureCollection <: AbstractFeatureCollection`
+## Implementation
+GeoInterface provides a traits interface, not unlike Tables.jl, by 
 
-## Remarks
+(a) a set of functions: 
+```julia
+geomtype(geom)
+ncoord(geom)
+ngeom(geom)
+getgeom(geom::geomtype, i)
+...
+```
+(b) a set of types for dispatching on said functions.
+ The types tells GeoInterface how to interpret the input object inside a GeoInterface function.
 
-Conceptually,
+```julia
+abstract Geometry
+Point <: AbstractPoint <: AbstractGeometry
+MultiPoint <: AbstractMultiPointGeometry <:AbstractGeometryCollection <: AbstractGeometry
+...
+```
 
-- an `::AbstractGeometryCollection` maps to a `DataArray{::AbstractGeometry}`, and
-- an `::AbstractFeatureCollection` maps to a `DataFrame`, where each row is an `AbstractFeature`
+### For developers looking to implement the interface
+GeoInterface requires five functions to be defined for a given geom:
 
-The design of the types in GeoInterface differs from the GeoJSON specification in the following ways:
+```julia
+GeoInterface.geomtype(geom::geomtype)::DataType = GeoInterface.X()
+GeoInterface.ncoord(geomtype(geom), geom::geomtype)::Integer
+GeoInterface.getcoord(geomtype(geom), geom::geomtype, i)::Real  # only for Points
+GeoInterface.ngeom(geomtype(geom), geom::geomtype)::Integer
+GeoInterface.getgeom(geomtype(geom), geom::geomtype, i)  # geomtype -> GeoInterface.Y
+```
+Where the `getgeom` could be an iterator (without the i) as well. It will return a new geom with the correct `geomtype`. The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such as `npoints` and `getpoint` for LineStrings.
 
-- Julia Geometries do not provide a `bbox` and `crs` method. If you wish to provide a `bbox` or `crs` attribute, wrap the geometry into a `Feature` or `FeatureCollection`.
-- Features do not have special fields for `id`, `bbox`, and `crs`. These are to be provided (or found) in the `properties` field, under the keys `featureid`, `bbox`, and `crs` respectively (if they exist).
+There are also optional generic methods that could help or speed up operations:
+```julia
+GeoInterface.crs(geom)::Union{Missing, GeoFormatTypes.CoordinateReferenceSystemFormat}
+GeoInterface.extent(geom)  # geomtype -> GeoInterface.Rectangle
+```
 
-## References
+And lastly, there are many other optional functions for each specific geometry. GeoInterface provides fallback implementations based on the generic functions above, but these are not optimized. These are detailed in the next chapter.
 
-[1]: A Python Protocol for Geospatial Data ([gist](https://gist.github.com/sgillies/2217756))
+### Examples
 
-[2]: GeoJSON Specification ([website](http://geojson.org/))
+A `geom::geomtype` with "Point"-like traits implements
+```julia
+GeoInterface.geomtype(geom::geomtype)::DataType = GeoInterface.Point()
+GeoInterface.ncoord(::GeoInterface.Point, geom::geomtype)::Integer
+GeoInterface.getcoord(::GeoInterface.Point, geom::geomtype, i)::Real
+
+# Defaults
+GeoInterface.ngeom(::GeoInterface.Point, geom)::Integer = 0
+GeoInterface.getgeom(::GeoInterface.Point, geom::geomtype, i) = nothing
+```
+
+A `geom::geomtype` with "LineString"-like traits implements the following methods:
+```julia
+GeoInterface.geomtype(geom::geomtype)::DataType = GeoInterface.LineString()
+GeoInterface.ncoord(::GeoInterface.LineString, geom::geomtype)::Integer
+
+# These alias for npoint and getpoint
+GeoInterface.ngeom(::GeoInterface.LineString, geom::geomtype)::Integer
+GeoInterface.getgeom(::GeoInterface.LineString, geom::geomtype, i) # of geomtype Point
+
+# Optional
+GeoInterface.isclosed(::GeoInterface.LineString, geom::geomtype)::Bool
+GeoInterface.issimple(::GeoInterface.LineString, geom::geomtype)::Bool
+GeoInterface.length(::GeoInterface.LineString, geom::geomtype)::Real
+```
+A `geom::geomtype` with "Polygon"-like traits can implement the following methods:
+```julia
+GeoInterface.geomtype(geom::geomtype)::DataType = GeoInterface.Polygon()
+GeoInterface.ncoord(::GeoInterface.Polygon, geom::geomtype)::Integer
+
+# These alias for nring and getring
+GeoInterface.ngeom(::GeoInterface.Polygon, geom::geomtype)::Integer
+GeoInterface.getgeom(::GeoInterface.Polygon, geom::geomtype, i)::"LineString"
+
+# Optional
+GeoInterface.area(::GeoInterface.Polygon, geom::geomtype)::Real
+GeoInterface.centroid(::GeoInterface.Polygon, geom::geomtype)::"Point"
+GeoInterface.pointonsurface(::GeoInterface.Polygon, geom::geomtype)::"Point"
+GeoInterface.boundary(::GeoInterface.Polygon, geom::geomtype)::"LineString"
+
+```
+A `geom::geomtype` with "GeometryCollection"-like traits has to implement the following methods:
+```julia
+GeoInterface.geomtype(geom::geomtype) = GeoInterface.GeometryCollection()
+GeoInterface.ncoord(::GeoInterface.GeometryCollection, geom::geomtype)::Integer
+GeoInterface.ngeom(::GeoInterface.GeometryCollection, geom::geomtype)::Integer
+GeoInterface.getgeom(::GeoInterface.GeometryCollection,geom::geomtypem, i)::"Geometry"
+```
+A `geom::geomtype` with "MultiPoint"-like traits has to implement the following methods:
+```julia
+GeoInterface.geomtype(geom::geomtype) = GeoInterface.MultiPoint()
+GeoInterface.ncoord(::GeoInterface.MultiPoint, geom::geomtype)::Integer
+
+# These alias for npoint and getpoint
+GeoInterface.ngeom(::GeoInterface.MultiPoint, geom::geomtype)::Integer
+GeoInterface.getgeom(::GeoInterface.MultiPoint, geom::geomtype, i)::"Point"
+```
+A `geom::geomtype` with "MultiLineString"-like traits has to implement the following methods:
+```julia
+GeoInterface.geomtype(geom::geomtype) = GeoInterface.MultiLineString()
+GeoInterface.ncoord(::GeoInterface.MultiLineString, geom::geomtype)::Integer
+
+# These alias for nlinestring and getlinestring
+GeoInterface.ngeom(::GeoInterface.MultiLineString, geom::geomtype)::Integer
+GeoInterface.getgeom(::GeoInterface.MultiLineString,geom::geomtypem, i)::"LineString"
+```
+A `geom::geomtype` with "MultiPolygon"-like traits has to implement the following methods:
+```julia
+GeoInterface.geomtype(geom::geomtype) = GeoInterface.MultiPolygon()
+GeoInterface.ncoord(::GeoInterface.MultiPolygon, geom::geomtype)::Integer
+
+# These alias for npolygon and getpolygon
+GeoInterface.ngeom(::GeoInterface.MultiPolygon, geom::geomtype)::Integer
+GeoInterface.getgeom(::GeoInterface.MultiPolygon, geom::geomtype, i)::"Polygon"
+```
+
+
+### Testing the interface
+GeoInterface provides a Testsuite for a geom type to check whether all functions that have been implemented also work as expected.
+
+```julia
+GeoInterface.test_interface_for_geom(geom)
+```
