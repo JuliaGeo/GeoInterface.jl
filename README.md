@@ -4,7 +4,7 @@ An interface for geospatial vector data in Julia
 This Package describe a set of traits based on the [Simple Features standard (SF)](https://www.opengeospatial.org/standards/sfa)
 for geospatial vector data, including the SQL/MM extension with support for circular geometry. 
 
-Packages which support the GeoInterfaceRFC.jl interface can be found in [INTEGRATIONS.md](INTEGRATIONS.md).
+Packages which support the GeoInterface.jl interface can be found in [INTEGRATIONS.md](INTEGRATIONS.md).
 
 ## Changes with respect to SF
 While we try to adhere to SF, there are changes and extensions to make it more Julian.

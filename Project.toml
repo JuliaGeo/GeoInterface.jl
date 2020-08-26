@@ -1,9 +1,7 @@
 name = "GeoInterface"
 uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 license = "MIT"
-version = "1.0"
-
-[deps]
+version = "1.0.0"
 
 [compat]
 julia = "1"

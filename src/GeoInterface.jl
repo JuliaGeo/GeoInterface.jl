@@ -1,4 +1,4 @@
-module GeoInterfaceRFC
+module GeoInterface
 
 include("types.jl")
 include("interface.jl")
