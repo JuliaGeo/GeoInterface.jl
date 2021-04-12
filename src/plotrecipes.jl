@@ -69,49 +69,49 @@ function shapecoords(geom::AbstractGeometry)
 end
 
 RecipesBase.@recipe f(geom::AbstractPoint) = (
-    aspect_ratio := 1;
+    aspect_ratio --> 1;
     seriestype --> :scatter;
     legend --> :false;
     shapecoords(geom)
 )
 
 RecipesBase.@recipe f(geom::AbstractMultiPoint) = (
-    aspect_ratio := 1;
+    aspect_ratio --> 1;
     seriestype --> :scatter;
     legend --> :false;
     shapecoords(geom)
 )
 
 RecipesBase.@recipe f(geom::AbstractLineString) = (
-    aspect_ratio := 1;
+    aspect_ratio --> 1;
     seriestype --> :path;
     legend --> :false;
     shapecoords(geom)
 )
 
 RecipesBase.@recipe f(geom::AbstractMultiLineString) = (
-    aspect_ratio := 1;
+    aspect_ratio --> 1;
     seriestype --> :path;
     legend --> :false;
     shapecoords(geom)
 )
 
 RecipesBase.@recipe f(geom::AbstractPolygon) = (
-    aspect_ratio := 1;
+    aspect_ratio --> 1;
     seriestype --> :shape;
     legend --> :false;
     shapecoords(geom)
 )
 
 RecipesBase.@recipe f(geom::AbstractMultiPolygon) = (
-    aspect_ratio := 1;
+    aspect_ratio --> 1;
     seriestype --> :shape;
     legend --> :false;
     shapecoords(geom)
 )
 
 RecipesBase.@recipe function f(geom::AbstractGeometry)
-    aspect_ratio := 1
+    aspect_ratio --> 1
     legend --> :false
     gtype = geotype(geom)
     if gtype == :Point || gtype == :MultiPoint
@@ -127,7 +127,7 @@ RecipesBase.@recipe function f(geom::AbstractGeometry)
 end
 
 RecipesBase.@recipe function f(geom::Vector{<:Union{Missing, AbstractGeometry}})
-    aspect_ratio := 1
+    aspect_ratio --> 1
     legend --> :false
     for g in skipmissing(geom)
         @series begin
