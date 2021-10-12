@@ -70,15 +70,14 @@ module GeoInterface
     geometry(obj::AbstractFeature) = error("geometry(::AbstractFeature) not defined.")
     # optional
     properties(obj::AbstractFeature) = Dict{String,Any}()
-    bbox(obj::AbstractFeature) = nothing
-    crs(obj::AbstractFeature) = nothing
 
     abstract type AbstractFeatureCollection end
     geotype(::AbstractFeatureCollection) = :FeatureCollection
     features(obj::AbstractFeatureCollection) = error("features(::AbstractFeatureCollection) not defined.")
+
     # optional
-    bbox(obj::AbstractFeatureCollection) = nothing
-    crs(obj::AbstractFeatureCollection) = nothing
+    bbox(obj) = nothing
+    crs(obj) = nothing
 
     include("operations.jl")
     include("geotypes.jl")
