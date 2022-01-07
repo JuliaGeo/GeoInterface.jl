@@ -69,63 +69,63 @@ function shapecoords(geom::AbstractGeometry)
 end
 
 RecipesBase.@recipe function f(geom::AbstractPoint)
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     seriestype --> :scatter
     shapecoords(geom)
 end
 
 RecipesBase.@recipe function f(geom::AbstractMultiPoint)
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     seriestype --> :scatter
     shapecoords(geom)
 end
 
 RecipesBase.@recipe function f(geom::AbstractLineString)
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     seriestype --> :path
     shapecoords(geom)
 end
 
 RecipesBase.@recipe function f(geom::AbstractMultiLineString)
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     seriestype --> :path
     shapecoords(geom)
 end
 
 RecipesBase.@recipe function f(geom::AbstractPolygon)
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     seriestype --> :shape
     shapecoords(geom)
 end
 
 RecipesBase.@recipe function f(geom::AbstractMultiPolygon)
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     seriestype --> :shape
     shapecoords(geom)
 end
 
 RecipesBase.@recipe function f(geom::AbstractGeometry)
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     gtype = geotype(geom)
     if gtype == :Point || gtype == :MultiPoint
@@ -141,9 +141,9 @@ RecipesBase.@recipe function f(geom::AbstractGeometry)
 end
 
 RecipesBase.@recipe function f(geom::Vector{<:Union{Missing, AbstractGeometry}})
+    label --> :none
     if plotattributes[:plot_object].n == 0 
         aspect_ratio --> 1
-        legend --> :false
     end
     for g in skipmissing(geom)
         @series begin
