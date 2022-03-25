@@ -89,8 +89,8 @@ uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
 [[deps.Template]]
 path = ".."
-uuid = "bf04f2de-4e87-4102-bdb5-62115b2b7225"
-version = "0.1.0"
+uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
+version = "1.0.0"
 
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]

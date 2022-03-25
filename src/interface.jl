@@ -1,9 +1,17 @@
 # All Geometries
+"""
+    GeoInterface.isgeometry(x) => Bool
+
+Check if an object has specifically defined that it is a geometry.
+It is recommended that for users implementing `MyType`, they define only
+`isgeometry(::Type{MyType})`. `isgeometry(::MyType)` will then automatically delegate to this
+method.
+"""
+isgeometry(x::T) where {T} = isgeometry(T)
+isgeometry(::Type{T}) where {T} = false
+
 """Returns the geometry type, such as `Polygon` or `Point`."""
-function geomtype(geom)
-    throw(ErrorException(string("Unknown Geometry type. ",
-        "Define GeoInterface.geomtype(::$(typeof(geom))) to return the desired type.")))
-end
+geomtype(geom) = nothing
 
 # All types
 """

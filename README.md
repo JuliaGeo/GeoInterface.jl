@@ -83,6 +83,7 @@ GeoInterface provides a traits interface, not unlike Tables.jl, by
 
 (a) a set of functions: 
 ```julia
+isgeometry(geom)
 geomtype(geom)
 ncoord(geom)
 ngeom(geom)
@@ -103,6 +104,7 @@ MultiPoint <: AbstractMultiPointGeometry <:AbstractGeometryCollection <: Abstrac
 GeoInterface requires five functions to be defined for a given geom:
 
 ```julia
+GeoInterface.isgeometry(geom::geomtype)::Bool = true
 GeoInterface.geomtype(geom::geomtype)::DataType = GeoInterface.X()
 GeoInterface.ncoord(geomtype(geom), geom::geomtype)::Integer
 GeoInterface.getcoord(geomtype(geom), geom::geomtype, i)::Real  # only for Points
@@ -202,5 +204,5 @@ GeoInterface.getgeom(::GeoInterface.MultiPolygon, geom::geomtype, i)::"Polygon"
 GeoInterface provides a Testsuite for a geom type to check whether all functions that have been implemented also work as expected.
 
 ```julia
-GeoInterface.test_interface_for_geom(geom)
+GeoInterface.testgeometry(geom)
 ```

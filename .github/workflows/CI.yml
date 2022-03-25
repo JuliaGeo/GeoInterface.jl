@@ -50,6 +50,6 @@ jobs:
       - run: |
           julia --project=docs -e '
             using Documenter: DocMeta, doctest
-            using Template
-            DocMeta.setdocmeta!(Template, :DocTestSetup, :(using Template); recursive=true)
-            doctest(Template)'
+            using GeoInterface
+            DocMeta.setdocmeta!(GeoInterface, :DocTestSetup, :(using GeoInterface); recursive=true)
+            doctest(GeoInterface)'
