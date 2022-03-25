@@ -2,7 +2,7 @@
 """Returns the geometry type, such as `Polygon` or `Point`."""
 function geomtype(geom)
     throw(ErrorException(string("Unknown Geometry type. ",
-    "Define GeoInterface.geomtype(::$(typeof(geom))) to return the desired type.")))
+        "Define GeoInterface.geomtype(::$(typeof(geom))) to return the desired type.")))
 end
 
 # All types
@@ -55,7 +55,7 @@ npatch(geom)::Integer = npatch(geomtype(geom), geom)
 """Returns a polygon in this surface, the order is arbitrary."""
 getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
 """Returns the collection of polygons in this surface that bounds the given polygon “p” for any polygon “p” in the surface."""
-boundingpolygons()
+boundingpolygons(geom) = nothing
 
 # GeometryCollection
 ngeom(geom) = ngeom(geomtype(geom), geom)
@@ -70,7 +70,7 @@ npolygon(geom) = npolygon(geomtype(geom), geom)
 getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
 
 # Other methods
-crs(geom) = missing  # or conforming to <:CoordinateReferenceSystemFormat in GeoFormatTypes
+crs(geom) = nothing  # or conforming to <:CoordinateReferenceSystemFormat in GeoFormatTypes
 
 
 # DE-9IM, see https://en.wikipedia.org/wiki/DE-9IM

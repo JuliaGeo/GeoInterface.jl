@@ -1,5 +1,5 @@
 """Test whether the interface for your `geom` has been implemented correctly."""
-function test_interface_for_geom(geom)
+function testgeometry(geom)
     try
         type = geomtype(geom)
         ncoord(geom)
@@ -10,6 +10,16 @@ function test_interface_for_geom(geom)
         end
     catch e
         println("You're missing an implementation: $e")
+        return false
+    end
+    return true
+end
+
+"""Test geomtype for `geom` has been implemented."""
+function isgeometry(geom)
+    try
+        type = geomtype(geom)
+    catch
         return false
     end
     return true
