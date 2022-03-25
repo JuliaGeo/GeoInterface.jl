@@ -87,7 +87,7 @@ uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
 [[deps.Sockets]]
 uuid = "6462fe0b-24de-5631-8697-dd941f90decc"
 
-[[deps.Template]]
+[[deps.GeoInterface]]
 path = ".."
 uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 version = "1.0.0"
