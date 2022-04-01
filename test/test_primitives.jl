@@ -1,6 +1,6 @@
 struct MyCurve end
 
-@testset "Primitives" begin
+@testset "Developer" begin
     # Implement interface
     GeoInterface.isgeometry(::Type{MyCurve}) = true
     GeoInterface.geomtype(::MyCurve) = GeoInterface.LineString()

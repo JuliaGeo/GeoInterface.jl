@@ -4,6 +4,7 @@ authors = ["JuliaGeo and contributors"]
 version = "1.0.0"
 
 [deps]
+Extents = "411431e0-e8b7-467b-b5e0-f676ba4f2910"
 RecipesBase = "3cdcf5f2-1ef4-517c-9805-6587b60abb01"
 
 [compat]

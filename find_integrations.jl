@@ -32,7 +32,7 @@ urls = [parseurl(joinpath(REGISTRIES, "General", string(first(nm)), nm, "Package
         for nm in pkgnames]
 
 open(joinpath(dirname(@__DIR__), "GeoInterface.jl", "INTEGRATIONS.md"), "w+") do io
-    println(io, "Packages currently integrating with GeoInterface.jl:")
+    println(io, "# Packages\nPackages currently integrating with GeoInterface.jl:")
     for (nm, url) in zip(pkgnames, urls)
         println(io, "* [$nm]($url)")
     end

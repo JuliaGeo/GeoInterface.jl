@@ -2,7 +2,7 @@
 """
     GeoInterface.isgeometry(x) => Bool
 
-Check if an object has specifically defined that it is a geometry.
+Check if an object `x` is a geometry and thus implicitely supports GeoInterface methods.
 It is recommended that for users implementing `MyType`, they define only
 `isgeometry(::Type{MyType})`. `isgeometry(::MyType)` will then automatically delegate to this
 method.
@@ -10,20 +10,34 @@ method.
 isgeometry(x::T) where {T} = isgeometry(T)
 isgeometry(::Type{T}) where {T} = false
 
-"""Returns the geometry type, such as `Polygon` or `Point`."""
+"""
+    GeoInterface.geomtype(geom) => T <: AbstractGeometry
+
+Returns the geometry type, such as [`GeoInterface.Polygon`](@ref) or [`GeoInterface.Point`](@ref).
+"""
 geomtype(geom) = nothing
 
 # All types
 """
     ncoord(geom) -> Integer
 
-Return the number of coordinate dimensions (such as XYZ) for the geometry.
+Return the number of coordinate dimensions (such as 3 for X,Y,Z) for the geometry.
+Note that SF distinguishes between dimensions, spatial dimensions and topological dimensions, which we do not.
 """
 ncoord(geom) = ncoord(geomtype(geom), geom)
 
-"""Return `true` when the geometry is empty."""
+"""
+    isempty(geom) -> Bool
+
+Return `true` when the geometry is empty.
+"""
 isempty(geom) = ngeom(geom) == 0
-"""Return `true` when the geometry doesn't cross itself."""
+
+"""
+    issimple(geom) -> Bool
+
+Return `true` when the geometry is simple, i.e. doesn't cross or touch itself.
+"""
 issimple(geom) = issimple(geomtype(geom), geom)
 
 # Point
@@ -78,7 +92,13 @@ npolygon(geom) = npolygon(geomtype(geom), geom)
 getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
 
 # Other methods
-crs(geom) = nothing  # or conforming to <:CoordinateReferenceSystemFormat in GeoFormatTypes
+"""
+    crs(geom) -> T <: GeoFormatTypes.CoordinateReferenceSystemFormat
+
+Retrieve Coordinate Reference System for given geom.
+In SF this is defined as `SRID`.
+"""
+crs(geom) = nothing
 
 
 # DE-9IM, see https://en.wikipedia.org/wiki/DE-9IM

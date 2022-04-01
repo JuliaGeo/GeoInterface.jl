@@ -2,14 +2,18 @@
 
 ## Coords
 # Four options in SF, xy, xyz, xym, xyzm
-const default_coord_names = (:X, :Y, :Z, :M)
+const default_coord_names = (:X, :Y, :Z, :M)  # always uppercase?
 
 coordnames(geom) = default_coord_names[1:ncoord(geom)]
 
+# Maybe hardcode dimension order? At least for X and Y?
 x(geom) = getcoord(geom, findfirst(coordnames(geom), :X))
 y(geom) = getcoord(geom, findfirst(coordnames(geom), :Y))
 z(geom) = getcoord(geom, findfirst(coordnames(geom), :Z))
 m(geom) = getcoord(geom, findfirst(coordnames(geom), :M))
+
+is3d(geom) = :Z in coordnames(geom)
+ismeasured(geom) = :M in coordnames(geom)
 
 ## Points
 npoint(c::AbstractCurve, geom) = ngeom(c, geom)
@@ -23,7 +27,7 @@ nhole(p::AbstractPolygon, geom) = nring(p, geom) - 1
 gethole(p::AbstractPolygon, geom, i) = getring(p, geom, i + 1)
 
 nlinestring(::AbstractMultiLineString, geom) = ngeom(p, geom)
-nlinestring(::AbstractMultiLineString, geom, i) = getgeom(p, geom, i)
+getlinestring(::AbstractMultiLineString, geom, i) = getgeom(p, geom, i)
 
 npolygon(::AbstractMultiPolygon, geom) = ngeom(p, geom)
 getpolygon(::AbstractMultiPolygon, geom, i) = getgeom(p, geom, i)
@@ -35,7 +39,7 @@ npoint(::Quad, _) = 4
 npoint(::Pentagon, _) = 5
 npoint(::Hexagon, _) = 6
 
-issimple(::AbstractCurve, geom) = allunique([getpoint(geom, i) for i in 1:npoint(geom) - 1]) && allunique([getpoint(geom, i) for i in 2:npoint(geom)])
+issimple(::AbstractCurve, geom) = allunique([getpoint(geom, i) for i in 1:npoint(geom)-1]) && allunique([getpoint(geom, i) for i in 2:npoint(geom)])
 isclosed(::AbstractCurve, geom) = getpoint(geom, 1) == getpoint(geom, npoint(geom))
 isring(x::AbstractCurve, geom) = issimple(x, geom) && isclosed(x, geom)
 
