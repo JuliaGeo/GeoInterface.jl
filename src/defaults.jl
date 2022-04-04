@@ -1,23 +1,31 @@
 # Defaults for many of the interface functions are defined here as fallback.
+# Methods here should take a type as first argument and should already be defined
+# in the `interface.jl` first as a generic f(geom) method.
 
 ## Coords
 # Four options in SF, xy, xyz, xym, xyzm
 const default_coord_names = (:X, :Y, :Z, :M)  # always uppercase?
 
-coordnames(geom) = default_coord_names[1:ncoord(geom)]
+coordnames(::AbstractGeometry, geom) = default_coord_names[1:ncoord(geom)]
 
 # Maybe hardcode dimension order? At least for X and Y?
-x(geom) = getcoord(geom, findfirst(coordnames(geom), :X))
-y(geom) = getcoord(geom, findfirst(coordnames(geom), :Y))
-z(geom) = getcoord(geom, findfirst(coordnames(geom), :Z))
-m(geom) = getcoord(geom, findfirst(coordnames(geom), :M))
+x(::AbstractPoint, geom) = getcoord(geom, findfirst(coordnames(geom), :X))
+y(::AbstractPoint, geom) = getcoord(geom, findfirst(coordnames(geom), :Y))
+z(::AbstractPoint, geom) = getcoord(geom, findfirst(coordnames(geom), :Z))
+m(::AbstractPoint, geom) = getcoord(geom, findfirst(coordnames(geom), :M))
 
-is3d(geom) = :Z in coordnames(geom)
-ismeasured(geom) = :M in coordnames(geom)
+is3d(::AbstractPoint, geom) = :Z in coordnames(geom)
+ismeasured(::AbstractPoint, geom) = :M in coordnames(geom)
 
 ## Points
+ngeom(::AbstractPoint, geom)::Integer = 0
+getgeom(::AbstractPoint, geom, i) = nothing
+
+## LineStrings
 npoint(c::AbstractCurve, geom) = ngeom(c, geom)
 getpoint(c::AbstractCurve, geom, i) = getgeom(c, geom, i)
+startpoint(c::AbstractCurve, geom) = getpoint(c, geom, 1)
+endpoint(c::AbstractCurve, geom) = getpoint(c, geom, length(geom))
 
 ## Polygons
 nring(p::AbstractPolygon, geom) = ngeom(p, geom)
@@ -26,12 +34,20 @@ getexterior(p::AbstractPolygon, geom) = getring(p, geom, 1)
 nhole(p::AbstractPolygon, geom) = nring(p, geom) - 1
 gethole(p::AbstractPolygon, geom, i) = getring(p, geom, i + 1)
 
-nlinestring(::AbstractMultiLineString, geom) = ngeom(p, geom)
-getlinestring(::AbstractMultiLineString, geom, i) = getgeom(p, geom, i)
+## MultiLineString
+nlinestring(p::AbstractMultiLineString, geom) = ngeom(p, geom)
+getlinestring(p::AbstractMultiLineString, geom, i) = getgeom(p, geom, i)
 
-npolygon(::AbstractMultiPolygon, geom) = ngeom(p, geom)
-getpolygon(::AbstractMultiPolygon, geom, i) = getgeom(p, geom, i)
+## MultiPolygon
+npolygon(p::AbstractMultiPolygon, geom) = ngeom(p, geom)
+getpolygon(p::AbstractMultiPolygon, geom, i) = getgeom(p, geom, i)
 
+## Surface
+npatch(p::AbstractPolyHedralSurface, geom)::Integer = ngeom(p, geom)
+getpatch(p::AbstractPolyHedralSurface, geom, i::Integer) = getgeom(p, geom, i)
+
+
+## Npoints
 npoint(::Line, _) = 2
 npoint(::Triangle, _) = 3
 npoint(::Rectangle, _) = 4
@@ -48,3 +64,6 @@ issimple(::AbstractMultiCurve, geom) = all(i -> issimple(getgeom(geom, i)), 1:ng
 isclosed(::AbstractMultiCurve, geom) = all(i -> isclosed(getgeom(geom, i)), 1:ngeom(geom))
 
 issimple(::MultiPoint, geom) = allunique((getgeom(geom, i) for i in 1:ngeom(geom)))
+
+crs(::AbstractGeometry, geom) = nothing
+extent(::AbstractGeometry, geom) = nothing

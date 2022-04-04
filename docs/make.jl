@@ -25,8 +25,7 @@ makedocs(;
         ],
         "Guides" => Any[
             "For developers"=>"guides/developer.md",
-            "As source"=>"guides/source.md",
-            "As sink"=>"guides/sink.md",
+            "Defaults"=>"guides/defaults.md",
         ],
         "Reference" => Any[
             "API" => "reference/api.md"
