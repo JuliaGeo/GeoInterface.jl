@@ -4,7 +4,7 @@
 
 ## Coords
 # Four options in SF, xy, xyz, xym, xyzm
-const default_coord_names = (:X, :Y, :Z, :M)  # always uppercase?
+const default_coord_names = (:X, :Y, :Z, :M) 
 
 coordnames(::AbstractGeometry, geom) = default_coord_names[1:ncoord(geom)]
 
