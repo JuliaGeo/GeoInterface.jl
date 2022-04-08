@@ -23,7 +23,7 @@ You read more about the `geomtype` in the [Type hierarchy](@ref).
 
 There are also optional generic methods that could help with locating this geometry.
 ```julia
-GeoInterface.crs(geomtype(geom), geom::customgeom)::GeoFormatTypes.CoordinateReferenceSystemFormat}
+GeoInterface.crs(geomtype(geom), geom::customgeom)::GeoFormatTypes.GeoFormat}
 GeoInterface.extent(geomtype(geom), geom::customgeom)::Extents.Extent
 ```
 
