@@ -40,6 +40,6 @@ GeoInterface.Polygon
 julia> ext = exterior(geom);
 julia> geomtype(ext)
 GeoInterface.LineString
-julia> getpoint.(Ref(ext), 1:npoint(ext))
+julia> getcoords.(getpoint.(Ref(ext), 1:npoint(ext)))
 [[1.,2.],[2.,3.],[1.,2.]]
 ```

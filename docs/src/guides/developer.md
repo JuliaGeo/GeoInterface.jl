@@ -9,7 +9,7 @@ also implement those interfaces where applicable.
 
 ```julia
 GeoInterface.isgeometry(geom::customgeom)::Bool = true
-GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.X()
+GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.X() # <: AbstractGeometry
 GeoInterface.ncoord(geomtype(geom), geom::customgeom)::Integer
 GeoInterface.getcoord(geomtype(geom), geom::customgeom, i)::Real  # only for Points
 GeoInterface.ngeom(geomtype(geom), geom::customgeom)::Integer

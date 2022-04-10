@@ -3,11 +3,13 @@ function testgeometry(geom)
     try
         @assert isgeometry(geom)
         type = geomtype(geom)
-        ncoord(geom)
-        ngeom(geom)
-        getgeom(geom, 1)
-        if type == Point()
+
+        if type == Point
             getcoord(geom, 1)
+            ncoord(geom)
+        else
+            ngeom(geom)
+            getgeom(geom, 1)
         end
     catch e
         println("You're missing an implementation: $e")

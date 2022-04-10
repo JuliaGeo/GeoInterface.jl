@@ -446,3 +446,11 @@ is3d(geom) = is3d(geomtype(geom), geom)
 Return whether the given `geom` has a :M coordinate.
 """
 ismeasured(geom) = ismeasured(geomtype(geom), geom)
+
+"""
+    coordinates(geom) -> Vector
+
+Return (an iterator of) point coordinates.
+Ensure backwards compatibility with the older GeoInterface
+"""
+coordinates(geom) = coordinates(geomtype(geom), geom)
