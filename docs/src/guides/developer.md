@@ -9,9 +9,9 @@ also implement those interfaces where applicable.
 
 ```julia
 GeoInterface.isgeometry(geom::customgeom)::Bool = true
-GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.X() # <: AbstractGeometry
+GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.XTrait() # <: AbstractGeometryTrait
 GeoInterface.ncoord(geomtype(geom), geom::customgeom)::Integer
-GeoInterface.getcoord(geomtype(geom), geom::customgeom, i)::Real  # only for Points
+GeoInterface.getcoord(geomtype(geom), geom::customgeom, i)::Real  # only for PointTraits
 GeoInterface.ngeom(geomtype(geom), geom::customgeom)::Integer
 GeoInterface.getgeom(geomtype(geom), geom::customgeom, i)  # geomtype -> GeoInterface.Y
 ```
@@ -76,78 +76,78 @@ GeoInterface.isgeometry(geom::customgeom)::Bool = true
 A `geom::customgeom` with "Point"-like traits implements
 ```julia
 GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.Point()
-GeoInterface.ncoord(::GeoInterface.Point, geom::customgeom)::Integer
-GeoInterface.getcoord(::GeoInterface.Point, geom::customgeom, i)::Real
+GeoInterface.ncoord(::GeoInterface.PointTrait, geom::customgeom)::Integer
+GeoInterface.getcoord(::GeoInterface.PointTrait, geom::customgeom, i)::Real
 
 # Defaults
-GeoInterface.ngeom(::GeoInterface.Point, geom)::Integer = 0
-GeoInterface.getgeom(::GeoInterface.Point, geom::customgeom, i) = nothing
+GeoInterface.ngeom(::GeoInterface.PointTrait, geom)::Integer = 0
+GeoInterface.getgeom(::GeoInterface.PointTrait, geom::customgeom, i) = nothing
 ```
 
 A `geom::customgeom` with "LineString"-like traits implements the following methods:
 ```julia
 GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.LineString()
-GeoInterface.ncoord(::GeoInterface.LineString, geom::customgeom)::Integer
+GeoInterface.ncoord(::GeoInterface.LineStringTrait, geom::customgeom)::Integer
 
 # These alias for npoint and getpoint
-GeoInterface.ngeom(::GeoInterface.LineString, geom::customgeom)::Integer
-GeoInterface.getgeom(::GeoInterface.LineString, geom::customgeom, i) # of geomtype Point
+GeoInterface.ngeom(::GeoInterface.LineStringTrait, geom::customgeom)::Integer
+GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::customgeom, i) # of geomtype Point
 
 # Optional
-GeoInterface.isclosed(::GeoInterface.LineString, geom::customgeom)::Bool
-GeoInterface.issimple(::GeoInterface.LineString, geom::customgeom)::Bool
-GeoInterface.length(::GeoInterface.LineString, geom::customgeom)::Real
+GeoInterface.isclosed(::GeoInterface.LineStringTrait, geom::customgeom)::Bool
+GeoInterface.issimple(::GeoInterface.LineStringTrait, geom::customgeom)::Bool
+GeoInterface.length(::GeoInterface.LineStringTrait, geom::customgeom)::Real
 ```
 A `geom::customgeom` with "Polygon"-like traits can implement the following methods:
 ```julia
 GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.Polygon()
-GeoInterface.ncoord(::GeoInterface.Polygon, geom::customgeom)::Integer
+GeoInterface.ncoord(::GeoInterface.PolygonTrait, geom::customgeom)::Integer
 
 # These alias for nring and getring
-GeoInterface.ngeom(::GeoInterface.Polygon, geom::customgeom)::Integer
-GeoInterface.getgeom(::GeoInterface.Polygon, geom::customgeom, i)::"LineString"
+GeoInterface.ngeom(::GeoInterface.PolygonTrait, geom::customgeom)::Integer
+GeoInterface.getgeom(::GeoInterface.PolygonTrait, geom::customgeom, i)::"LineStringTrait"
 
 # Optional
-GeoInterface.area(::GeoInterface.Polygon, geom::customgeom)::Real
-GeoInterface.centroid(::GeoInterface.Polygon, geom::customgeom)::"Point"
-GeoInterface.pointonsurface(::GeoInterface.Polygon, geom::customgeom)::"Point"
-GeoInterface.boundary(::GeoInterface.Polygon, geom::customgeom)::"LineString"
+GeoInterface.area(::GeoInterface.PolygonTrait, geom::customgeom)::Real
+GeoInterface.centroid(::GeoInterface.PolygonTrait, geom::customgeom)::"PointTrait"
+GeoInterface.pointonsurface(::GeoInterface.PolygonTrait, geom::customgeom)::"PointTrait"
+GeoInterface.boundary(::GeoInterface.PolygonTrait, geom::customgeom)::"LineStringTrait"
 ```
 
 A `geom::customgeom` with "GeometryCollection"-like traits has to implement the following methods:
 ```julia
 GeoInterface.geomtype(geom::customgeom) = GeoInterface.GeometryCollection()
-GeoInterface.ncoord(::GeoInterface.GeometryCollection, geom::customgeom)::Integer
-GeoInterface.ngeom(::GeoInterface.GeometryCollection, geom::customgeom)::Integer
-GeoInterface.getgeom(::GeoInterface.GeometryCollection,geom::customgeomm, i)::"Geometry"
+GeoInterface.ncoord(::GeoInterface.GeometryCollectionTrait, geom::customgeom)::Integer
+GeoInterface.ngeom(::GeoInterface.GeometryCollectionTrait, geom::customgeom)::Integer
+GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait,geom::customgeomm, i)::"GeometryTrait"
 ```
 
 A `geom::customgeom` with "MultiPoint"-like traits has to implement the following methods:
 ```julia
 GeoInterface.geomtype(geom::customgeom) = GeoInterface.MultiPoint()
-GeoInterface.ncoord(::GeoInterface.MultiPoint, geom::customgeom)::Integer
+GeoInterface.ncoord(::GeoInterface.MultiPointTrait, geom::customgeom)::Integer
 
 # These alias for npoint and getpoint
-GeoInterface.ngeom(::GeoInterface.MultiPoint, geom::customgeom)::Integer
-GeoInterface.getgeom(::GeoInterface.MultiPoint, geom::customgeom, i)::"Point"
+GeoInterface.ngeom(::GeoInterface.MultiPointTrait, geom::customgeom)::Integer
+GeoInterface.getgeom(::GeoInterface.MultiPointTrait, geom::customgeom, i)::"PointTrait"
 ```
 
 A `geom::customgeom` with "MultiLineString"-like traits has to implement the following methods:
 ```julia
 GeoInterface.geomtype(geom::customgeom) = GeoInterface.MultiLineString()
-GeoInterface.ncoord(::GeoInterface.MultiLineString, geom::customgeom)::Integer
+GeoInterface.ncoord(::GeoInterface.MultiLineStringTrait, geom::customgeom)::Integer
 
 # These alias for nlinestring and getlinestring
-GeoInterface.ngeom(::GeoInterface.MultiLineString, geom::customgeom)::Integer
-GeoInterface.getgeom(::GeoInterface.MultiLineString,geom::customgeomm, i)::"LineString"
+GeoInterface.ngeom(::GeoInterface.MultiLineStringTrait, geom::customgeom)::Integer
+GeoInterface.getgeom(::GeoInterface.MultiLineStringTrait,geom::customgeomm, i)::"LineStringTrait"
 ```
 
 A `geom::customgeom` with "MultiPolygon"-like traits has to implement the following methods:
 ```julia
 GeoInterface.geomtype(geom::customgeom) = GeoInterface.MultiPolygon()
-GeoInterface.ncoord(::GeoInterface.MultiPolygon, geom::customgeom)::Integer
+GeoInterface.ncoord(::GeoInterface.MultiPolygonTrait, geom::customgeom)::Integer
 
 # These alias for npolygon and getpolygon
-GeoInterface.ngeom(::GeoInterface.MultiPolygon, geom::customgeom)::Integer
-GeoInterface.getgeom(::GeoInterface.MultiPolygon, geom::customgeom, i)::"Polygon"
+GeoInterface.ngeom(::GeoInterface.MultiPolygonTrait, geom::customgeom)::Integer
+GeoInterface.getgeom(::GeoInterface.MultiPolygonTrait, geom::customgeom, i)::"PolygonTrait"
 ```

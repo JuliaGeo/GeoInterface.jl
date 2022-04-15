@@ -4,7 +4,7 @@ function testgeometry(geom)
         @assert isgeometry(geom)
         type = geomtype(geom)
 
-        if type == Point
+        if type == PointTrait()
             getcoord(geom, 1)
             ncoord(geom)
         else

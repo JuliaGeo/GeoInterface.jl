@@ -279,6 +279,13 @@ In SF this is defined as `envelope`.
 """
 extent(geom) = extent(geomtype(geom), geom)
 
+"""
+    bbox(geom) -> T <: Extents.Extent
+
+Alias for [`extent`](@ref), for compatibility with
+GeoJSON and the Python geointerface.
+"""
+bbox(geom) = extent(geom)
 
 # DE-9IM, see https://en.wikipedia.org/wiki/DE-9IM
 """

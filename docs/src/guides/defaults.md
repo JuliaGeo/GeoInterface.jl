@@ -4,22 +4,22 @@ Of note here are the `ngeom` and `getgeom` for each geometry type, which transla
 
 |                            | ngeom       | getgeom       |
 |----------------------------|-------------|---------------|
-| [`AbstractPoint`](@ref)              | -           | -             |
-| [`AbstractCurve`](@ref), [`MultiPoint`](@ref)  | [`npoint`](@ref)      | [`getpoint`](@ref)      |
-| [`AbstractPolygon`](@ref)            | [`nring`](@ref)       | [`getring`](@ref)       |
-| [`AbstractMultiLineString`](@ref)    | [`nlinestring`](@ref) | [`getlinestring`](@ref) |
-| [`AbstractMultiPolygon`](@ref)       | [`npolygon`](@ref)    | [`getpolygon`](@ref)    |
-| [`AbstractPolyhedralSurface`](@ref)  | [`npatch`](@ref)      | [`getpatch`](@ref)      |
-| [`AbstractGeometryCollection`](@ref) | [`ngeom`](@ref)       | [`getgeom`](@ref)       |
+| [`AbstractPointTrait`](@ref)              | -           | -             |
+| [`AbstractCurveTrait`](@ref), [`MultiPointTrait`](@ref)  | [`npoint`](@ref)      | [`getpoint`](@ref)      |
+| [`AbstractPolygonTrait`](@ref)            | [`nring`](@ref)       | [`getring`](@ref)       |
+| [`AbstractMultiLineStringTrait`](@ref)    | [`nlinestring`](@ref) | [`getlinestring`](@ref) |
+| [`AbstractMultiPolygonTrait`](@ref)       | [`npolygon`](@ref)    | [`getpolygon`](@ref)    |
+| [`AbstractPolyhedralSurfaceTrait`](@ref)  | [`npatch`](@ref)      | [`getpatch`](@ref)      |
+| [`AbstractGeometryCollectionTrait`](@ref) | [`ngeom`](@ref)       | [`getgeom`](@ref)       |
 
 ## Polygons
-Of note are `Polygon`s, which can have holes, for which we automatically add the following
+Of note are `PolygonTrait`s, which can have holes, for which we automatically add the following
 functions based on the `ngeom` implemented by package authors.
 
 ```julia
-getexterior(p::AbstractPolygon, geom) = getring(p, geom, 1)
-nhole(p::AbstractPolygon, geom) = nring(p, geom) - 1
-gethole(p::AbstractPolygon, geom, i) = getring(p, geom, i + 1)
+getexterior(p::AbstractPolygonTrait, geom) = getring(p, geom, 1)
+nhole(p::AbstractPolygonTrait, geom) = nring(p, geom) - 1
+gethole(p::AbstractPolygonTrait, geom, i) = getring(p, geom, i + 1)
 ```
 ## LineStrings
 Simarly for LineStrings, we have the following
@@ -32,10 +32,10 @@ endpoint(geom) = getpoint(geom, length(geom))
 In some cases, we know the return value of a function for a specific geometry (sub)type beforehand and have implemented them.
 
 ```julia
-npoint(::Line, _) = 2
-npoint(::Triangle, _) = 3
-npoint(::Rectangle, _) = 4
-npoint(::Quad, _) = 4
-npoint(::Pentagon, _) = 5
-npoint(::Hexagon, _) = 6
+npoint(::LineTrait, _) = 2
+npoint(::TriangleTrait, _) = 3
+npoint(::RectangleTrait, _) = 4
+npoint(::QuadTrait, _) = 4
+npoint(::PentagonTrait, _) = 5
+npoint(::HexagonTrait, _) = 6
 ```

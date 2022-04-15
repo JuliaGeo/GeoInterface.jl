@@ -3,6 +3,8 @@ Simple Features (SF) are OGC standards describing two dimensional geographic fea
 The standards describe a hierarchy of types (Part 1), an interface with SQL (Part II) and an SQL/MM extension with support for circular geometry.
 
 ## Type hierarchy
+All types used here come from the SF. We added `Trait` to all geometry types here to distinguish them from actual geometry structs.
+
 ![SF Type hierarchy. From the Simple Feature standard by OGC.](types.png)
 `The SF Type hierarchy. From OpenGIS® Implementation Standard for Geographic information - Simple feature access - Part 1: Common architecture at http://www.opengis.net/doc/is/sfa/1.2.1.`
 
@@ -20,7 +22,7 @@ NumPatches -> npatch
 ```
 
 We generalized [`ngeom`](@ref) and [`getgeom`](@ref) to apply to 
-all geometries, not just a [`AbstractGeometryCollection`](@ref)s.
+all geometries, not just a [`AbstractGeometryCollectionTrait`](@ref)s.
 
 We also simplified the dimension functions. From the three original (`dimension`, `coordinateDimension`, `spatialDimension`) there's now only the coordinate dimension, so not to overlap with the Julia `ndims`.
 ```julia

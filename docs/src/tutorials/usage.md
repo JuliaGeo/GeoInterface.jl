@@ -13,14 +13,14 @@ getgeom(geom::geomtype, i)
 ```
 
 ## Types
-(b) a set of types for dispatching on said functions.
+(b) a set of trait-types for dispatching on said functions.
 
-The types tell GeoInterface how to interpret the input object inside a GeoInterface function.
+The types tell GeoInterface how to interpret the input object inside a GeoInterface function and are specific for each type of Geometry.
 
 ```julia
-abstract Geometry
-Point <: AbstractPoint <: AbstractGeometry
-MultiPoint <: AbstractMultiPointGeometry <:AbstractGeometryCollection <: AbstractGeometry
+abstract GeometryTrait
+PointTrait <: AbstractPointTrait <: AbstractGeometryTrait
+MultiPointTrait <: AbstractMultiPointGeometryTrait <:AbstractGeometryCollectionTrait <: AbstractGeometryTrait
 ...
 ```
 
@@ -36,10 +36,12 @@ julia> geom = createpolygon(...)::ArchGDAL.IGeometry  # no idea about the interf
 julia> isgeometry(geom)
 True
 julia> geomtype(geom)
-GeoInterface.Polygon
+GeoInterface.PolygonTrait()
 julia> ext = exterior(geom);
 julia> geomtype(ext)
-GeoInterface.LineString
+GeoInterface.LineStringTrait()
 julia> getcoords.(getpoint.(Ref(ext), 1:npoint(ext)))
 [[1.,2.],[2.,3.],[1.,2.]]
+julia> coords(geom)  # fallback based on ngeom & npoint above
+
 ```
