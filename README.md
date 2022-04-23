@@ -11,3 +11,5 @@ Using these traits, it should be easy to parse, serialize and use different geom
 without knowing the specifics of each individual package. In that regard it is similar to Tables.jl, but for geometries instead of tables.
 
 Packages which support the GeoInterface.jl interface can be found in [INTEGRATIONS.md](INTEGRATIONS.md).
+
+We thank Julia Computing for supporting contributions to this package.

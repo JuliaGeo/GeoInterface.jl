@@ -38,7 +38,7 @@ coordnames(geom) = coordnames(geomtype(geom), geom)
 
 Return `true` when the geometry is empty.
 """
-isempty(geom) = ngeom(geom) == 0
+isempty(geom) = isempty(geomtype(geom), geom)
 
 """
     issimple(geom) -> Bool
@@ -461,3 +461,11 @@ Return (an iterator of) point coordinates.
 Ensure backwards compatibility with the older GeoInterface
 """
 coordinates(geom) = coordinates(geomtype(geom), geom)
+
+"""
+    convert(type::CustomGeom, geom)
+
+Convert `geom` into the `CustomGeom` type if both geom as the CustomGeom package
+have implemented GeoInterface.
+"""
+convert(T, geom) = convert(T, geomtype(geom), geom)

@@ -16,6 +16,7 @@ m(::AbstractPointTrait, geom) = getcoord(geom, findfirst(coordnames(geom), :M))
 
 is3d(::AbstractPointTrait, geom) = :Z in coordnames(geom)
 ismeasured(::AbstractPointTrait, geom) = :M in coordnames(geom)
+isempty(T, geom) = false
 
 ## Points
 ngeom(::AbstractPointTrait, geom)::Integer = 0
