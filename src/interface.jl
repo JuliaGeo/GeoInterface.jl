@@ -469,3 +469,17 @@ Convert `geom` into the `CustomGeom` type if both geom as the CustomGeom package
 have implemented GeoInterface.
 """
 convert(T, geom) = convert(T, geomtype(geom), geom)
+
+"""
+    astext(geom) -> WKT
+
+Convert `geom` into Well Known Text (WKT) representation, such as `POINT (30 10)`.
+"""
+astext(geom) = astext(geomtype(geom), geom)
+
+"""
+    asbinary(geom) -> WKB
+
+Convert `geom` into Well Known Binary (WKB) representation, such as `000000000140000000000000004010000000000000`.
+"""
+asbinary(geom) = asbinary(geomtype(geom), geom)
