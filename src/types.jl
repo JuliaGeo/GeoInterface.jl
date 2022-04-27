@@ -1,3 +1,10 @@
+"""
+A trait for defining custom trees of AbstractGeometry,
+where some of the interface and plot recipes are free.
+"""
+abstract type AbstractGeometry end
+isgeometry(::AbstractGeometry) = true
+
 """An AbstractGeometryTrait type for all geometries."""
 abstract type AbstractGeometryTrait end
 

@@ -1,9 +1,12 @@
 module GeoInterface
 
+using RecipesBase
+
 include("types.jl")
 include("interface.jl")
 include("defaults.jl")
 include("utils.jl")
+include("plotrecipes.jl")
 
 export testgeometry
 export isgeometry
