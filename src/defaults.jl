@@ -47,6 +47,8 @@ getlinestring(p::AbstractMultiLineStringTrait, geom, i) = getgeom(p, geom, i)
 npolygon(p::AbstractMultiPolygonTrait, geom) = ngeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom) = getgeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom, i) = getgeom(p, geom, i)
+getring(g::AbstractMultiPolygonTrait, geom) = (r for r in getrings(p) for p in getpolygons(geom))
+nring(p::AbstractPolygonTrait, geom) = sum(nring(p) for p in getpolygons(p))
 
 ## Surface
 npatch(p::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(p, geom)

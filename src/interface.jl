@@ -191,21 +191,26 @@ boundary(geom) = boundary(geomtype(geom), geom)
     nring(geom) -> Integer
 
 Return the number of rings in given `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+Note that this is only valid for [`AbstractPolygon`](@ref)s and
+[`AbstractMultiPolygon`](@ref)s
 """
 nring(geom) = nring(geomtype(geom), geom)
 
 """
-    getring(geom, i::Integer) -> Int
+    getring(geom, [i::Integer]) -> Int
 
 Return the `i`th ring for a given `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+Without the `i` argument, an iterator over all rings is returned.
+
+Note that this is only valid for [`AbstractPolygon`](@ref)s and
+[`AbstractMultiPolygon`](@ref)s in single-argument form.
 """
 getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
 """
     getring(geom) -> Iterator
 """
 getring(geom) = getring(geomtype(geom), geom)
+getring(geom, i) = getring(geomtype(geom), geom, i)
 
 """
     getexterior(geom) -> Curve
@@ -313,16 +318,30 @@ Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 npolygon(geom) = npolygon(geomtype(geom), geom)
 
 """
-    getpolygon(geom, i::Integer) -> AbstractCurve
+    getpolygon(geom, [i::Integer]) -> AbstractCurve
 
 Returns the `i`th polygon for the given `geom`.
+Where no `i` index is passed, an iterator over all polygons is returned.
 Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 """
+getpolygon(geom) = getpolygon(geomtype(geom), geom)
 getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
 """
     getpolygon(geom) -> Iterator
 """
 getpolygon(geom) = getpolygon(geomtype(geom), geom)
+
+"""
+    getring(geom, i::Integer) -> iterable
+
+A specific ring `i` in a polygon or multipolygon (exterior and holes).
+Where no `i` index is passed, an iterator over all rings is returned.
+
+Note that this is only valid for [`AbstractPolygon`](@ref)s and
+[`AbstractMultiPolygon`](@ref)s.
+"""
+getring(geom) = getring(geomtype(geom), geom)
+getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
 
 # Other methods
 """
