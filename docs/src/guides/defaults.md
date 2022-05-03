@@ -5,16 +5,18 @@ Of note here are the `ngeom` and `getgeom` for each geometry type, which transla
 |                            | ngeom       | getgeom       |
 |----------------------------|-------------|---------------|
 | [`AbstractPointTrait`](@ref)              | -           | -             |
-| [`AbstractCurveTrait`](@ref), [`MultiPointTrait`](@ref)  | [`npoint`](@ref)      | [`getpoint`](@ref)      |
-| [`AbstractPolygonTrait`](@ref)            | [`nring`](@ref)       | [`getring`](@ref)       |
-| [`AbstractMultiLineStringTrait`](@ref)    | [`nlinestring`](@ref) | [`getlinestring`](@ref) |
-| [`AbstractMultiPolygonTrait`](@ref)       | [`npolygon`](@ref)    | [`getpolygon`](@ref)    |
-| [`AbstractPolyhedralSurfaceTrait`](@ref)  | [`npatch`](@ref)      | [`getpatch`](@ref)      |
-| [`AbstractGeometryCollectionTrait`](@ref) | [`ngeom`](@ref)       | [`getgeom`](@ref)       |
+| [`AbstractCurveTrait`](@ref), [`MultiPointTrait`](@ref)  | [`npoint(geom)`](@ref)      | [`getpoint(geom)`](@ref)      |
+| [`AbstractPolygonTrait`](@ref)            | [`nring(geom)`](@ref)       | [`getring(geom)`](@ref)       |
+| [`AbstractMultiLineStringTrait`](@ref)    | [`nlinestring(geom)`](@ref) | [`getlinestring(geom)`](@ref) |
+| [`AbstractMultiPolygonTrait`](@ref)       | [`npolygon(geom)`](@ref)    | [`getpolygon(geom)`](@ref)    |
+| [`AbstractPolyhedralSurfaceTrait`](@ref)  | [`npatch(geom)`](@ref)      | [`getpatch(geom)`](@ref)      |
+| [`AbstractGeometryCollectionTrait`](@ref) | [`ngeom(geom)`](@ref)       | [`getgeom(geom)`](@ref)       |
 
 ## Polygons
 Of note are `PolygonTrait`s, which can have holes, for which we automatically add the following
-functions based on the `ngeom` implemented by package authors.
+functions based on the `ngeom` implemented by package authors. In some cases, the assumptions here
+are not correct (most notably Shapefile), where the second ring is not necessarily a hole, but could
+be another exterior.
 
 ```julia
 getexterior(p::AbstractPolygonTrait, geom) = getring(p, geom, 1)

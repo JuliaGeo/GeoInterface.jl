@@ -11,6 +11,35 @@ isgeometry(x::T) where {T} = isgeometry(T)
 isgeometry(::Type{T}) where {T} = false
 
 """
+    GeoInterface.isfeature(x) => Bool
+
+Check if an object `x` is a feature and thus implicitely supports some GeoInterface methods.
+A feature is a combination of a geometry and properties, not unlike a row in a table.
+It is recommended that for users implementing `MyType`, they define only
+`isfeature(::Type{MyType})`. `isfeature(::MyType)` will then automatically delegate to this
+method.
+Ensures backwards compatibility with the older GeoInterface.
+"""
+isfeature(x::T) where {T} = isfeature(T)
+isfeature(::Type{T}) where {T} = false
+
+"""
+    GeoInterface.geometry(feat) => geom
+
+Retrieve the geometry of `feat`. It is expected that `isgeometry(geom) === true`.
+Ensures backwards compatibility with the older GeoInterface.
+"""
+geometry(feat) = nothing
+
+"""
+    GeoInterface.properties(feat) => properties
+
+Retrieve the properties of `feat`. This can be any Iterable that behaves like an AbstractRow.
+Ensures backwards compatibility with the older GeoInterface.
+"""
+properties(feat) = nothing
+
+"""
     GeoInterface.geomtype(geom) => T <: AbstractGeometry
 
 Returns the geometry type, such as [`GeoInterface.Polygon`](@ref) or [`GeoInterface.Point`](@ref).
@@ -54,6 +83,10 @@ Return the `i`th coordinate for a given `geom`.
 Note that this is only valid for individual [`AbstractPoint`]s.
 """
 getcoord(geom, i::Integer) = getcoord(geomtype(geom), geom, i)
+"""
+    getcoord(geom) -> Iterator
+"""
+getcoord(geom) = getcoord(geomtype(geom), geom)
 
 # Curve, LineString, MultiPoint
 """
@@ -71,6 +104,10 @@ Return the `i`th Point in given `geom`.
 Note that this is only valid for [`AbstractCurve`](@ref)s and [`AbstractMultiPoint`](@ref)s.
 """
 getpoint(geom, i::Integer) = getpoint(geomtype(geom), geom, i)
+"""
+    getpoint(geom) -> Iterator
+"""
+getpoint(geom) = getpoint(geomtype(geom), geom)
 
 # Curve
 """
@@ -164,6 +201,10 @@ nring(geom) = nring(geomtype(geom), geom)
 Return the `i`th ring for a given `geom`.
 Note that this is only valid for [`AbstractPolygon`](@ref)s.
 """
+getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
+"""
+    getring(geom) -> Iterator
+"""
 getring(geom) = getring(geomtype(geom), geom)
 
 """
@@ -189,6 +230,10 @@ Returns the `i`th interior ring for this given `geom`.
 Note that this is only valid for [`AbstractPolygon`](@ref)s.
 """
 gethole(geom, i::Integer) = gethole(geomtype(geom), geom, i)
+"""
+    gethole(geom) -> Iterator
+"""
+gethole(geom) = gethole(geomtype(geom), geom)
 
 # PolyHedralSurface
 """
@@ -206,6 +251,10 @@ Returns the `i`th patch for the given `geom`.
 Note that this is only valid for [`AbstractPolyHedralSurface`](@ref)s.
 """
 getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
+"""
+    getpatch(geom) -> Iterator
+"""
+getpatch(geom) = getpatch(geomtype(geom), geom)
 
 """
     boundingpolygons(geom, i) -> AbstractMultiPolygon
@@ -228,6 +277,10 @@ ngeom(geom) = ngeom(geomtype(geom), geom)
 Returns the `i`th geometry for the given `geom`.
 """
 getgeom(geom, i::Integer) = getgeom(geomtype(geom), geom, i)
+"""
+    getgeom(geom) -> Iterator
+"""
+getgeom(geom) = getgeom(geomtype(geom), geom)
 
 # MultiLineString
 """
@@ -245,6 +298,10 @@ Returns the `i`th linestring for the given `geom`.
 Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
 """
 getlinestring(geom, i::Integer) = getlinestring(geomtype(geom), geom, i)
+"""
+    getlinestring(geom) -> Iterator
+"""
+getlinestring(geom) = getlinestring(geomtype(geom), geom)
 
 # MultiPolygon
 """
@@ -254,6 +311,7 @@ Returns the number of polygons for the given `geom`.
 Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 """
 npolygon(geom) = npolygon(geomtype(geom), geom)
+
 """
     getpolygon(geom, i::Integer) -> AbstractCurve
 
@@ -261,6 +319,10 @@ Returns the `i`th polygon for the given `geom`.
 Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 """
 getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
+"""
+    getpolygon(geom) -> Iterator
+"""
+getpolygon(geom) = getpolygon(geomtype(geom), geom)
 
 # Other methods
 """
@@ -284,6 +346,7 @@ extent(geom) = extent(geomtype(geom), geom)
 
 Alias for [`extent`](@ref), for compatibility with
 GeoJSON and the Python geointerface.
+Ensures backwards compatibility with the older GeoInterface.
 """
 bbox(geom) = extent(geom)
 
@@ -458,7 +521,7 @@ ismeasured(geom) = ismeasured(geomtype(geom), geom)
     coordinates(geom) -> Vector
 
 Return (an iterator of) point coordinates.
-Ensure backwards compatibility with the older GeoInterface
+Ensures backwards compatibility with the older GeoInterface.
 """
 coordinates(geom) = coordinates(geomtype(geom), geom)
 

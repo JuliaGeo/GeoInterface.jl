@@ -15,7 +15,7 @@ GeoInterface.getcoord(geomtype(geom), geom::customgeom, i)::Real  # only for Poi
 GeoInterface.ngeom(geomtype(geom), geom::customgeom)::Integer
 GeoInterface.getgeom(geomtype(geom), geom::customgeom, i)  # geomtype -> GeoInterface.Y
 ```
-Where the `getgeom` could be an iterator (without the i) as well. It will return a new geom with the correct `geomtype`. The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such as `npoints` and `getpoint` for LineStrings.
+Where the `getgeom` and `getcoord` could be an iterator (without the `i`) as well. It will return a new geom with the correct `geomtype`. The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such as `npoints` and `getpoint` for LineStrings.
 
 You read more about the `geomtype` in the [Type hierarchy](@ref).
 
@@ -28,6 +28,13 @@ GeoInterface.extent(geomtype(geom), geom::customgeom)::Extents.Extent
 ```
 
 And lastly, there are many other optional functions for each specific geometry. GeoInterface provides fallback implementations based on the generic functions above, but these are not optimized. These are detailed in [Fallbacks](@ref).
+
+## Required for Feature
+```julia
+GeoInterface.isfeature(feat::customfeat)::Bool = true
+GeoInterface.properties(feat::customfeat)
+GeoInterface.geometry(feat::customfeat)
+```
 
 ## GeoSpatial Operations
 ```julia

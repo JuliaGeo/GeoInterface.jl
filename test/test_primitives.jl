@@ -1,18 +1,22 @@
 struct MyCurve end
+struct MyPoint end
 
 @testset "Developer" begin
     # Implement interface
+
+    GeoInterface.isgeometry(::MyPoint) = true
     GeoInterface.isgeometry(::MyCurve) = true
+    GeoInterface.geomtype(::MyPoint) = GeoInterface.PointTrait()
     GeoInterface.geomtype(::MyCurve) = GeoInterface.LineStringTrait()
-    GeoInterface.ncoord(::GeoInterface.LineStringTrait, geom::MyCurve) = 2
+    GeoInterface.ncoord(::GeoInterface.PointTrait, geom::MyPoint) = 2
+    GeoInterface.getcoord(::GeoInterface.PointTrait, geom::MyPoint, i) = [[1, 2], [2, 3]][i]
     GeoInterface.ngeom(::GeoInterface.LineStringTrait, geom::MyCurve) = 2
-    GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve, i) = [[1, 2], [2, 3]][i]
+    GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve, i) = MyPoint()
     GeoInterface.convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
 
     # Test validity
     geom = MyCurve()
     @test testgeometry(geom)
-
     @test !isnothing(GeoInterface.convert(MyCurve, geom))
 
     # Check functions

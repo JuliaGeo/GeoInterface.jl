@@ -20,16 +20,19 @@ isempty(T, geom) = false
 
 ## Points
 ngeom(::AbstractPointTrait, geom)::Integer = 0
+getgeom(::AbstractPointTrait, geom) = nothing
 getgeom(::AbstractPointTrait, geom, i) = nothing
 
 ## LineStrings
 npoint(c::AbstractCurveTrait, geom) = ngeom(c, geom)
+getpoint(c::AbstractCurveTrait, geom) = getgeom(c, geom)
 getpoint(c::AbstractCurveTrait, geom, i) = getgeom(c, geom, i)
 startpoint(c::AbstractCurveTrait, geom) = getpoint(c, geom, 1)
 endpoint(c::AbstractCurveTrait, geom) = getpoint(c, geom, length(geom))
 
 ## Polygons
 nring(p::AbstractPolygonTrait, geom) = ngeom(p, geom)
+getring(p::AbstractPolygonTrait, geom) = getgeom(p, geom)
 getring(p::AbstractPolygonTrait, geom, i) = getgeom(p, geom, i)
 getexterior(p::AbstractPolygonTrait, geom) = getring(p, geom, 1)
 nhole(p::AbstractPolygonTrait, geom) = nring(p, geom) - 1
@@ -37,16 +40,22 @@ gethole(p::AbstractPolygonTrait, geom, i) = getring(p, geom, i + 1)
 
 ## MultiLineString
 nlinestring(p::AbstractMultiLineStringTrait, geom) = ngeom(p, geom)
+getlinestring(p::AbstractMultiLineStringTrait, geom) = getgeom(p, geom)
 getlinestring(p::AbstractMultiLineStringTrait, geom, i) = getgeom(p, geom, i)
 
 ## MultiPolygon
 npolygon(p::AbstractMultiPolygonTrait, geom) = ngeom(p, geom)
+getpolygon(p::AbstractMultiPolygonTrait, geom) = getgeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom, i) = getgeom(p, geom, i)
 
 ## Surface
 npatch(p::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(p, geom)
+getpatch(p::AbstractPolyHedralSurfaceTrait, geom) = getgeom(p, geom)
 getpatch(p::AbstractPolyHedralSurfaceTrait, geom, i::Integer) = getgeom(p, geom, i)
 
+## Default iterator
+getgeom(p::AbstractGeometryTrait, geom) = (getgeom(p, geom, i) for i in 1:ngeom(p, geom))
+getcoord(p::AbstractPointTrait, geom) = (getcoord(p, geom, i) for i in 1:ncoord(p, geom))
 
 ## Npoints
 npoint(::LineTrait, _) = 2
@@ -71,8 +80,17 @@ extent(::AbstractGeometryTrait, geom) = nothing
 
 # Backwards compatibility
 function coordinates(::AbstractPointTrait, geom)
-    collect(getcoord(geom, i) for i in 1:ncoord(geom))
+    collect(getcoord(geom))
 end
 function coordinates(::AbstractGeometryTrait, geom)
-    collect(coordinates(getgeom(geom, i)) for i in 1:ngeom(geom))
+    collect(coordinates(getgeom(geom)))
 end
+
+# Subtraits
+subtrait(::PointTrait) = nothing
+subtrait(::LineStringTrait) = PointTrait
+subtrait(::PolygonTrait) = LineStringTrait
+subtrait(::MultiPointTrait) = PointTrait
+subtrait(::MultiLineStringTrait) = LineStringTrait
+subtrait(::MultiPolygonTrait) = PolygonTrait
+subtrait(::GeometryCollectionTrait) = nothing

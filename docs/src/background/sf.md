@@ -1,6 +1,6 @@
 # Simple Features
-Simple Features (SF) are OGC standards describing two dimensional geographic features, such as Points and Polygons and the relations between them.
-The standards describe a hierarchy of types (Part 1), an interface with SQL (Part II) and an SQL/MM extension with support for circular geometry.
+Simple Features ([SF](https://en.wikipedia.org/wiki/Simple_Features)) are OGC standards describing two dimensional geographic features, such as Points and Polygons and the relations between them.
+The standards describe a hierarchy of types (Part 1), a functional interface with SQL (Part II) and an SQL/MM extension with support for circular geometry types, such as `Circularstring`.
 
 ## Type hierarchy
 All types used here come from the SF. We added `Trait` to all geometry types here to distinguish them from actual geometry structs.
@@ -12,7 +12,7 @@ All types used here come from the SF. We added `Trait` to all geometry types her
 While we try to adhere to SF, there are changes and extensions to make it more Julian.
 
 ### Function names
-All function names are without the `ST_` prefix and are lowercased. In some cases the names have changed as well, to be inline with common Julia functions. `NumX` becomes `nx` and `Xn` becomes `getX`:
+All function names are without the `ST_` prefix and are lowercased. In some cases the names have changed as well, to be inline with common Julia functions. `NumX` becomes `nx` and `geomN` becomes `getgeom`:
 ```julia
 GeometryType -> geomtype
 NumGeometries -> ngeom
@@ -24,15 +24,18 @@ NumPatches -> npatch
 We generalized [`ngeom`](@ref) and [`getgeom`](@ref) to apply to 
 all geometries, not just a [`AbstractGeometryCollectionTrait`](@ref)s.
 
-We also simplified the dimension functions. From the three original (`dimension`, `coordinateDimension`, `spatialDimension`) there's now only the coordinate dimension, so not to overlap with the Julia `ndims`.
+We also simplified the dimension functions. From the three original (`dimension`, `coordinateDimension`, `spatialDimension`) there's now only the coordinate dimension, by using `ncoords`, which represent coordinate dimensions like `X`, `Y`, `Z` and `M`. Topological dimensions (a point is 0-dimensional), and the functions related to it, are not used in this interface to prevent confusion. Similarly, we do not overload the Julia `ndims`, to prevent confusion and possible conflict with custom vector based geometries.
+
 ```julia
 coordinateDimension -> ncoords  # x, y, z, m
+dimension -> unused
+spatialDimension -> unused
 ```
 
-We've generalized the some functions:
+We've generalized the naming of some functions:
 ```julia
 SRID -> crs
-envelope -> extent
+envelope -> extent  # also aliased to bbox
 ```
 
 And added a helper method to clarify the naming of coordinates.
@@ -44,10 +47,9 @@ coordnames = (:X, :Y, :Z, :M)
 Not all SF functions are implemented, either as a possibly slower fallback or empty descriptor or not at all. The following SF functions are not (yet) available.
 
 ```julia
-dimension
+dimension  # topological dimensions
 spatialDimension
-asText
-asBinary
+
 
 locateAlong
 locateBetween

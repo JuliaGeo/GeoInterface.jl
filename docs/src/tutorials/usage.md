@@ -1,5 +1,5 @@
 # Traits interface
-GeoInterface provides a traits interface, not unlike Tables.jl, by a set of functions and types.
+GeoInterface provides a traits interface, not unlike Tables.jl, by a set of functions and types for geospatial data.
 
 ## Functions
 (a) a set of functions: 
@@ -7,8 +7,9 @@ GeoInterface provides a traits interface, not unlike Tables.jl, by a set of func
 isgeometry(geom)
 geomtype(geom)
 ncoord(geom)
+getcoord(geom, i)
 ngeom(geom)
-getgeom(geom::geomtype, i)
+getgeom(geom, i)
 ...
 ```
 
@@ -32,7 +33,7 @@ to work with their custom geometries, you can just call the above generic functi
 julia> using ArchGDAL
 julia> geom = createpolygon(...)::ArchGDAL.IGeometry  # no idea about the interface
 
-# With GeoInterface
+# Inspect with GeoInterface methods
 julia> isgeometry(geom)
 True
 julia> geomtype(geom)
