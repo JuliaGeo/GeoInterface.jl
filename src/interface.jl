@@ -84,7 +84,7 @@ Note that this is only valid for individual [`AbstractPoint`]s.
 """
 getcoord(geom, i::Integer) = getcoord(geomtype(geom), geom, i)
 """
-    getcoord(geom) -> Iterator
+    getcoord(geom) -> iterator
 """
 getcoord(geom) = getcoord(geomtype(geom), geom)
 
@@ -104,8 +104,11 @@ Return the `i`th Point in given `geom`.
 Note that this is only valid for [`AbstractCurve`](@ref)s and [`AbstractMultiPoint`](@ref)s.
 """
 getpoint(geom, i::Integer) = getpoint(geomtype(geom), geom, i)
+
 """
-    getpoint(geom) -> Iterator
+    getpoint(geom) -> iterator
+
+Returns an iterator over all points in `geom`.
 """
 getpoint(geom) = getpoint(geomtype(geom), geom)
 
@@ -191,7 +194,8 @@ boundary(geom) = boundary(geomtype(geom), geom)
     nring(geom) -> Integer
 
 Return the number of rings in given `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+Note that this is only valid for [`AbstractPolygon`](@ref)s and
+[`AbstractMultiPolygon`](@ref)s
 """
 nring(geom) = nring(geomtype(geom), geom)
 
@@ -199,11 +203,17 @@ nring(geom) = nring(geomtype(geom), geom)
     getring(geom, i::Integer) -> Int
 
 Return the `i`th ring for a given `geom`.
+
 Note that this is only valid for [`AbstractPolygon`](@ref)s.
 """
 getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
+
 """
-    getring(geom) -> Iterator
+    getring(geom) -> iterator
+
+Returns an iterator over all rings in `geom`.
+Note that this is only valid for [`AbstractPolygon`](@ref)s and
+[`AbstractMultiPolygon`](@ref)s in single-argument form.
 """
 getring(geom) = getring(geomtype(geom), geom)
 
@@ -215,7 +225,6 @@ Note that this is only valid for [`AbstractPolygon`](@ref)s.
 """
 getexterior(geom) = getexterior(geomtype(geom), geom)
 
-
 """
     nhole(geom) -> Integer
 
@@ -223,6 +232,7 @@ Returns the number of holes for this given `geom`.
 Note that this is only valid for [`AbstractPolygon`](@ref)s.
 """
 nhole(geom)::Integer = nhole(geomtype(geom), geom)
+
 """
     gethole(geom, i::Integer) -> Curve
 
@@ -230,8 +240,12 @@ Returns the `i`th interior ring for this given `geom`.
 Note that this is only valid for [`AbstractPolygon`](@ref)s.
 """
 gethole(geom, i::Integer) = gethole(geomtype(geom), geom, i)
+
 """
-    gethole(geom) -> Iterator
+    gethole(geom) -> iterator
+
+Returns an iterator over all holes in `geom`.
+Note that this is only valid for [`AbstractPolygon`](@ref)s.
 """
 gethole(geom) = gethole(geomtype(geom), geom)
 
@@ -251,8 +265,12 @@ Returns the `i`th patch for the given `geom`.
 Note that this is only valid for [`AbstractPolyHedralSurface`](@ref)s.
 """
 getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
+
 """
-    getpatch(geom) -> Iterator
+    getpatch(geom) -> iterator
+
+Returns an iterator over all patches in `geom`.
+Note that this is only valid for [`AbstractPolyHedralSurface`](@ref)s.
 """
 getpatch(geom) = getpatch(geomtype(geom), geom)
 
@@ -277,8 +295,11 @@ ngeom(geom) = ngeom(geomtype(geom), geom)
 Returns the `i`th geometry for the given `geom`.
 """
 getgeom(geom, i::Integer) = getgeom(geomtype(geom), geom, i)
+
 """
-    getgeom(geom) -> Iterator
+    getgeom(geom) -> iterator
+
+Returns an iterator over all geometry components in `geom`.
 """
 getgeom(geom) = getgeom(geomtype(geom), geom)
 
@@ -298,8 +319,12 @@ Returns the `i`th linestring for the given `geom`.
 Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
 """
 getlinestring(geom, i::Integer) = getlinestring(geomtype(geom), geom, i)
+
 """
-    getlinestring(geom) -> Iterator
+    getlinestring(geom) -> iterator
+
+Returns an iterator over all linestrings in a geometry.
+Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
 """
 getlinestring(geom) = getlinestring(geomtype(geom), geom)
 
@@ -319,10 +344,32 @@ Returns the `i`th polygon for the given `geom`.
 Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 """
 getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
+
 """
-    getpolygon(geom) -> Iterator
+    getpolygon(geom) -> iterator
+
+Returns an iterator over all polygons in a geometry.
+Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 """
 getpolygon(geom) = getpolygon(geomtype(geom), geom)
+
+"""
+    getring(geom, i::Integer) -> AbstractCurve
+
+A specific ring `i` in a polygon or multipolygon (exterior and holes).
+Note that this is only valid for [`AbstractPolygon`](@ref)s and
+[`AbstractMultiPolygon`](@ref)s.
+"""
+getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
+
+"""
+    getring(geom) -> iterable
+
+Returns an iterator over all rings in a geometry.
+Note that this is only valid for [`AbstractPolygon`](@ref)s and
+[`AbstractMultiPolygon`](@ref)s.
+"""
+getring(geom) = getring(geomtype(geom), geom)
 
 # Other methods
 """

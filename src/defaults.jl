@@ -37,16 +37,24 @@ getring(p::AbstractPolygonTrait, geom, i) = getgeom(p, geom, i)
 getexterior(p::AbstractPolygonTrait, geom) = getring(p, geom, 1)
 nhole(p::AbstractPolygonTrait, geom) = nring(p, geom) - 1
 gethole(p::AbstractPolygonTrait, geom, i) = getring(p, geom, i + 1)
+npoint(p::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(p))
+getpoint(g::AbstractPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(geom))
 
 ## MultiLineString
 nlinestring(p::AbstractMultiLineStringTrait, geom) = ngeom(p, geom)
 getlinestring(p::AbstractMultiLineStringTrait, geom) = getgeom(p, geom)
 getlinestring(p::AbstractMultiLineStringTrait, geom, i) = getgeom(p, geom, i)
+npoint(g::AbstractMultiLineStringTrait, geom) = sum(npoint(l) for ls in getlinestring(geom))
+getpoint(g::AbstractMultiLineStringTrait, geom) = (p for p in getpoint(ls) for l in getlinestring(geom))
 
 ## MultiPolygon
 npolygon(p::AbstractMultiPolygonTrait, geom) = ngeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom) = getgeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom, i) = getgeom(p, geom, i)
+nring(p::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(p))
+getring(g::AbstractMultiPolygonTrait, geom) = (r for r in getring(p) for p in getpolygon(geom))
+npoint(p::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(geom))
+getpoint(g::AbstractMultiPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(geom))
 
 ## Surface
 npatch(p::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(p, geom)
