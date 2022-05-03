@@ -48,9 +48,9 @@ gethole(p::AbstractPolygonTrait, geom, i) = getring(p, geom, i + 1)
 npolygon(p::AbstractMultiPolygonTrait, geom) = ngeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom) = getgeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom, i) = getgeom(p, geom, i)
-getring(g::AbstractMultiPolygonTrait, geom) = (r for r in getrings(p) for p in getpolygons(geom))
+getring(g::AbstractMultiPolygonTrait, geom) = (r for r in getring(p) for p in getpolygon(geom))
 getpoint(g::AbstractMultiPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(geom))
-nring(p::AbstractPolygonTrait, geom) = sum(nring(p) for p in getpolygons(p))
+nring(p::AbstractPolygonTrait, geom) = sum(nring(p) for p in getpolygon(p))
 
 ## Surface
 npatch(p::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(p, geom)
