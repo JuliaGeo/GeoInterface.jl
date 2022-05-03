@@ -200,7 +200,7 @@ Note that this is only valid for [`AbstractPolygon`](@ref)s and
 nring(geom) = nring(geomtype(geom), geom)
 
 """
-    getring(geom, [i::Integer]) -> Int
+    getring(geom, i::Integer) -> Int
 
 Return the `i`th ring for a given `geom`.
 
@@ -212,7 +212,6 @@ getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
     getring(geom) -> iterator
 
 Returns an iterator over all rings in `geom`.
-
 Note that this is only valid for [`AbstractPolygon`](@ref)s and
 [`AbstractMultiPolygon`](@ref)s in single-argument form.
 """
@@ -322,7 +321,7 @@ Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
 getlinestring(geom, i::Integer) = getlinestring(geomtype(geom), geom, i)
 
 """
-    getlinestring(geom, i::Integer) -> iterator
+    getlinestring(geom) -> iterator
 
 Returns an iterator over all linestrings in a geometry.
 Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
@@ -339,20 +338,20 @@ Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 npolygon(geom) = npolygon(geomtype(geom), geom)
 
 """
-    getpolygon(geom) -> AbstractCurve
+    getpolygon(geom, i::Integer) -> AbstractCurve
 
 Returns the `i`th polygon for the given `geom`.
 Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 """
-getpolygon(geom) = getpolygon(geomtype(geom), geom)
+getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
 
 """
-    getpolygon(geom) -> AbstractCurve
+    getpolygon(geom) -> iterator
 
 Returns an iterator over all polygons in a geometry.
 Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
 """
-getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
+getpolygon(geom) = getpolygon(geomtype(geom), geom)
 
 """
     getring(geom, i::Integer) -> AbstractCurve
@@ -500,7 +499,7 @@ union(a, b) = union(geomtype(a), geomtype(b), a, b)
 
 # Spatial analysis
 """
-3   distance(a, b) -> Number
+    distance(a, b) -> Number
 
 Returns the shortest distance between `a` with `b`.
 """
