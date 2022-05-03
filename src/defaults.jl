@@ -30,24 +30,26 @@ getpoint(c::AbstractCurveTrait, geom, i) = getgeom(c, geom, i)
 startpoint(c::AbstractCurveTrait, geom) = getpoint(c, geom, 1)
 endpoint(c::AbstractCurveTrait, geom) = getpoint(c, geom, length(geom))
 
+## MultiLineString
+nlinestring(p::AbstractMultiLineStringTrait, geom) = ngeom(p, geom)
+getlinestring(p::AbstractMultiLineStringTrait, geom) = getgeom(p, geom)
+getlinestring(p::AbstractMultiLineStringTrait, geom, i) = getgeom(p, geom, i)
+getpoint(g::AbstractMultiLineStringTrait, geom) = (p for p in getpoint(p) for g in getlinestring(geom))
+
 ## Polygons
 nring(p::AbstractPolygonTrait, geom) = ngeom(p, geom)
 getring(p::AbstractPolygonTrait, geom) = getgeom(p, geom)
 getring(p::AbstractPolygonTrait, geom, i) = getgeom(p, geom, i)
 getexterior(p::AbstractPolygonTrait, geom) = getring(p, geom, 1)
-nhole(p::AbstractPolygonTrait, geom) = nring(p, geom) - 1
+nhole(p::AbstractPolygonTrait, geom) = nring(p, geom) - 1ring
 gethole(p::AbstractPolygonTrait, geom, i) = getring(p, geom, i + 1)
-
-## MultiLineString
-nlinestring(p::AbstractMultiLineStringTrait, geom) = ngeom(p, geom)
-getlinestring(p::AbstractMultiLineStringTrait, geom) = getgeom(p, geom)
-getlinestring(p::AbstractMultiLineStringTrait, geom, i) = getgeom(p, geom, i)
 
 ## MultiPolygon
 npolygon(p::AbstractMultiPolygonTrait, geom) = ngeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom) = getgeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom, i) = getgeom(p, geom, i)
 getring(g::AbstractMultiPolygonTrait, geom) = (r for r in getrings(p) for p in getpolygons(geom))
+getpoint(g::AbstractMultiPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(geom))
 nring(p::AbstractPolygonTrait, geom) = sum(nring(p) for p in getpolygons(p))
 
 ## Surface
