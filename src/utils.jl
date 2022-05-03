@@ -1,5 +1,3 @@
-using InteractiveUtils
-
 """Test whether the required interface for your `geom` has been implemented correctly."""
 function testgeometry(geom)
     try
