@@ -50,7 +50,7 @@ getpolygon(p::AbstractMultiPolygonTrait, geom) = getgeom(p, geom)
 getpolygon(p::AbstractMultiPolygonTrait, geom, i) = getgeom(p, geom, i)
 getring(g::AbstractMultiPolygonTrait, geom) = (r for r in getring(p) for p in getpolygon(geom))
 getpoint(g::AbstractMultiPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(geom))
-nring(p::AbstractPolygonTrait, geom) = sum(nring(p) for p in getpolygon(p))
+nring(p::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(p))
 
 ## Surface
 npatch(p::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(p, geom)
