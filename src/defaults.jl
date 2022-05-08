@@ -95,6 +95,28 @@ function coordinates(::AbstractGeometryTrait, geom)
 end
 
 # Subtraits
+
+"""
+    subtrait(t::AbstractGeometryTrait)
+
+Gets the expected (sub)trait for subgeometries (retrieved with [`getgeom`](@ref)) of trait `t`.
+This follows the [Type hierarchy](@ref) of Simple Features.
+
+# Examples
+```jldoctest; setup = :(using GeoInterface)
+julia> GeoInterface.subtrait(GeoInterface.LineStringTrait())
+GeoInterface.PointTrait
+julia> GeoInterface.subtrait(GeoInterface.MultiPointTrait())
+GeoInterface.PointTrait
+```
+```jldoctest; setup = :(using GeoInterface)
+# `nothing` is returned when there's no subtrait or when it's not known beforehand
+julia> isnothing(GeoInterface.subtrait(GeoInterface.PointTrait()))
+true
+julia> isnothing(GeoInterface.subtrait(GeoInterface.GeometryCollectionTrait()))
+true
+```
+"""
 subtrait(::PointTrait) = nothing
 subtrait(::LineStringTrait) = PointTrait
 subtrait(::PolygonTrait) = LineStringTrait

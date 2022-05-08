@@ -11,13 +11,13 @@ CurrentModule = GeoInterface
 
 This Package describe a set of traits based on the [Simple Features standard (SF)](https://www.opengeospatial.org/standards/sfa)
 for geospatial vector data, including the SQL/MM extension with support for circular geometry.
-Using these traits, it should be easy to parse, serialize and use different geometries in the Julia ecosystem,
+By using these traits, it should be easy to parse, serialize and use different custom geometries in the Julia ecosystem,
 without knowing the specifics of each individual package. In that regard it is similar to Tables.jl, but for geometries instead of tables.
 
 Packages which support the GeoInterface.jl interface can be found in [Packages](@ref).
 
-For background about the interface and Simple Features, see [Changes with respect to SF](@ref).
 For usage see [Traits interface](@ref), while if you look to implement GeoInterface in your own package, check out [Implementing GeoInterface](@ref).
+For background about the interface and Simple Features, see [Changes with respect to SF](@ref).
 
 !!! compat
-    This traits interface is new and is a major departure from previous pre-1.0 releases. Feel free to ask questions on Github.
+    This traits interface is new and is a major departure from previous pre-1.0 releases. See [History](@ref) for more information. Feel free to ask questions on Github.

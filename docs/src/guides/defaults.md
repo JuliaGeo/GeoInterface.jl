@@ -28,7 +28,7 @@ nhole(p::AbstractPolygonTrait, geom) = nring(p, geom) - 1
 gethole(p::AbstractPolygonTrait, geom, i) = getring(p, geom, i + 1)
 ```
 ## LineStrings
-Simarly for LineStrings, we have the following
+Similarly for `LineStringTrait`s, we have the following
 ```julia
 startpoint(geom) = getpoint(geom, 1)
 endpoint(geom) = getpoint(geom, length(geom))

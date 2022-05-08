@@ -18,6 +18,7 @@ makedocs(;
         "Home" => "index.md",
         "Background" => Any[
             "Simple Features"=>"background/sf.md",
+            "History"=>"background/history.md",
         ],
         "Tutorials" => Any[
             "Installation"=>"tutorials/installation.md",
@@ -31,7 +32,8 @@ makedocs(;
             "API" => "reference/api.md"
             "Implementations" => "reference/integrations.md"
         ],
-    ]
+    ],
+    doctest=true
 )
 
 deploydocs(;

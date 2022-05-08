@@ -4,24 +4,30 @@ CurrentModule = GeoInterface
 
 # Implementing GeoInterface
 GeoInterface requires six functions to be defined for a custom geometry. On top of that
-it could be useful to also implement some optional methods if they apply or are faster than the fallbacks.
+it could be useful to also implement some optional methods if they apply or are faster than the [Fallbacks](@ref).
 
 If your package also supports geospatial operations on geometries--such as intersections--, please
 also implement those interfaces where applicable.
+
+Last but not least, we also provide an interface for features--geometries with properties--if applicable.
 
 ## Required for Geometry
 
 ```julia
 GeoInterface.isgeometry(geom::customgeom)::Bool = true
-GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.XTraitTrait() # <: AbstractGeometryTrait
+GeoInterface.geomtype(geom::customgeom)::DataType = GeoInterface.XTrait() # <: AbstractGeometryTrait
+# for PointTraits
 GeoInterface.ncoord(geomtype(geom), geom::customgeom)::Integer
-GeoInterface.getcoord(geomtype(geom), geom::customgeom, i)::Real  # only for PointTraits
+GeoInterface.getcoord(geomtype(geom), geom::customgeom, i)::Real
+# for non PointTraits
 GeoInterface.ngeom(geomtype(geom), geom::customgeom)::Integer
-GeoInterface.getgeom(geomtype(geom), geom::customgeom, i)  # geomtype -> GeoInterface.Y
+GeoInterface.getgeom(geomtype(geom), geom::customgeom, i)
 ```
-Where the `getgeom` and `getcoord` could be an iterator (without the `i`) as well. It will return a new geom with the correct `geomtype`. The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such as `npoints` and `getpoint` for LineStrings.
+Where the `getgeom` and `getcoord` could be an iterator (without the `i`) as well. It will return a new geom with the correct `geomtype`.
+This means that a call to `getgeom` on a geometry that has a `LineStringTrait` should return something that implements the `PointTrait`. This hierarchy can be checked programmatically with [`subtrait`](@ref). You read more about the `geomtype` in the [Type hierarchy](@ref).
 
-You read more about the `geomtype` in the [Type hierarchy](@ref).
+The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such as `npoints` and `getpoint` for `LineStringTrait`s.
+
 
 ## Optional for Geometry
 
@@ -71,15 +77,16 @@ union(geomtype(a), geomtype(b), a, b)
 ```
 
 ## Testing the interface
-GeoInterface provides a Testsuite for a geom type to check whether all functions that have been implemented also work as expected.
+GeoInterface provides a Testsuite for a geom type to check whether the required functions that have been correctly implemented and work as expected.
 
 ```julia
 GeoInterface.testgeometry(geom)
+GeoInterface.testfeature(geom)
 ```
 
 ## Examples
 
-All custom geometies implement
+All custom geometries implement
 ```julia
 GeoInterface.isgeometry(geom::customgeom)::Bool = true
 ```

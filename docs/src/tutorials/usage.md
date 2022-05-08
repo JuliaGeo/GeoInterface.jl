@@ -47,6 +47,6 @@ julia> geomtype(ext)
 GeoInterface.LineStringTrait()
 julia> getcoords.(getpoint.(Ref(ext), 1:npoint(ext)))
 [[1.,2.],[2.,3.],[1.,2.]]
-julia> coords(geom)  # fallback based on ngeom & npoint above
+julia> coordinates(geom)  # fallback based on ngeom & npoint above
 
 ```

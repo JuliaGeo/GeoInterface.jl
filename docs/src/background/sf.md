@@ -12,6 +12,7 @@ All types used here come from the SF. We added `Trait` to all geometry types her
 ![SF Type hierarchy. From the Simple Feature standard by OGC.](types.png)
 `The SF Type hierarchy. From OpenGIS® Implementation Standard for Geographic information - Simple feature access - Part 1: Common architecture at http://www.opengis.net/doc/is/sfa/1.2.1.`
 
+
 ## Changes with respect to SF
 While we try to adhere to SF, there are changes and extensions to make it more Julian.
 
@@ -54,15 +55,6 @@ Not all SF functions are implemented, either as a possibly slower fallback or em
 dimension  # topological dimensions
 spatialDimension
 
-
 locateAlong
 locateBetween
 ```
-
-## History
-The previous pre-1.0 releases of GeoInterface.jl were smaller in scope, aligned to geointerface in Python [^sgillies]
-which builds on GeoJSON [^geojson]. It provided abstract types and expected other geometries to be implemented as a subtype.
-Recent Julia developments have shown that subtyping is difficult--you can only choose one supertype--and many packages moved to trait-based interfaces. Tables.jl is an excellent example.
-
-[^sgillies]: https://gist.github.com/sgillies/2217756
-[^geojson]: https://geojson.org/
