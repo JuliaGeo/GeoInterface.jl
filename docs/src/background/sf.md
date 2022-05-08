@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = GeoInterface
+```
+
 # Simple Features
 Simple Features ([SF](https://en.wikipedia.org/wiki/Simple_Features)) are OGC standards describing two dimensional geographic features, such as Points and Polygons and the relations between them.
 The standards describe a hierarchy of types (Part 1), a functional interface with SQL (Part II) and an SQL/MM extension with support for circular geometry types, such as `Circularstring`.

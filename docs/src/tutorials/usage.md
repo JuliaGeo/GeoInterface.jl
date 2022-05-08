@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = GeoInterface
+```
+
 # Traits interface
 GeoInterface provides a traits interface, not unlike Tables.jl, by a set of functions and types for geospatial data.
 

@@ -42,7 +42,7 @@ properties(feat) = nothing
 """
     GeoInterface.geomtype(geom) => T <: AbstractGeometry
 
-Returns the geometry type, such as [`GeoInterface.Polygon`](@ref) or [`GeoInterface.Point`](@ref).
+Returns the geometry type, such as [`GeoInterface.PolygonTrait`](@ref) or [`GeoInterface.PointTrait`](@ref).
 """
 geomtype(geom) = nothing
 
@@ -80,7 +80,7 @@ issimple(geom) = issimple(geomtype(geom), geom)
     getcoord(geom, i) -> Number
 
 Return the `i`th coordinate for a given `geom`.
-Note that this is only valid for individual [`AbstractPoint`]s.
+Note that this is only valid for individual [`AbstractPointTrait`](@ref)s.
 """
 getcoord(geom, i::Integer) = getcoord(geomtype(geom), geom, i)
 """
@@ -93,7 +93,7 @@ getcoord(geom) = getcoord(geomtype(geom), geom)
     npoint(geom) -> Int
 
 Return the number of points in given `geom`.
-Note that this is only valid for [`AbstractCurve`](@ref)s and [`AbstractMultiPoint`](@ref)s.
+Note that this is only valid for [`AbstractCurveTrait`](@ref)s and [`AbstractMultiPointTrait`](@ref)s.
 """
 npoint(geom) = npoint(geomtype(geom), geom)
 
@@ -101,7 +101,7 @@ npoint(geom) = npoint(geomtype(geom), geom)
     getpoint(geom, i::Integer) -> Point
 
 Return the `i`th Point in given `geom`.
-Note that this is only valid for [`AbstractCurve`](@ref)s and [`AbstractMultiPoint`](@ref)s.
+Note that this is only valid for [`AbstractCurveTrait`](@ref)s and [`AbstractMultiPointTrait`](@ref)s.
 """
 getpoint(geom, i::Integer) = getpoint(geomtype(geom), geom, i)
 
@@ -117,7 +117,7 @@ getpoint(geom) = getpoint(geomtype(geom), geom)
     startpoint(geom) -> Point
 
 Return the first point in the `geom`.
-Note that this is only valid for [`AbstractCurve`](@ref)s.
+Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
 startpoint(geom) = startpoint(geomtype(geom), geom)
 
@@ -125,7 +125,7 @@ startpoint(geom) = startpoint(geomtype(geom), geom)
     endpoint(geom) -> Point
 
 Return the last point in the `geom`.
-Note that this is only valid for [`AbstractCurve`](@ref)s.
+Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
 endpoint(geom) = endpoint(geomtype(geom), geom)
 
@@ -134,7 +134,7 @@ endpoint(geom) = endpoint(geomtype(geom), geom)
 
 Return whether the `geom` is closed, i.e. whether
 the `startpoint` is the same as the `endpoint`.
-Note that this is only valid for [`AbstractCurve`](@ref)s.
+Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
 isclosed(geom) = isclosed(geomtype(geom), geom)
 
@@ -143,7 +143,7 @@ isclosed(geom) = isclosed(geomtype(geom), geom)
 
 Return whether the `geom` is a ring, i.e. whether
 the `geom` [`isclosed`](@ref) and [`issimple`](@ref).
-Note that this is only valid for [`AbstractCurve`](@ref)s.
+Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
 isring(geom) = isclosed(geom) && issimple(geom)
 
@@ -151,7 +151,7 @@ isring(geom) = isclosed(geom) && issimple(geom)
     length(geom) -> Number
 
 Return the length of `geom` in its 2d coordinate system.
-Note that this is only valid for [`AbstractCurve`](@ref)s.
+Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
 length(geom) = length(geomtype(geom), geom)
 
@@ -160,7 +160,7 @@ length(geom) = length(geomtype(geom), geom)
     area(geom) -> Number
 
 Return the area of `geom` in its 2d coordinate system.
-Note that this is only valid for [`AbstractSurface`](@ref)s.
+Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 area(geom) = area(geomtype(geom), geom)
 
@@ -169,7 +169,7 @@ area(geom) = area(geomtype(geom), geom)
 
 The mathematical centroid for this Surface as a Point.
 The result is not guaranteed to be on this Surface.
-Note that this is only valid for [`AbstractSurface`](@ref)s.
+Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 centroid(geom) = centroid(geomtype(geom), geom)
 
@@ -177,7 +177,7 @@ centroid(geom) = centroid(geomtype(geom), geom)
     pointonsurface(geom) -> Point
 
 A Point guaranteed to be on this geometry (as opposed to [`centroid`](@ref)).
-Note that this is only valid for [`AbstractSurface`](@ref)s.
+Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 pointonsurface(geom) = pointonsurface(geomtype(geom), geom)
 
@@ -185,7 +185,7 @@ pointonsurface(geom) = pointonsurface(geomtype(geom), geom)
     boundary(geom) -> Curve
 
 Return the boundary of `geom`.
-Note that this is only valid for [`AbstractSurface`](@ref)s.
+Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 boundary(geom) = boundary(geomtype(geom), geom)
 
@@ -194,17 +194,17 @@ boundary(geom) = boundary(geomtype(geom), geom)
     nring(geom) -> Integer
 
 Return the number of rings in given `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s and
-[`AbstractMultiPolygon`](@ref)s
+Note that this is only valid for [`AbstractPolygonTrait`](@ref)s and
+[`AbstractMultiPolygonTrait`](@ref)s
 """
 nring(geom) = nring(geomtype(geom), geom)
 
 """
-    getring(geom, i::Integer) -> Int
+    getring(geom, i::Integer) -> AbstractCurve
 
-Return the `i`th ring for a given `geom`.
-
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+A specific ring `i` in a polygon or multipolygon (exterior and holes).
+Note that this is only valid for [`AbstractPolygonTrait`](@ref)s and
+[`AbstractMultiPolygonTrait`](@ref)s.
 """
 getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
 
@@ -212,8 +212,8 @@ getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
     getring(geom) -> iterator
 
 Returns an iterator over all rings in `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s and
-[`AbstractMultiPolygon`](@ref)s in single-argument form.
+Note that this is only valid for [`AbstractPolygonTrait`](@ref)s and
+[`AbstractMultiPolygonTrait`](@ref)s in single-argument form.
 """
 getring(geom) = getring(geomtype(geom), geom)
 
@@ -221,7 +221,7 @@ getring(geom) = getring(geomtype(geom), geom)
     getexterior(geom) -> Curve
 
 Returns the exterior ring of a Polygon as a `AbstractCurve`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
 getexterior(geom) = getexterior(geomtype(geom), geom)
 
@@ -229,7 +229,7 @@ getexterior(geom) = getexterior(geomtype(geom), geom)
     nhole(geom) -> Integer
 
 Returns the number of holes for this given `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
 nhole(geom)::Integer = nhole(geomtype(geom), geom)
 
@@ -237,7 +237,7 @@ nhole(geom)::Integer = nhole(geomtype(geom), geom)
     gethole(geom, i::Integer) -> Curve
 
 Returns the `i`th interior ring for this given `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
 gethole(geom, i::Integer) = gethole(geomtype(geom), geom, i)
 
@@ -245,7 +245,7 @@ gethole(geom, i::Integer) = gethole(geomtype(geom), geom, i)
     gethole(geom) -> iterator
 
 Returns an iterator over all holes in `geom`.
-Note that this is only valid for [`AbstractPolygon`](@ref)s.
+Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
 gethole(geom) = gethole(geomtype(geom), geom)
 
@@ -254,7 +254,7 @@ gethole(geom) = gethole(geomtype(geom), geom)
     npatch(geom)
 
 Returns the number of patches for the given `geom`.
-Note that this is only valid for [`AbstractPolyHedralSurface`](@ref)s.
+Note that this is only valid for [`AbstractPolyHedralSurfaceTrait`](@ref)s.
 """
 npatch(geom)::Integer = npatch(geomtype(geom), geom)
 
@@ -262,7 +262,7 @@ npatch(geom)::Integer = npatch(geomtype(geom), geom)
     getpatch(geom, i::Integer) -> AbstractPolygon
 
 Returns the `i`th patch for the given `geom`.
-Note that this is only valid for [`AbstractPolyHedralSurface`](@ref)s.
+Note that this is only valid for [`AbstractPolyHedralSurfaceTrait`](@ref)s.
 """
 getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
 
@@ -270,7 +270,7 @@ getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
     getpatch(geom) -> iterator
 
 Returns an iterator over all patches in `geom`.
-Note that this is only valid for [`AbstractPolyHedralSurface`](@ref)s.
+Note that this is only valid for [`AbstractPolyHedralSurfaceTrait`](@ref)s.
 """
 getpatch(geom) = getpatch(geomtype(geom), geom)
 
@@ -308,7 +308,7 @@ getgeom(geom) = getgeom(geomtype(geom), geom)
     nlinestring(geom) -> Integer
 
 Returns the number of curves for the given `geom`.
-Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
+Note that this is only valid for [`AbstractMultiLineStringTrait`](@ref)s.
 """
 nlinestring(geom) = nlinestring(geomtype(geom), geom)
 
@@ -316,7 +316,7 @@ nlinestring(geom) = nlinestring(geomtype(geom), geom)
     getlinestring(geom, i::Integer) -> AbstractCurve
 
 Returns the `i`th linestring for the given `geom`.
-Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
+Note that this is only valid for [`AbstractMultiLineStringTrait`](@ref)s.
 """
 getlinestring(geom, i::Integer) = getlinestring(geomtype(geom), geom, i)
 
@@ -324,7 +324,7 @@ getlinestring(geom, i::Integer) = getlinestring(geomtype(geom), geom, i)
     getlinestring(geom) -> iterator
 
 Returns an iterator over all linestrings in a geometry.
-Note that this is only valid for [`AbstractMultiLineString`](@ref)s.
+Note that this is only valid for [`AbstractMultiLineStringTrait`](@ref)s.
 """
 getlinestring(geom) = getlinestring(geomtype(geom), geom)
 
@@ -333,7 +333,7 @@ getlinestring(geom) = getlinestring(geomtype(geom), geom)
     npolygon(geom) -> Integer
 
 Returns the number of polygons for the given `geom`.
-Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
+Note that this is only valid for [`AbstractMultiPolygonTrait`](@ref)s.
 """
 npolygon(geom) = npolygon(geomtype(geom), geom)
 
@@ -341,7 +341,7 @@ npolygon(geom) = npolygon(geomtype(geom), geom)
     getpolygon(geom, i::Integer) -> AbstractCurve
 
 Returns the `i`th polygon for the given `geom`.
-Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
+Note that this is only valid for [`AbstractMultiPolygonTrait`](@ref)s.
 """
 getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
 
@@ -349,27 +349,9 @@ getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
     getpolygon(geom) -> iterator
 
 Returns an iterator over all polygons in a geometry.
-Note that this is only valid for [`AbstractMultiPolygon`](@ref)s.
+Note that this is only valid for [`AbstractMultiPolygonTrait`](@ref)s.
 """
 getpolygon(geom) = getpolygon(geomtype(geom), geom)
-
-"""
-    getring(geom, i::Integer) -> AbstractCurve
-
-A specific ring `i` in a polygon or multipolygon (exterior and holes).
-Note that this is only valid for [`AbstractPolygon`](@ref)s and
-[`AbstractMultiPolygon`](@ref)s.
-"""
-getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
-
-"""
-    getring(geom) -> iterable
-
-Returns an iterator over all rings in a geometry.
-Note that this is only valid for [`AbstractPolygon`](@ref)s and
-[`AbstractMultiPolygon`](@ref)s.
-"""
-getring(geom) = getring(geomtype(geom), geom)
 
 # Other methods
 """
@@ -523,7 +505,7 @@ convexhull(geom) = convexhull(geomtype(geom), geom)
     x(geom) -> Number
 
 Return the :X coordinate of the given `geom`.
-Note that this is only valid for [`AbstractPoint`](@ref)s.
+Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
 x(geom) = x(geomtype(geom), geom)
 
@@ -531,7 +513,7 @@ x(geom) = x(geomtype(geom), geom)
     y(geom) -> Number
 
 Return the :Y coordinate of the given `geom`.
-Note that this is only valid for [`AbstractPoint`](@ref)s.
+Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
 y(geom) = y(geomtype(geom), geom)
 
@@ -539,7 +521,7 @@ y(geom) = y(geomtype(geom), geom)
     z(geom) -> Number
 
 Return the :Z coordinate of the given `geom`.
-Note that this is only valid for [`AbstractPoint`](@ref)s.
+Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
 z(geom) = z(geomtype(geom), geom)
 
@@ -547,7 +529,7 @@ z(geom) = z(geomtype(geom), geom)
     m(geom) -> Number
 
 Return the :M coordinate of the given `geom`.
-Note that this is only valid for [`AbstractPoint`](@ref)s.
+Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
 m(geom) = m(geomtype(geom), geom)
 

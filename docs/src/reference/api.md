@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = GeoInterface
+```
+
 # API
 
 ## Functions

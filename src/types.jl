@@ -52,7 +52,7 @@ struct HexagonTrait <: AbstractPolygonTrait end
 
 """An AbstractPolyHedralSurfaceTrait type for all polyhedralsurfaces."""
 abstract type AbstractPolyHedralSurfaceTrait <: AbstractSurfaceTrait end
-"""A PolyHedralSurfaceTrait is a connected surface consisting of [`PolygonsTraits`](@ref)."""
+"""A PolyHedralSurfaceTrait is a connected surface consisting of [`PolygonTrait`](@ref)s."""
 struct PolyHedralSurfaceTrait <: AbstractPolyHedralSurfaceTrait end
 """A TINTrait is a [`PolyHedralSurfaceTrait`](@ref) consisting of [`TriangleTrait`](@ref)s."""
 struct TINTrait <: AbstractPolyHedralSurfaceTrait end  # Surface consisting of Triangles
