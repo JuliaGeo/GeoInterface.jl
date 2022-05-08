@@ -9,7 +9,7 @@ struct MyPoint end
     GeoInterface.geomtype(::MyPoint) = GeoInterface.PointTrait()
     GeoInterface.geomtype(::MyCurve) = GeoInterface.LineStringTrait()
     GeoInterface.ncoord(::GeoInterface.PointTrait, geom::MyPoint) = 2
-    GeoInterface.getcoord(::GeoInterface.PointTrait, geom::MyPoint, i) = [[1, 2], [2, 3]][i]
+    GeoInterface.getcoord(::GeoInterface.PointTrait, geom::MyPoint, i) = [1, 2][i]
     GeoInterface.ngeom(::GeoInterface.LineStringTrait, geom::MyCurve) = 2
     GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve, i) = MyPoint()
     GeoInterface.convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
@@ -21,6 +21,7 @@ struct MyPoint end
 
     # Check functions
     @test GeoInterface.npoint(geom) == 2  # defaults to ngeom
+    @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
     @test_throws MethodError GeoInterface.area(geom)
 
 end

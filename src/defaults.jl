@@ -91,7 +91,7 @@ function coordinates(::AbstractPointTrait, geom)
     collect(getcoord(geom))
 end
 function coordinates(::AbstractGeometryTrait, geom)
-    collect(coordinates(getgeom(geom)))
+    collect(coordinates.(getgeom(geom)))
 end
 
 # Subtraits
