@@ -6,13 +6,13 @@
 # Four options in SF, xy, xyz, xym, xyzm
 const default_coord_names = (:X, :Y, :Z, :M)
 
-coordnames(::AbstractGeometryTrait, geom) = default_coord_names[1:ncoord(geom)]
+coordnames(t::AbstractGeometryTrait, geom) = default_coord_names[1:ncoord(t, geom)]
 
 # Maybe hardcode dimension order? At least for X and Y?
-x(::AbstractPointTrait, geom) = getcoord(geom, findfirst(isequal(:X), coordnames(geom)))
-y(::AbstractPointTrait, geom) = getcoord(geom, findfirst(isequal(:Y), coordnames(geom)))
-z(::AbstractPointTrait, geom) = getcoord(geom, findfirst(isequal(:Z), coordnames(geom)))
-m(::AbstractPointTrait, geom) = getcoord(geom, findfirst(isequal(:M), coordnames(geom)))
+x(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:X), coordnames(geom)))
+y(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Y), coordnames(geom)))
+z(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Z), coordnames(geom)))
+m(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:M), coordnames(geom)))
 
 is3d(::AbstractPointTrait, geom) = :Z in coordnames(geom)
 ismeasured(::AbstractPointTrait, geom) = :M in coordnames(geom)
@@ -24,46 +24,46 @@ getgeom(::AbstractPointTrait, geom) = nothing
 getgeom(::AbstractPointTrait, geom, i) = nothing
 
 ## LineStrings
-npoint(c::AbstractCurveTrait, geom) = ngeom(c, geom)
-getpoint(c::AbstractCurveTrait, geom) = getgeom(c, geom)
-getpoint(c::AbstractCurveTrait, geom, i) = getgeom(c, geom, i)
-startpoint(c::AbstractCurveTrait, geom) = getpoint(c, geom, 1)
-endpoint(c::AbstractCurveTrait, geom) = getpoint(c, geom, length(geom))
+npoint(t::AbstractCurveTrait, geom) = ngeom(t, geom)
+getpoint(t::AbstractCurveTrait, geom) = getgeom(t, geom)
+getpoint(t::AbstractCurveTrait, geom, i) = getgeom(t, geom, i)
+startpoint(t::AbstractCurveTrait, geom) = getpoint(t, geom, 1)
+endpoint(t::AbstractCurveTrait, geom) = getpoint(t, geom, length(geom))
 
 ## Polygons
-nring(p::AbstractPolygonTrait, geom) = ngeom(p, geom)
-getring(p::AbstractPolygonTrait, geom) = getgeom(p, geom)
-getring(p::AbstractPolygonTrait, geom, i) = getgeom(p, geom, i)
-getexterior(p::AbstractPolygonTrait, geom) = getring(p, geom, 1)
-nhole(p::AbstractPolygonTrait, geom) = nring(p, geom) - 1
-gethole(p::AbstractPolygonTrait, geom, i) = getring(p, geom, i + 1)
-npoint(p::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(p))
-getpoint(g::AbstractPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(geom))
+nring(t::AbstractPolygonTrait, geom) = ngeom(t, geom)
+getring(t::AbstractPolygonTrait, geom) = getgeom(t, geom)
+getring(t::AbstractPolygonTrait, geom, i) = getgeom(t, geom, i)
+getexterior(t::AbstractPolygonTrait, geom) = getring(t, geom, 1)
+nhole(t::AbstractPolygonTrait, geom) = nring(t, geom) - 1
+gethole(t::AbstractPolygonTrait, geom, i) = getring(t, geom, i + 1)
+npoint(p::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
+getpoint(t::AbstractPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(t, geom))
 
 ## MultiLineString
-nlinestring(p::AbstractMultiLineStringTrait, geom) = ngeom(p, geom)
-getlinestring(p::AbstractMultiLineStringTrait, geom) = getgeom(p, geom)
-getlinestring(p::AbstractMultiLineStringTrait, geom, i) = getgeom(p, geom, i)
-npoint(g::AbstractMultiLineStringTrait, geom) = sum(npoint(l) for ls in getlinestring(geom))
-getpoint(g::AbstractMultiLineStringTrait, geom) = (p for p in getpoint(ls) for l in getlinestring(geom))
+nlinestring(t::AbstractMultiLineStringTrait, geom) = ngeom(t, geom)
+getlinestring(t::AbstractMultiLineStringTrait, geom) = getgeom(t, geom)
+getlinestring(t::AbstractMultiLineStringTrait, geom, i) = getgeom(t, geom, i)
+npoint(t::AbstractMultiLineStringTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom))
+getpoint(t::AbstractMultiLineStringTrait, geom) = (p for p in getpoint(ls) for ls in getgeom(t, geom))
 
 ## MultiPolygon
-npolygon(p::AbstractMultiPolygonTrait, geom) = ngeom(p, geom)
-getpolygon(p::AbstractMultiPolygonTrait, geom) = getgeom(p, geom)
-getpolygon(p::AbstractMultiPolygonTrait, geom, i) = getgeom(p, geom, i)
-nring(p::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(p))
-getring(g::AbstractMultiPolygonTrait, geom) = (r for r in getring(p) for p in getpolygon(geom))
-npoint(p::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(geom))
-getpoint(g::AbstractMultiPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(geom))
+npolygon(t::AbstractMultiPolygonTrait, geom) = ngeom(t, geom)
+getpolygon(t::AbstractMultiPolygonTrait, geom) = getgeom(t, geom)
+getpolygon(t::AbstractMultiPolygonTrait, geom, i) = getgeom(t, geom, i)
+nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(t, geom))
+getring(t::AbstractMultiPolygonTrait, geom) = (r for r in getring(p) for p in getpolygon(t, geom))
+npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(t, geom))
+getpoint(t::AbstractMultiPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(t, geom))
 
 ## Surface
-npatch(p::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(p, geom)
-getpatch(p::AbstractPolyHedralSurfaceTrait, geom) = getgeom(p, geom)
-getpatch(p::AbstractPolyHedralSurfaceTrait, geom, i::Integer) = getgeom(p, geom, i)
+npatch(t::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(t, geom)
+getpatch(t::AbstractPolyHedralSurfaceTrait, geom) = getgeom(t, geom)
+getpatch(t::AbstractPolyHedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom, i)
 
 ## Default iterator
-getgeom(p::AbstractGeometryTrait, geom) = (getgeom(p, geom, i) for i in 1:ngeom(p, geom))
-getcoord(p::AbstractPointTrait, geom) = (getcoord(p, geom, i) for i in 1:ncoord(p, geom))
+getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(t, geom))
+getcoord(t::AbstractPointTrait, geom) = (getcoord(t, geom, i) for i in 1:ncoord(t, geom))
 
 ## Npoints
 npoint(::LineTrait, _) = 2
@@ -73,25 +73,28 @@ npoint(::QuadTrait, _) = 4
 npoint(::PentagonTrait, _) = 5
 npoint(::HexagonTrait, _) = 6
 
-issimple(::AbstractCurveTrait, geom) = allunique([getpoint(geom, i) for i in 1:npoint(geom)-1]) && allunique([getpoint(geom, i) for i in 2:npoint(geom)])
-isclosed(::AbstractCurveTrait, geom) = getpoint(geom, 1) == getpoint(geom, npoint(geom))
-isring(x::AbstractCurveTrait, geom) = issimple(x, geom) && isclosed(x, geom)
+issimple(::AbstractCurveTrait, geom) =
+    allunique([getpoint(t, geom, i) for i in 1:npoint(geom)-1]) && allunique([getpoint(t, geom, i) for i in 2:npoint(t, geom)])
+isclosed(t::AbstractCurveTrait, geom) = getpoint(t, geom, 1) == getpoint(t, geom, npoint(t, geom))
+isring(t::AbstractCurveTrait, geom) = issimple(t, geom) && isclosed(t, geom)
 
 # TODO Only simple if it's also not intersecting itself, except for its endpoints
-issimple(::AbstractMultiCurveTrait, geom) = all(i -> issimple(getgeom(geom, i)), 1:ngeom(geom))
-isclosed(::AbstractMultiCurveTrait, geom) = all(i -> isclosed(getgeom(geom, i)), 1:ngeom(geom))
+issimple(t::AbstractMultiCurveTrait, geom) = all(i -> issimple(getgeom(t, geom, i)), 1:ngeom(t, geom))
+isclosed(t::AbstractMultiCurveTrait, geom) = all(i -> isclosed(getgeom(t, geom, i)), 1:ngeom(t, geom))
 
-issimple(::MultiPointTrait, geom) = allunique((getgeom(geom, i) for i in 1:ngeom(geom)))
+issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom, i) for i in 1:ngeom(t, geom)))
+getpoint(t::AbstractMultiPointTrait, geom) = getgeom(t, geom)
+getpoint(t::AbstractMultiPointTrait, geom, i) = getgeom(t, geom, i)
 
 crs(::AbstractGeometryTrait, geom) = nothing
 extent(::AbstractGeometryTrait, geom) = nothing
 
 # Backwards compatibility
-function coordinates(::AbstractPointTrait, geom)
-    collect(getcoord(geom))
+function coordinates(t::AbstractPointTrait, geom)
+    collect(getcoord(t, geom))
 end
-function coordinates(::AbstractGeometryTrait, geom)
-    collect(coordinates.(getgeom(geom)))
+function coordinates(t::AbstractGeometryTrait, geom)
+    collect(coordinates.(getgeom(t, geom)))
 end
 
 # Subtraits
