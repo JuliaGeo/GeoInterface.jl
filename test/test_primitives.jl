@@ -23,5 +23,8 @@ struct MyPoint end
     @test GeoInterface.npoint(geom) == 2  # defaults to ngeom
     @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
     @test_throws MethodError GeoInterface.area(geom)
+    point = GeoInterface.getgeom(geom, 1)
+    @test GeoInterface.y(point) == 2
+
 
 end

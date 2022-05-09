@@ -9,10 +9,10 @@ const default_coord_names = (:X, :Y, :Z, :M)
 coordnames(::AbstractGeometryTrait, geom) = default_coord_names[1:ncoord(geom)]
 
 # Maybe hardcode dimension order? At least for X and Y?
-x(::AbstractPointTrait, geom) = getcoord(geom, findfirst(coordnames(geom), :X))
-y(::AbstractPointTrait, geom) = getcoord(geom, findfirst(coordnames(geom), :Y))
-z(::AbstractPointTrait, geom) = getcoord(geom, findfirst(coordnames(geom), :Z))
-m(::AbstractPointTrait, geom) = getcoord(geom, findfirst(coordnames(geom), :M))
+x(::AbstractPointTrait, geom) = getcoord(geom, findfirst(x -> x === :X, coordnames(geom)))
+y(::AbstractPointTrait, geom) = getcoord(geom, findfirst(x -> x === :Y, coordnames(geom)))
+z(::AbstractPointTrait, geom) = getcoord(geom, findfirst(x -> x === :Z, coordnames(geom)))
+m(::AbstractPointTrait, geom) = getcoord(geom, findfirst(x -> x === :M, coordnames(geom)))
 
 is3d(::AbstractPointTrait, geom) = :Z in coordnames(geom)
 ismeasured(::AbstractPointTrait, geom) = :M in coordnames(geom)
