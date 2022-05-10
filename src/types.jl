@@ -73,6 +73,8 @@ struct MultiLineStringTrait <: AbstractMultiLineStringTrait end
 
 """An AbstractMultiSurfaceTrait type for all multisurfaces."""
 abstract type AbstractMultiSurfaceTrait <: AbstractGeometryCollectionTrait end
+"""A MultiSurfaceTrait is a collection of [`AbstractSurfaceTrait`](@ref)s."""
+struct MultiSurfaceTrait <: AbstractMultiSurfaceTrait end
 """An AbstractMultiPolygonTrait type for all multipolygons."""
 abstract type AbstractMultiPolygonTrait <: AbstractMultiSurfaceTrait end
 """A MultiPolygonTrait is a collection of [`PolygonTrait`](@ref)s."""

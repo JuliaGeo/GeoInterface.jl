@@ -13,7 +13,10 @@ function testgeometry(geom)
             n = ngeom(geom)
             if n >= 1  # geometry could be empty
                 g2 = getgeom(geom, 1)
-                geomtype(g2) == subtrait(type)
+                subtype = subtrait(type)
+                if !isnothing(subtype)
+                    @assert geomtype(g2) isa subtype
+                end
                 @assert testgeometry(g2)  # recursive testing of subgeometries
             end
         end

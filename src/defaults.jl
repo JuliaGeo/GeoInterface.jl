@@ -102,15 +102,15 @@ end
 """
     subtrait(t::AbstractGeometryTrait)
 
-Gets the expected (sub)trait for subgeometries (retrieved with [`getgeom`](@ref)) of trait `t`.
+Gets the expected, possible abstract, (sub)trait for subgeometries (retrieved with [`getgeom`](@ref)) of trait `t`.
 This follows the [Type hierarchy](@ref) of Simple Features.
 
 # Examples
 ```jldoctest; setup = :(using GeoInterface)
 julia> GeoInterface.subtrait(GeoInterface.LineStringTrait())
 GeoInterface.PointTrait
-julia> GeoInterface.subtrait(GeoInterface.MultiPointTrait())
-GeoInterface.PointTrait
+julia> GeoInterface.subtrait(GeoInterface.PolygonTrait())  # Any of LineStringTrait, LineTrait, LinearRingTrait
+GeoInterface.AbstractLineStringTrait
 ```
 ```jldoctest; setup = :(using GeoInterface)
 # `nothing` is returned when there's no subtrait or when it's not known beforehand
@@ -120,10 +120,15 @@ julia> isnothing(GeoInterface.subtrait(GeoInterface.GeometryCollectionTrait()))
 true
 ```
 """
-subtrait(::PointTrait) = nothing
-subtrait(::LineStringTrait) = PointTrait
-subtrait(::PolygonTrait) = LineStringTrait
-subtrait(::MultiPointTrait) = PointTrait
-subtrait(::MultiLineStringTrait) = LineStringTrait
-subtrait(::MultiPolygonTrait) = PolygonTrait
-subtrait(::GeometryCollectionTrait) = nothing
+subtrait(::AbstractPointTrait) = nothing
+subtrait(::AbstractCurveTrait) = AbstractPointTrait
+subtrait(::AbstractCurvePolygonTrait) = AbstractCurveTrait
+subtrait(::AbstractPolygonTrait) = AbstractLineStringTrait
+subtrait(::AbstractPolyHedralSurfaceTrait) = AbstractPolygonTrait
+subtrait(::TINTrait) = TriangleTrait
+subtrait(::AbstractMultiPointTrait) = AbstractPointTrait
+subtrait(::AbstractMultiLineStringTrait) = AbstractLineStringTrait
+subtrait(::AbstractMultiPolygonTrait) = AbstractPolygonTrait
+subtrait(::AbstractMultiSurfaceTrait) = AbstractSurfaceTrait
+subtrait(::AbstractGeometryCollectionTrait) = nothing
+subtrait(::AbstractGeometryTrait) = nothing  # fallback

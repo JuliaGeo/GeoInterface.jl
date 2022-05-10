@@ -1,9 +1,9 @@
-struct MyCurve end
-struct MyPoint end
+
 
 @testset "Developer" begin
     # Implement interface
-
+    struct MyCurve end
+    struct MyPoint end
     GeoInterface.isgeometry(::MyPoint) = true
     GeoInterface.isgeometry(::MyCurve) = true
     GeoInterface.geomtype(::MyPoint) = GeoInterface.PointTrait()
@@ -26,5 +26,8 @@ struct MyPoint end
     point = GeoInterface.getgeom(geom, 1)
     @test GeoInterface.y(point) == 2
 
+end
 
+@testset "Defaults" begin
+    @test GeoInterface.subtrait(GeoInterface.TINTrait()) == GeoInterface.TriangleTrait
 end
