@@ -108,7 +108,7 @@ This follows the [Type hierarchy](@ref) of Simple Features.
 # Examples
 ```jldoctest; setup = :(using GeoInterface)
 julia> GeoInterface.subtrait(GeoInterface.LineStringTrait())
-GeoInterface.PointTrait
+GeoInterface.AbstractPointTrait
 julia> GeoInterface.subtrait(GeoInterface.PolygonTrait())  # Any of LineStringTrait, LineTrait, LinearRingTrait
 GeoInterface.AbstractLineStringTrait
 ```
