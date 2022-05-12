@@ -19,7 +19,7 @@ ismeasured(::AbstractPointTrait, geom) = :M in coordnames(geom)
 isempty(T, geom) = false
 
 ## Points
-ngeom(::AbstractPointTrait, geom)::Integer = 0
+ngeom(::AbstractPointTrait, geom) = 0
 getgeom(::AbstractPointTrait, geom) = nothing
 getgeom(::AbstractPointTrait, geom, i) = nothing
 
@@ -37,24 +37,24 @@ getring(t::AbstractPolygonTrait, geom, i) = getgeom(t, geom, i)
 getexterior(t::AbstractPolygonTrait, geom) = getring(t, geom, 1)
 nhole(t::AbstractPolygonTrait, geom) = nring(t, geom) - 1
 gethole(t::AbstractPolygonTrait, geom, i) = getring(t, geom, i + 1)
-npoint(p::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
-getpoint(t::AbstractPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(t, geom))
+npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
+getpoint(t::AbstractPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## MultiLineString
 nlinestring(t::AbstractMultiLineStringTrait, geom) = ngeom(t, geom)
 getlinestring(t::AbstractMultiLineStringTrait, geom) = getgeom(t, geom)
 getlinestring(t::AbstractMultiLineStringTrait, geom, i) = getgeom(t, geom, i)
 npoint(t::AbstractMultiLineStringTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom))
-getpoint(t::AbstractMultiLineStringTrait, geom) = (p for p in getpoint(ls) for ls in getgeom(t, geom))
+getpoint(t::AbstractMultiLineStringTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
 
 ## MultiPolygon
 npolygon(t::AbstractMultiPolygonTrait, geom) = ngeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom) = getgeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom, i) = getgeom(t, geom, i)
 nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(t, geom))
-getring(t::AbstractMultiPolygonTrait, geom) = (r for r in getring(p) for p in getpolygon(t, geom))
+getring(t::AbstractMultiPolygonTrait, geom) = flatten((r for r in getring(p)) for p in getpolygon(t, geom))
 npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(t, geom))
-getpoint(t::AbstractMultiPolygonTrait, geom) = (p for p in getpoint(r) for r in getring(t, geom))
+getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## Surface
 npatch(t::AbstractPolyHedralSurfaceTrait, geom)::Integer = ngeom(t, geom)
@@ -68,10 +68,15 @@ getcoord(t::AbstractPointTrait, geom) = (getcoord(t, geom, i) for i in 1:ncoord(
 ## Npoints
 npoint(::LineTrait, _) = 2
 npoint(::TriangleTrait, _) = 3
+nring(::TriangleTrait, _) = 1
 npoint(::RectangleTrait, _) = 4
+nring(::RectangleTrait, _) = 1
 npoint(::QuadTrait, _) = 4
+nring(::QuadTrait, _) = 1
 npoint(::PentagonTrait, _) = 5
+nring(::PentagonTrait, _) = 1
 npoint(::HexagonTrait, _) = 6
+nring(::HexagonTrait, _) = 1
 
 issimple(::AbstractCurveTrait, geom) =
     allunique([getpoint(t, geom, i) for i in 1:npoint(geom)-1]) && allunique([getpoint(t, geom, i) for i in 2:npoint(t, geom)])

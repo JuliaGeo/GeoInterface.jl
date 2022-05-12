@@ -30,7 +30,7 @@ end
 """Test whether the required interface for your `feature` has been implemented correctly."""
 function testfeature(feature)
     try
-        @assert isfeature(geom)
+        @assert isfeature(feature)
         geom = geometry(feature)
         @assert isgeometry(geom)
         props = properties(feature)

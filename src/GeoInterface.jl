@@ -1,5 +1,7 @@
 module GeoInterface
 
+using Base.Iterators
+
 include("types.jl")
 include("interface.jl")
 include("defaults.jl")
