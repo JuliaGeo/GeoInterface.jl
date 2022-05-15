@@ -1,4 +1,5 @@
-
+using GeoInterface
+using Test
 
 @testset "Developer" begin
     # Implement interface
@@ -19,7 +20,7 @@
     GeoInterface.geomtype(::MyCurve) = GeoInterface.LineStringTrait()
     GeoInterface.ngeom(::GeoInterface.LineStringTrait, geom::MyCurve) = 2
     GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve, i) = MyPoint()
-    GeoInterface.convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
+    convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
 
     GeoInterface.isgeometry(::MyPolygon) = true
     GeoInterface.geomtype(::MyPolygon) = GeoInterface.PolygonTrait()
@@ -29,15 +30,15 @@
 
     @testset "Point" begin
         geom = MyPoint()
-        @test GeoInterface.testgeometry(geom)
+        @test testgeometry(geom)
         @test GeoInterface.x(geom) === 1
         @test GeoInterface.y(geom) === 2
-        @test GeoInterface.ncoord(geom) === 2
+        @test ncoord(geom) === 2
     end
 
     @testset "LineString" begin
         geom = MyCurve()
-        @test GeoInterface.testgeometry(geom)
+        @test testgeometry(geom)
         @test !isnothing(GeoInterface.convert(MyCurve, geom))
 
         @test GeoInterface.npoint(geom) == 2  # defaults to ngeom
@@ -49,7 +50,7 @@
 
     @testset "Polygon" begin
         geom = MyPolygon()
-        @test GeoInterface.testgeometry(geom)
+        @test testgeometry(geom)
 
         @test GeoInterface.nring(geom) == 2
         @test GeoInterface.nhole(geom) == 1
@@ -71,10 +72,10 @@ end
     struct Row end
     struct Point end
 
-    GeoInterface.isgeometry(::Point) = true
-    GeoInterface.geomtype(::Point) = GeoInterface.PointTrait()
-    GeoInterface.ncoord(::GeoInterface.PointTrait, geom::Point) = 2
-    GeoInterface.getcoord(::GeoInterface.PointTrait, geom::Point, i) = [1, 2][i]
+    isgeometry(::Point) = true
+    geomtype(::Point) = GeoInterface.PointTrait()
+    ncoord(::GeoInterface.PointTrait, geom::Point) = 2
+    getcoord(::GeoInterface.PointTrait, geom::Point, i) = [1, 2][i]
 
     GeoInterface.isfeature(::Row) = true
     GeoInterface.geometry(r::Row) = Point()
