@@ -20,7 +20,7 @@ using Test
     GeoInterface.geomtype(::MyCurve) = GeoInterface.LineStringTrait()
     GeoInterface.ngeom(::GeoInterface.LineStringTrait, geom::MyCurve) = 2
     GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve, i) = MyPoint()
-    convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
+    Base.convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
 
     GeoInterface.isgeometry(::MyPolygon) = true
     GeoInterface.geomtype(::MyPolygon) = GeoInterface.PolygonTrait()
@@ -39,7 +39,7 @@ using Test
     @testset "LineString" begin
         geom = MyCurve()
         @test testgeometry(geom)
-        @test !isnothing(GeoInterface.convert(MyCurve, geom))
+        @test !isnothing(convert(MyCurve, geom))
 
         @test GeoInterface.npoint(geom) == 2  # defaults to ngeom
         @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
@@ -72,10 +72,10 @@ end
     struct Row end
     struct Point end
 
-    isgeometry(::Point) = true
-    geomtype(::Point) = GeoInterface.PointTrait()
-    ncoord(::GeoInterface.PointTrait, geom::Point) = 2
-    getcoord(::GeoInterface.PointTrait, geom::Point, i) = [1, 2][i]
+    GeoInterface.isgeometry(::Point) = true
+    GeoInterface.geomtype(::Point) = GeoInterface.PointTrait()
+    GeoInterface.ncoord(::GeoInterface.PointTrait, geom::Point) = 2
+    GeoInterface.getcoord(::GeoInterface.PointTrait, geom::Point, i) = [1, 2][i]
 
     GeoInterface.isfeature(::Row) = true
     GeoInterface.geometry(r::Row) = Point()
