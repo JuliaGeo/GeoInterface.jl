@@ -66,17 +66,17 @@ getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(
 getcoord(t::AbstractPointTrait, geom) = (getcoord(t, geom, i) for i in 1:ncoord(t, geom))
 
 ## Npoints
-npoint(::LineTrait, _) = 2
-npoint(::TriangleTrait, _) = 3
-nring(::TriangleTrait, _) = 1
-npoint(::RectangleTrait, _) = 4
-nring(::RectangleTrait, _) = 1
-npoint(::QuadTrait, _) = 4
-nring(::QuadTrait, _) = 1
-npoint(::PentagonTrait, _) = 5
-nring(::PentagonTrait, _) = 1
-npoint(::HexagonTrait, _) = 6
-nring(::HexagonTrait, _) = 1
+npoint(::LineTrait, geom) = 2
+npoint(::TriangleTrait, geom) = 3
+nring(::TriangleTrait, geom) = 1
+npoint(::RectangleTrait, geom) = 4
+nring(::RectangleTrait, geom) = 1
+npoint(::QuadTrait, geom) = 4
+nring(::QuadTrait, geom) = 1
+npoint(::PentagonTrait, geom) = 5
+nring(::PentagonTrait, geom) = 1
+npoint(::HexagonTrait, geom) = 6
+nring(::HexagonTrait, geom) = 1
 
 issimple(::AbstractCurveTrait, geom) =
     allunique([getpoint(t, geom, i) for i in 1:npoint(geom)-1]) && allunique([getpoint(t, geom, i) for i in 2:npoint(t, geom)])

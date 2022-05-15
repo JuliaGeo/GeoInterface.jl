@@ -38,10 +38,10 @@ endpoint(geom) = getpoint(geom, length(geom))
 In some cases, we know the return value of a function for a specific geometry (sub)type beforehand and have implemented them.
 
 ```julia
-npoint(::LineTrait, _) = 2
-npoint(::TriangleTrait, _) = 3
-npoint(::RectangleTrait, _) = 4
-npoint(::QuadTrait, _) = 4
-npoint(::PentagonTrait, _) = 5
-npoint(::HexagonTrait, _) = 6
+npoint(::LineTrait, geom) = 2
+npoint(::TriangleTrait, geom) = 3
+npoint(::RectangleTrait, geom) = 4
+npoint(::QuadTrait, geom) = 4
+npoint(::PentagonTrait, geom) = 5
+npoint(::HexagonTrait, geom) = 6
 ```
