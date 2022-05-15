@@ -2,7 +2,7 @@
 """
     GeoInterface.isgeometry(x) => Bool
 
-Check if an object `x` is a geometry and thus implicitely supports GeoInterface methods.
+Check if an object `x` is a geometry and thus implicitly supports GeoInterface methods.
 It is recommended that for users implementing `MyType`, they define only
 `isgeometry(::Type{MyType})`. `isgeometry(::MyType)` will then automatically delegate to this
 method.
@@ -13,12 +13,13 @@ isgeometry(::Type{T}) where {T} = false
 """
     GeoInterface.isfeature(x) => Bool
 
-Check if an object `x` is a feature and thus implicitely supports some GeoInterface methods.
+Check if an object `x` is a feature and thus implicitly supports some GeoInterface methods.
 A feature is a combination of a geometry and properties, not unlike a row in a table.
 It is recommended that for users implementing `MyType`, they define only
 `isfeature(::Type{MyType})`. `isfeature(::MyType)` will then automatically delegate to this
 method.
-Ensures backwards compatibility with the older GeoInterface.
+
+Ensures backwards compatibility with GeoInterface version 0.
 """
 isfeature(x::T) where {T} = isfeature(T)
 isfeature(::Type{T}) where {T} = false
@@ -27,7 +28,7 @@ isfeature(::Type{T}) where {T} = false
     GeoInterface.geometry(feat) => geom
 
 Retrieve the geometry of `feat`. It is expected that `isgeometry(geom) === true`.
-Ensures backwards compatibility with the older GeoInterface.
+Ensures backwards compatibility with GeoInterface version 0.
 """
 geometry(feat) = nothing
 
@@ -35,14 +36,14 @@ geometry(feat) = nothing
     GeoInterface.properties(feat) => properties
 
 Retrieve the properties of `feat`. This can be any Iterable that behaves like an AbstractRow.
-Ensures backwards compatibility with the older GeoInterface.
+Ensures backwards compatibility with GeoInterface version 0.
 """
 properties(feat) = nothing
 
 """
     GeoInterface.geomtype(geom) => T <: AbstractGeometry
 
-Returns the geometry type, such as [`GeoInterface.PolygonTrait`](@ref) or [`GeoInterface.PointTrait`](@ref).
+Returns the geometry type, such as [`PolygonTrait`](@ref) or [`PointTrait`](@ref).
 """
 geomtype(geom) = nothing
 
@@ -375,7 +376,7 @@ extent(geom) = extent(geomtype(geom), geom)
 
 Alias for [`extent`](@ref), for compatibility with
 GeoJSON and the Python geointerface.
-Ensures backwards compatibility with the older GeoInterface.
+Ensures backwards compatibility with GeoInterface version 0.
 """
 bbox(geom) = extent(geom)
 
@@ -550,7 +551,7 @@ ismeasured(geom) = ismeasured(geomtype(geom), geom)
     coordinates(geom) -> Vector
 
 Return (an iterator of) point coordinates.
-Ensures backwards compatibility with the older GeoInterface.
+Ensures backwards compatibility with GeoInterface version 0.
 """
 coordinates(geom) = coordinates(geomtype(geom), geom)
 

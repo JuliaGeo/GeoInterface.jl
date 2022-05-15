@@ -6,14 +6,14 @@
 ###
 ### Usage
 ###
-### 1. ensure a development version of Tables.jl (`pkg> add GeoInterface`)
+### 1. ensure a development version of GeoInterface.jl (`pkg> add GeoInterface`)
 ### 2. make sure the General registry is up to date (`pkg> up`)
 ### 3. run this script, which uses the first depot from DEPOT_PATH
 
 DEPOT = first(DEPOT_PATH)
 REGISTRIES = joinpath(DEPOT, "registries")
 @info DEPOT
-# find each package w/ a direct dependency on Tables.jl
+# find each package w/ a direct dependency on GeoInterface.jl
 general = joinpath(DEPOT, "General")
 mkpath(general)
 # run(`tar -xzf General.tar.gz -C $general`)

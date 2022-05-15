@@ -1,5 +1,5 @@
 # Defaults for many of the interface functions are defined here as fallback.
-# Methods here should take a type as first argument and should already be defined
+# Methods here should take a trait instance as first argument and should already be defined
 # in the `interface.jl` first as a generic f(geom) method.
 
 ## Coords
@@ -66,17 +66,17 @@ getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(
 getcoord(t::AbstractPointTrait, geom) = (getcoord(t, geom, i) for i in 1:ncoord(t, geom))
 
 ## Npoints
-npoint(::LineTrait, _) = 2
-npoint(::TriangleTrait, _) = 3
-nring(::TriangleTrait, _) = 1
-npoint(::RectangleTrait, _) = 4
-nring(::RectangleTrait, _) = 1
-npoint(::QuadTrait, _) = 4
-nring(::QuadTrait, _) = 1
-npoint(::PentagonTrait, _) = 5
-nring(::PentagonTrait, _) = 1
-npoint(::HexagonTrait, _) = 6
-nring(::HexagonTrait, _) = 1
+npoint(::LineTrait, geom) = 2
+npoint(::TriangleTrait, geom) = 3
+nring(::TriangleTrait, geom) = 1
+npoint(::RectangleTrait, geom) = 4
+nring(::RectangleTrait, geom) = 1
+npoint(::QuadTrait, geom) = 4
+nring(::QuadTrait, geom) = 1
+npoint(::PentagonTrait, geom) = 5
+nring(::PentagonTrait, geom) = 1
+npoint(::HexagonTrait, geom) = 6
+nring(::HexagonTrait, geom) = 1
 
 issimple(::AbstractCurveTrait, geom) =
     allunique([getpoint(t, geom, i) for i in 1:npoint(geom)-1]) && allunique([getpoint(t, geom, i) for i in 2:npoint(t, geom)])
@@ -107,21 +107,21 @@ end
 """
     subtrait(t::AbstractGeometryTrait)
 
-Gets the expected, possible abstract, (sub)trait for subgeometries (retrieved with [`getgeom`](@ref)) of trait `t`.
-This follows the [Type hierarchy](@ref) of Simple Features.
+Gets the expected, possible abstract, (sub)trait for subgeometries (retrieved with
+[`getgeom`](@ref)) of trait `t`. This follows the [Type hierarchy](@ref) of Simple Features.
 
 # Examples
 ```jldoctest; setup = :(using GeoInterface)
-julia> GeoInterface.subtrait(GeoInterface.LineStringTrait())
-GeoInterface.AbstractPointTrait
-julia> GeoInterface.subtrait(GeoInterface.PolygonTrait())  # Any of LineStringTrait, LineTrait, LinearRingTrait
-GeoInterface.AbstractLineStringTrait
+julia> GeoInterface.subtrait(LineStringTrait())
+AbstractPointTrait
+julia> GeoInterface.subtrait(PolygonTrait())  # Any of LineStringTrait, LineTrait, LinearRingTrait
+AbstractLineStringTrait
 ```
 ```jldoctest; setup = :(using GeoInterface)
 # `nothing` is returned when there's no subtrait or when it's not known beforehand
-julia> isnothing(GeoInterface.subtrait(GeoInterface.PointTrait()))
+julia> isnothing(GeoInterface.subtrait(PointTrait()))
 true
-julia> isnothing(GeoInterface.subtrait(GeoInterface.GeometryCollectionTrait()))
+julia> isnothing(GeoInterface.subtrait(GeometryCollectionTrait()))
 true
 ```
 """
