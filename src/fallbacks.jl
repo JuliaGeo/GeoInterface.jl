@@ -40,12 +40,17 @@ gethole(t::AbstractPolygonTrait, geom, i) = getring(t, geom, i + 1)
 npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
 getpoint(t::AbstractPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
+## MultiPoint
+npoint(t::AbstractMultiPointTrait, geom) = ngeom(t, geom)
+getpoint(t::AbstractMultiPointTrait, geom) = getgeom(t, geom)
+getpoint(t::AbstractMultiPointTrait, geom, i) = getgeom(t, geom, i)
+
 ## MultiLineString
-nlinestring(t::AbstractMultiLineStringTrait, geom) = ngeom(t, geom)
-getlinestring(t::AbstractMultiLineStringTrait, geom) = getgeom(t, geom)
-getlinestring(t::AbstractMultiLineStringTrait, geom, i) = getgeom(t, geom, i)
-npoint(t::AbstractMultiLineStringTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom))
-getpoint(t::AbstractMultiLineStringTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
+nlinestring(t::AbstractMultiCurveTrait, geom) = ngeom(t, geom)
+getlinestring(t::AbstractMultiCurveTrait, geom) = getgeom(t, geom)
+getlinestring(t::AbstractMultiCurveTrait, geom, i) = getgeom(t, geom, i)
+npoint(t::AbstractMultiCurveTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom))
+getpoint(t::AbstractMultiCurveTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
 
 ## MultiPolygon
 npolygon(t::AbstractMultiPolygonTrait, geom) = ngeom(t, geom)
@@ -65,7 +70,7 @@ getpatch(t::AbstractPolyHedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom,
 getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(t, geom))
 getcoord(t::AbstractPointTrait, geom) = (getcoord(t, geom, i) for i in 1:ncoord(t, geom))
 
-## Npoints
+## Special geometries
 npoint(::LineTrait, geom) = 2
 npoint(::TriangleTrait, geom) = 3
 nring(::TriangleTrait, geom) = 1
@@ -101,6 +106,8 @@ end
 function coordinates(t::AbstractGeometryTrait, geom)
     collect(coordinates.(getgeom(t, geom)))
 end
+
+Base.convert(T::Type, ::AbstractGeometryTrait, geom) = error("Conversion is enabled for type $T, but not implemented. Please report this issue to the package maintainer.")
 
 # Subtraits
 

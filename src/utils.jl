@@ -15,13 +15,18 @@ function testgeometry(geom)
                 g2 = getgeom(geom, 1)
                 subtype = subtrait(type)
                 if !isnothing(subtype)
-                    @assert geomtype(g2) isa subtype
+                    issub = geomtype(g2) isa subtype
+                    !issub && error("Implemented hierarchy for this geometry type is incorrect. Subgeometry should be a $subtype")
                 end
                 @assert testgeometry(g2)  # recursive testing of subgeometries
             end
         end
     catch e
-        println("You're missing an implementation: $e")
+        if e isa MethodError
+            println("You're missing an implementation: $e")
+        else
+            throw(e)
+        end
         return false
     end
     return true
