@@ -41,10 +41,10 @@ julia> geom = createpolygon(...)::ArchGDAL.IGeometry  # no idea about the interf
 julia> isgeometry(geom)
 True
 julia> geomtype(geom)
-GeoInterface.PolygonTrait()
+PolygonTrait()
 julia> ext = exterior(geom);
 julia> geomtype(ext)
-GeoInterface.LineStringTrait()
+LineStringTrait()
 julia> getcoords.(getpoint.(Ref(ext), 1:npoint(ext)))
 [[1.,2.],[2.,3.],[1.,2.]]
 julia> coordinates(geom)  # fallback based on ngeom & npoint above

@@ -43,7 +43,7 @@ properties(feat) = nothing
 """
     GeoInterface.geomtype(geom) => T <: AbstractGeometry
 
-Returns the geometry type, such as [`GeoInterface.PolygonTrait`](@ref) or [`GeoInterface.PointTrait`](@ref).
+Returns the geometry type, such as [`PolygonTrait`](@ref) or [`PointTrait`](@ref).
 """
 geomtype(geom) = nothing
 

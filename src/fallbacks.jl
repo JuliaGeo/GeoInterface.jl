@@ -112,16 +112,16 @@ Gets the expected, possible abstract, (sub)trait for subgeometries (retrieved wi
 
 # Examples
 ```jldoctest; setup = :(using GeoInterface)
-julia> GeoInterface.subtrait(GeoInterface.LineStringTrait())
-GeoInterface.AbstractPointTrait
-julia> GeoInterface.subtrait(GeoInterface.PolygonTrait())  # Any of LineStringTrait, LineTrait, LinearRingTrait
-GeoInterface.AbstractLineStringTrait
+julia> GeoInterface.subtrait(LineStringTrait())
+AbstractPointTrait
+julia> GeoInterface.subtrait(PolygonTrait())  # Any of LineStringTrait, LineTrait, LinearRingTrait
+AbstractLineStringTrait
 ```
 ```jldoctest; setup = :(using GeoInterface)
 # `nothing` is returned when there's no subtrait or when it's not known beforehand
-julia> isnothing(GeoInterface.subtrait(GeoInterface.PointTrait()))
+julia> isnothing(GeoInterface.subtrait(PointTrait()))
 true
-julia> isnothing(GeoInterface.subtrait(GeoInterface.GeometryCollectionTrait()))
+julia> isnothing(GeoInterface.subtrait(GeometryCollectionTrait()))
 true
 ```
 """
