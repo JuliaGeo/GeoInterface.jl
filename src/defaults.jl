@@ -88,6 +88,7 @@ issimple(t::AbstractMultiCurveTrait, geom) = all(i -> issimple(getgeom(t, geom, 
 isclosed(t::AbstractMultiCurveTrait, geom) = all(i -> isclosed(getgeom(t, geom, i)), 1:ngeom(t, geom))
 
 issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom, i) for i in 1:ngeom(t, geom)))
+npoint(t::AbstractMultiPointTrait, geom) = ngeom(t, geom)
 getpoint(t::AbstractMultiPointTrait, geom) = getgeom(t, geom)
 getpoint(t::AbstractMultiPointTrait, geom, i) = getgeom(t, geom, i)
 
