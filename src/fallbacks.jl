@@ -1,5 +1,5 @@
 # Defaults for many of the interface functions are defined here as fallback.
-# Methods here should take a type as first argument and should already be defined
+# Methods here should take a trait instance as first argument and should already be defined
 # in the `interface.jl` first as a generic f(geom) method.
 
 ## Coords
@@ -107,8 +107,8 @@ end
 """
     subtrait(t::AbstractGeometryTrait)
 
-Gets the expected, possible abstract, (sub)trait for subgeometries (retrieved with [`getgeom`](@ref)) of trait `t`.
-This follows the [Type hierarchy](@ref) of Simple Features.
+Gets the expected, possible abstract, (sub)trait for subgeometries (retrieved with
+[`getgeom`](@ref)) of trait `t`. This follows the [Type hierarchy](@ref) of Simple Features.
 
 # Examples
 ```jldoctest; setup = :(using GeoInterface)

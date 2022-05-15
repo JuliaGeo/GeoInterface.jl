@@ -1,19 +1,12 @@
 module GeoInterface
 
-using Base.Iterators
+using Base.Iterators: flatten
+
+export testgeometry, isgeometry, geomtype, ncoord, getcoord, ngeom, getgeom
 
 include("types.jl")
 include("interface.jl")
 include("fallbacks.jl")
 include("utils.jl")
-
-export testgeometry
-export isgeometry
-
-export geomtype
-export ncoord
-export getcoord
-export ngeom
-export getgeom
 
 end # module
