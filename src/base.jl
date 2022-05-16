@@ -17,3 +17,10 @@ for i in 2:4
     GeoInterface.ncoord(::PointTrait, geom::sig) = i
     GeoInterface.getcoord(::PointTrait, geom::sig, i) = getindex(geom, i)
 end
+
+# Custom coordinate order/names NamedTuple
+GeoInterface.isgeometry(::Type{<:NamedTuple{Keys,NTuple{N,T}}}) where {Keys,N,T<:Real} = all(in(default_coord_names), Keys)
+GeoInterface.geomtrait(::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = PointTrait()
+GeoInterface.ncoord(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = Base.length(geom)
+GeoInterface.getcoord(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}, i) where {Keys,N,T<:Real} = getindex(geom, i)
+GeoInterface.coordnames(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = Keys

@@ -312,15 +312,20 @@ end
     @testset "NamedTuple" begin
         geom = (; X=1, Y=2)
         @test testgeometry(geom)
+        @test GeoInterface.x(geom) == 1
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2]
+
         geom = (; X=1, Y=2, Z=3)
         @test testgeometry(geom)
         geom = (; X=1, Y=2, Z=3, M=4)
+        @test testgeometry(geom)
+        geom = (; Z=3, X=1, Y=2, M=4)
         @test testgeometry(geom)
 
         @test GeoInterface.x(geom) == 1
         @test GeoInterface.m(geom) == 4
         @test GeoInterface.ncoord(geom) == 4
-        @test collect(GeoInterface.getcoord(geom)) == [1, 2, 3, 4]
+        @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
 
     end
 end
