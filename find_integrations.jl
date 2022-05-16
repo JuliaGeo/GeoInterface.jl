@@ -37,3 +37,4 @@ open(joinpath(dirname(@__DIR__), "GeoInterface.jl", "INTEGRATIONS.md"), "w+") do
         println(io, "* [$nm]($url)")
     end
 end
+
