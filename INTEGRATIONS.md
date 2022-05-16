@@ -1,0 +1,17 @@
+# Packages
+Packages currently integrating with GeoInterface.jl:
+* [AlgebraOfGraphics](https://github.com/JuliaPlots/AlgebraOfGraphics.jl.git)
+* [ArchGDAL](https://github.com/yeesian/ArchGDAL.jl.git)
+* [GADM](https://github.com/JuliaGeo/GADM.jl.git)
+* [GeoData](https://github.com/rafaqz/GeoData.jl.git)
+* [GeoDatasets](https://github.com/JuliaGeo/GeoDatasets.jl.git)
+* [GeoJSON](https://github.com/JuliaGeo/GeoJSON.jl.git)
+* [GeoMakie](https://github.com/JuliaPlots/GeoMakie.jl.git)
+* [GeoTables](https://github.com/JuliaEarth/GeoTables.jl.git)
+* [LibGEOS](https://github.com/JuliaGeo/LibGEOS.jl.git)
+* [Mangal](https://github.com/EcoJulia/Mangal.jl.git)
+* [OmniSci](https://github.com/omnisci/OmniSci.jl.git)
+* [Rasters](https://github.com/rafaqz/Rasters.jl.git)
+* [Shapefile](https://github.com/JuliaGeo/Shapefile.jl.git)
+* [SpatialDependence](https://github.com/javierbarbero/SpatialDependence.jl.git)
+* [Turf](https://github.com/philoez98/Turf.jl.git)
