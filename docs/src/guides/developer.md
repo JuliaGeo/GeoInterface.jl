@@ -39,6 +39,17 @@ GeoInterface.extent(geomtype(geom), geom::customgeom)::Extents.Extent
 
 And lastly, there are many other optional functions for each specific geometry. GeoInterface provides fallback implementations based on the generic functions above, but these are not optimized. These are detailed in [Fallbacks](@ref).
 
+### Conversion
+It is useful if others can convert any custom geometry into your
+geometry type, if their custom geometry supports GeoInterface as well.
+This requires the following three methods, and the last one requires more code to generate `T` with `ngeom`, `getgeom` or just `coordinates` calls.
+
+```julia
+Base.convert(::Type{T}, geom) where T<:AbstractPackageType = Base.convert(T, geomtype(geom), geom)
+Base.convert(::Type{T}, ::LineStringTrait, geom::T) = geom  # fast fallthrough without conversion
+Base.convert(::Type{T}, ::LineStringTrait, geom) = ...  # slow custom conversion based on ngeom and getgeom
+```
+
 ## Required for Feature
 ```julia
 GeoInterface.isfeature(feat::customfeat)::Bool = true
