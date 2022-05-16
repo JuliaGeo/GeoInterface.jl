@@ -51,11 +51,11 @@ GeoInterface is implemented automatically for `NTuple`s, `NamedTuple`s and `Vect
 
 ```julia
 a = [1,2,3]
-x(a) == 1
+GeoInterface.x(a) == 1
 
 b = (1,2,3)
-x(b) == 2
+GeoInterface.y(b) == 2
 
-c = (;X=1, Y=2)
-x(c) == 1
+c = (;X=1, Y=2, Z=3)
+GeoInterface.z(c) == 3
 ```
