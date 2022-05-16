@@ -50,12 +50,12 @@ struct PentagonTrait <: AbstractPolygonTrait end
 "A [`PolygonTrait`](@ref) with six vertices."
 struct HexagonTrait <: AbstractPolygonTrait end
 
-"An AbstractPolyHedralSurfaceTrait type for all polyhedralsurfaces."
-abstract type AbstractPolyHedralSurfaceTrait <: AbstractSurfaceTrait end
-"A PolyHedralSurfaceTrait is a connected surface consisting of [`PolygonTrait`](@ref)s."
-struct PolyHedralSurfaceTrait <: AbstractPolyHedralSurfaceTrait end
-"A TINTrait is a [`PolyHedralSurfaceTrait`](@ref) consisting of [`TriangleTrait`](@ref)s."
-struct TINTrait <: AbstractPolyHedralSurfaceTrait end  # Surface consisting of Triangles
+"An AbstractPolyhedralSurfaceTrait type for all polyhedralsurfaces."
+abstract type AbstractPolyhedralSurfaceTrait <: AbstractSurfaceTrait end
+"A PolyhedralSurfaceTrait is a connected surface consisting of [`PolygonTrait`](@ref)s."
+struct PolyhedralSurfaceTrait <: AbstractPolyhedralSurfaceTrait end
+"A TINTrait is a [`PolyhedralSurfaceTrait`](@ref) consisting of [`TriangleTrait`](@ref)s."
+struct TINTrait <: AbstractPolyhedralSurfaceTrait end  # Surface consisting of Triangles
 
 "An AbstractMultiPointTrait type for all multipoints."
 abstract type AbstractMultiPointTrait <: AbstractGeometryCollectionTrait end

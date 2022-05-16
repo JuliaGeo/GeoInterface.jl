@@ -250,12 +250,12 @@ Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
 gethole(geom) = gethole(geomtype(geom), geom)
 
-# PolyHedralSurface
+# PolyhedralSurface
 """
     npatch(geom)
 
 Returns the number of patches for the given `geom`.
-Note that this is only valid for [`AbstractPolyHedralSurfaceTrait`](@ref)s.
+Note that this is only valid for [`AbstractPolyhedralSurfaceTrait`](@ref)s.
 """
 npatch(geom)::Integer = npatch(geomtype(geom), geom)
 
@@ -263,7 +263,7 @@ npatch(geom)::Integer = npatch(geomtype(geom), geom)
     getpatch(geom, i::Integer) -> AbstractPolygon
 
 Returns the `i`th patch for the given `geom`.
-Note that this is only valid for [`AbstractPolyHedralSurfaceTrait`](@ref)s.
+Note that this is only valid for [`AbstractPolyhedralSurfaceTrait`](@ref)s.
 """
 getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
 
@@ -271,7 +271,7 @@ getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
     getpatch(geom) -> iterator
 
 Returns an iterator over all patches in `geom`.
-Note that this is only valid for [`AbstractPolyHedralSurfaceTrait`](@ref)s.
+Note that this is only valid for [`AbstractPolyhedralSurfaceTrait`](@ref)s.
 """
 getpatch(geom) = getpatch(geomtype(geom), geom)
 
