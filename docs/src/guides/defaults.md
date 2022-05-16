@@ -45,3 +45,17 @@ npoint(::QuadTrait, geom) = 4
 npoint(::PentagonTrait, geom) = 5
 npoint(::HexagonTrait, geom) = 6
 ```
+
+# Implementations
+GeoInterface is implemented automatically for `NTuple`s, `NamedTuple`s and `Vector`s to behave as Points.
+
+```julia
+a = [1,2,3]
+x(a) == 1
+
+b = (1,2,3)
+x(b) == 2
+
+c = (;X=1, Y=2)
+x(c) == 1
+```

@@ -290,3 +290,37 @@ end
     @test GeoInterface.astext(geom) isa String
     @test GeoInterface.asbinary(geom) isa Vector{UInt8}
 end
+
+@testset "Base Implementations" begin
+
+    @testset "Vector" begin
+        geom = [1, 2]
+        @test testgeometry(geom)
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.ncoord(geom) == 2
+        @test collect(GeoInterface.getcoord(geom)) == geom
+    end
+
+    @testset "Tuple" begin
+        geom = (1, 2)
+        @test testgeometry(geom)
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.ncoord(geom) == 2
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2]
+    end
+
+    @testset "NamedTuple" begin
+        geom = (; X=1, Y=2)
+        @test testgeometry(geom)
+        geom = (; X=1, Y=2, Z=3)
+        @test testgeometry(geom)
+        geom = (; X=1, Y=2, Z=3, M=4)
+        @test testgeometry(geom)
+
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.m(geom) == 4
+        @test GeoInterface.ncoord(geom) == 4
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2, 3, 4]
+
+    end
+end

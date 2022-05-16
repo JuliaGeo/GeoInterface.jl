@@ -1,7 +1,7 @@
 """Test whether the required interface for your `geom` has been implemented correctly."""
 function testgeometry(geom)
     try
-        @assert isgeometry(geom)
+        @assert isgeometry(geom) "Geom doesn't implement `isgeometry`."
         type = geomtrait(geom)
 
         if type == PointTrait()
@@ -18,7 +18,7 @@ function testgeometry(geom)
                     issub = geomtrait(g2) isa subtype
                     !issub && error("Implemented hierarchy for this geometry type is incorrect. Subgeometry should be a $subtype")
                 end
-                @assert testgeometry(g2)  # recursive testing of subgeometries
+                @assert testgeometry(g2) "Subgeometry implementation is not valid."
             end
         end
     catch e
