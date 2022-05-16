@@ -19,7 +19,7 @@ While we try to adhere to SF, there are changes and extensions to make it more J
 ### Function names
 All function names are without the `ST_` prefix and are lowercased. In some cases the names have changed as well, to be inline with common Julia functions. `NumX` becomes `nx` and `geomN` becomes `getgeom`:
 ```julia
-GeometryType -> geomtype
+GeometryType -> geomtrait
 NumGeometries -> ngeom
 GeometryN -> getgeom
 NumPatches -> npatch

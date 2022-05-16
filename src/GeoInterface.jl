@@ -2,7 +2,7 @@ module GeoInterface
 
 using Base.Iterators: flatten
 
-export testgeometry, isgeometry, geomtype, ncoord, getcoord, ngeom, getgeom
+export testgeometry, isgeometry, geomtrait, ncoord, getcoord, ngeom, getgeom
 
 # traits
 export AbstractGeometryTrait,

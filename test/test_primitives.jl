@@ -15,54 +15,54 @@ using Test
     struct MyCollection end
 
     GeoInterface.isgeometry(::MyPoint) = true
-    GeoInterface.geomtype(::MyPoint) = PointTrait()
+    GeoInterface.geomtrait(::MyPoint) = PointTrait()
     GeoInterface.ncoord(::PointTrait, geom::MyPoint) = 2
     GeoInterface.getcoord(::PointTrait, geom::MyPoint, i) = [1, 2][i]
 
     GeoInterface.isgeometry(::MyEmptyPoint) = true
-    GeoInterface.geomtype(::MyEmptyPoint) = PointTrait()
+    GeoInterface.geomtrait(::MyEmptyPoint) = PointTrait()
     GeoInterface.ncoord(::PointTrait, geom::MyEmptyPoint) = 0
     GeoInterface.isempty(::PointTrait, geom::MyEmptyPoint) = true
 
     GeoInterface.isgeometry(::MyCurve) = true
-    GeoInterface.geomtype(::MyCurve) = LineStringTrait()
+    GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
     GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
     GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
-    Base.convert(T::Type{MyCurve}, geom::X) where {X} = Base.convert(T, geomtype(geom), geom)
+    Base.convert(T::Type{MyCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
     Base.convert(::Type{MyCurve}, ::LineStringTrait, geom::MyCurve) = geom
 
     GeoInterface.isgeometry(::MyPolygon) = true
-    GeoInterface.geomtype(::MyPolygon) = PolygonTrait()
+    GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
     GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2
     GeoInterface.getgeom(::PolygonTrait, geom::MyPolygon, i) = MyCurve()
 
     GeoInterface.isgeometry(::MyTriangle) = true
-    GeoInterface.geomtype(::MyTriangle) = TriangleTrait()
+    GeoInterface.geomtrait(::MyTriangle) = TriangleTrait()
     GeoInterface.ngeom(::TriangleTrait, geom::MyTriangle) = 3
     GeoInterface.getgeom(::TriangleTrait, geom::MyTriangle, i) = MyCurve()
 
     GeoInterface.isgeometry(::MyMultiPoint) = true
-    GeoInterface.geomtype(::MyMultiPoint) = MultiPointTrait()
+    GeoInterface.geomtrait(::MyMultiPoint) = MultiPointTrait()
     GeoInterface.ngeom(::MultiPointTrait, geom::MyMultiPoint) = 2
     GeoInterface.getgeom(::MultiPointTrait, geom::MyMultiPoint, i) = MyPoint()
 
     GeoInterface.isgeometry(::MyMultiCurve) = true
-    GeoInterface.geomtype(::MyMultiCurve) = MultiCurveTrait()
+    GeoInterface.geomtrait(::MyMultiCurve) = MultiCurveTrait()
     GeoInterface.ngeom(::MultiCurveTrait, geom::MyMultiCurve) = 2
     GeoInterface.getgeom(::MultiCurveTrait, geom::MyMultiCurve, i) = MyCurve()
 
     GeoInterface.isgeometry(::MyMultiPolygon) = true
-    GeoInterface.geomtype(::MyMultiPolygon) = MultiPolygonTrait()
+    GeoInterface.geomtrait(::MyMultiPolygon) = MultiPolygonTrait()
     GeoInterface.ngeom(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
     GeoInterface.getgeom(::MultiPolygonTrait, geom::MyMultiPolygon, i) = MyPolygon()
 
     GeoInterface.isgeometry(::MyTIN) = true
-    GeoInterface.geomtype(::MyTIN) = PolyhedralSurfaceTrait()
+    GeoInterface.geomtrait(::MyTIN) = PolyhedralSurfaceTrait()
     GeoInterface.ngeom(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
     GeoInterface.getgeom(::PolyhedralSurfaceTrait, geom::MyTIN, i) = MyTriangle()
 
     GeoInterface.isgeometry(::MyCollection) = true
-    GeoInterface.geomtype(::MyCollection) = GeometryCollectionTrait()
+    GeoInterface.geomtrait(::MyCollection) = GeometryCollectionTrait()
     GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
     GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
 
@@ -205,7 +205,7 @@ end
     struct Point end
 
     GeoInterface.isgeometry(::Point) = true
-    GeoInterface.geomtype(::Point) = PointTrait()
+    GeoInterface.geomtrait(::Point) = PointTrait()
     GeoInterface.ncoord(::PointTrait, geom::Point) = 2
     GeoInterface.getcoord(::PointTrait, geom::Point, i) = [1, 2][i]
 
@@ -221,14 +221,14 @@ end
     struct XCurve end
     struct XPolygon end
 
-    Base.convert(T::Type{XCurve}, geom::X) where {X} = Base.convert(T, geomtype(geom), geom)
+    Base.convert(T::Type{XCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
     Base.convert(::Type{XCurve}, ::LineStringTrait, geom::XCurve) = geom  # fast fallthrough
     Base.convert(::Type{XCurve}, ::LineStringTrait, geom) = geom
 
     geom = MyCurve()
     @test !isnothing(convert(MyCurve, geom))
 
-    Base.convert(T::Type{XPolygon}, geom::X) where {X} = Base.convert(T, geomtype(geom), geom)
+    Base.convert(T::Type{XPolygon}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
     @test_throws Exception convert(MyPolygon, geom)
 end
 
@@ -236,7 +236,7 @@ end
     struct XGeom end
 
     GeoInterface.isgeometry(::XGeom) = true
-    GeoInterface.geomtype(::XGeom) = PointTrait()
+    GeoInterface.geomtrait(::XGeom) = PointTrait()
     GeoInterface.ncoord(::PointTrait, geom::XGeom) = 2
     GeoInterface.getcoord(::PointTrait, geom::XGeom, i) = [1, 2][i]
 
