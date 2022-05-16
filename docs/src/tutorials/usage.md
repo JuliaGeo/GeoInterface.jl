@@ -9,7 +9,7 @@ GeoInterface provides a traits interface, not unlike Tables.jl, by a set of func
 (a) a set of functions: 
 ```julia
 isgeometry(geom)
-geomtype(geom)
+geomtrait(geom)
 ncoord(geom)
 getcoord(geom, i)
 ngeom(geom)
@@ -40,10 +40,10 @@ julia> geom = createpolygon(...)::ArchGDAL.IGeometry  # no idea about the interf
 # Inspect with GeoInterface methods
 julia> isgeometry(geom)
 True
-julia> geomtype(geom)
+julia> geomtrait(geom)
 PolygonTrait()
 julia> ext = exterior(geom);
-julia> geomtype(ext)
+julia> geomtrait(ext)
 LineStringTrait()
 julia> getcoords.(getpoint.(Ref(ext), 1:npoint(ext)))
 [[1.,2.],[2.,3.],[1.,2.]]

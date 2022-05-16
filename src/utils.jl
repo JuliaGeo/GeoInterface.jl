@@ -2,7 +2,7 @@
 function testgeometry(geom)
     try
         @assert isgeometry(geom)
-        type = geomtype(geom)
+        type = geomtrait(geom)
 
         if type == PointTrait()
             n = ncoord(geom)
@@ -15,7 +15,7 @@ function testgeometry(geom)
                 g2 = getgeom(geom, 1)
                 subtype = subtrait(type)
                 if !isnothing(subtype)
-                    issub = geomtype(g2) isa subtype
+                    issub = geomtrait(g2) isa subtype
                     !issub && error("Implemented hierarchy for this geometry type is incorrect. Subgeometry should be a $subtype")
                 end
                 @assert testgeometry(g2)  # recursive testing of subgeometries
