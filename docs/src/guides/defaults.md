@@ -47,7 +47,7 @@ npoint(::HexagonTrait, geom) = 6
 ```
 
 # Implementations
-GeoInterface is implemented automatically for `NTuple`s, `NamedTuple`s and `Vector`s to behave as Points.
+GeoInterface is implemented for `NTuple`s, `NamedTuple`s and `AbstractVector`s to behave as Points. Note the `eltype` in all cases should be a `Real`. Only the keys `X`, `Y`, `Z`, and `M` are supported for `NamedTuple`s.
 
 ```julia
 a = [1,2,3]
