@@ -50,10 +50,10 @@ npoint(::HexagonTrait, geom) = 6
 GeoInterface is implemented for `NTuple`s, `NamedTuple`s and `AbstractVector`s to behave as Points. Note the `eltype` in all cases should be a `Real`. Only the keys `X`, `Y`, `Z`, and `M` are supported for `NamedTuple`s.
 
 ```julia
-a = [1,2,3]
+a = [1, 2, 3]
 GeoInterface.x(a) == 1
 
-b = (1,2,3)
+b = (1, 2, 3)
 GeoInterface.y(b) == 2
 
 c = (;X=1, Y=2, Z=3)
