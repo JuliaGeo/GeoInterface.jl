@@ -13,7 +13,7 @@ Of note here are the `ngeom` and `getgeom` for each geometry type, which transla
 | [`AbstractPolygonTrait`](@ref)            | [`nring(geom)`](@ref)       | [`getring(geom)`](@ref)       |
 | [`AbstractMultiLineStringTrait`](@ref)    | [`nlinestring(geom)`](@ref) | [`getlinestring(geom)`](@ref) |
 | [`AbstractMultiPolygonTrait`](@ref)       | [`npolygon(geom)`](@ref)    | [`getpolygon(geom)`](@ref)    |
-| [`AbstractPolyHedralSurfaceTrait`](@ref)  | [`npatch(geom)`](@ref)      | [`getpatch(geom)`](@ref)      |
+| [`AbstractPolyhedralSurfaceTrait`](@ref)  | [`npatch(geom)`](@ref)      | [`getpatch(geom)`](@ref)      |
 | [`AbstractGeometryCollectionTrait`](@ref) | [`ngeom(geom)`](@ref)       | [`getgeom(geom)`](@ref)       |
 
 ## Polygons
@@ -44,4 +44,18 @@ npoint(::RectangleTrait, geom) = 4
 npoint(::QuadTrait, geom) = 4
 npoint(::PentagonTrait, geom) = 5
 npoint(::HexagonTrait, geom) = 6
+```
+
+# Implementations
+GeoInterface is implemented for `NTuple`s, `NamedTuple`s and `AbstractVector`s to behave as Points. Note the `eltype` in all cases should be a `Real`. Only the keys `X`, `Y`, `Z`, and `M` are supported for `NamedTuple`s.
+
+```julia
+a = [1, 2, 3]
+GeoInterface.x(a) == 1
+
+b = (1, 2, 3)
+GeoInterface.y(b) == 2
+
+c = (;X=1, Y=2, Z=3)
+GeoInterface.z(c) == 3
 ```

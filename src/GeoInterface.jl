@@ -2,7 +2,7 @@ module GeoInterface
 
 using Base.Iterators: flatten
 
-export testgeometry, isgeometry, geomtype, ncoord, getcoord, ngeom, getgeom
+export testgeometry, isgeometry, geomtrait, ncoord, getcoord, ngeom, getgeom
 
 # traits
 export AbstractGeometryTrait,
@@ -27,8 +27,8 @@ export AbstractGeometryTrait,
     QuadTrait,
     PentagonTrait,
     HexagonTrait,
-    AbstractPolyHedralSurfaceTrait,
-    PolyHedralSurfaceTrait,
+    AbstractPolyhedralSurfaceTrait,
+    PolyhedralSurfaceTrait,
     TINTrait,
     AbstractMultiPointTrait,
     MultiPointTrait,
@@ -45,5 +45,6 @@ include("types.jl")
 include("interface.jl")
 include("fallbacks.jl")
 include("utils.jl")
+include("base.jl")
 
 end # module
