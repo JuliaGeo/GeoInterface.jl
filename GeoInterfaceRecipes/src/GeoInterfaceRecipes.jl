@@ -19,7 +19,7 @@ macro enable_geo_plots(typ)
               @nospecialize
               series_list = RecipesBase.RecipeData[]
               RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
-              Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.geomtype(geom), geom)))
+              Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.geomtrait(geom), geom)))
               return series_list
         end
         function RecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::Base.AbstractVector{<:Base.Union{Base.Missing,<:($(esc(typ)))}})
@@ -27,7 +27,7 @@ macro enable_geo_plots(typ)
               series_list = RecipesBase.RecipeData[]
               RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
               for g in Base.skipmissing(geom)
-                  Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.geomtype(g), g)))
+                  Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.geomtrait(g), g)))
               end
               return series_list
         end
