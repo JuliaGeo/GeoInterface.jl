@@ -17,36 +17,36 @@ struct MyCollection{N} <: MyAbstractGeom{N} end
 GeoInterfaceRecipes.@enable_geo_plots MyAbstractGeom
 
 GeoInterface.isgeometry(::MyAbstractGeom) = true
-GeoInterface.is3d(::GeoInterface.AbstractGeometryTrait, ::MyAbstractGeom{N}) where N = N == 3
-GeoInterface.ncoord(::GeoInterface.AbstractGeometryTrait, geom::MyAbstractGeom{N}) where N = N
+GeoInterface.is3d(::GeoInterface.AbstractGeometryTrait, ::MyAbstractGeom{N}) where {N} = N == 3
+GeoInterface.ncoord(::GeoInterface.AbstractGeometryTrait, geom::MyAbstractGeom{N}) where {N} = N
 GeoInterface.coordnames(::GeoInterface.AbstractGeometryTrait, ::MyAbstractGeom{2}) = (:X, :Y)
 GeoInterface.coordnames(::GeoInterface.AbstractGeometryTrait, ::MyAbstractGeom{3}) = (:X, :Y, :Z)
 
-GeoInterface.geomtype(::MyPoint) = GeoInterface.PointTrait()
+GeoInterface.geomtrait(::MyPoint) = GeoInterface.PointTrait()
 GeoInterface.getcoord(::GeoInterface.PointTrait, geom::MyPoint{2}, i::Integer) = (rand(1:10), rand(11:20))[i]
 GeoInterface.getcoord(::GeoInterface.PointTrait, geom::MyPoint{3}, i::Integer) = (rand(1:10), rand(11:20), rand(21:30))[i]
 
-GeoInterface.geomtype(::MyCurve) = GeoInterface.LineStringTrait()
+GeoInterface.geomtrait(::MyCurve) = GeoInterface.LineStringTrait()
 GeoInterface.ngeom(::GeoInterface.LineStringTrait, geom::MyCurve) = 3
-GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve{N}, i) where N = MyPoint{N}()
+GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve{N}, i) where {N} = MyPoint{N}()
 GeoInterface.convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
 
-GeoInterface.geomtype(::MyPolygon) = GeoInterface.PolygonTrait()
+GeoInterface.geomtrait(::MyPolygon) = GeoInterface.PolygonTrait()
 GeoInterface.ngeom(::GeoInterface.PolygonTrait, geom::MyPolygon) = 2
-GeoInterface.getgeom(::GeoInterface.PolygonTrait, geom::MyPolygon{N}, i) where N = MyCurve{N}()
+GeoInterface.getgeom(::GeoInterface.PolygonTrait, geom::MyPolygon{N}, i) where {N} = MyCurve{N}()
 
-GeoInterface.geomtype(::MyMultiPolygon) = GeoInterface.MultiPolygonTrait()
+GeoInterface.geomtrait(::MyMultiPolygon) = GeoInterface.MultiPolygonTrait()
 GeoInterface.ngeom(::GeoInterface.MultiPolygonTrait, geom::MyMultiPolygon) = 2
-GeoInterface.getgeom(::GeoInterface.MultiPolygonTrait, geom::MyMultiPolygon{N}, i) where N = MyPolygon{N}()
+GeoInterface.getgeom(::GeoInterface.MultiPolygonTrait, geom::MyMultiPolygon{N}, i) where {N} = MyPolygon{N}()
 
-GeoInterface.geomtype(::MyMultiPoint) = GeoInterface.MultiPointTrait()
+GeoInterface.geomtrait(::MyMultiPoint) = GeoInterface.MultiPointTrait()
 GeoInterface.ngeom(::GeoInterface.MultiPointTrait, geom::MyMultiPoint) = 10
-GeoInterface.getgeom(::GeoInterface.MultiPointTrait, geom::MyMultiPoint{N}, i) where N = MyPoint{N}()
+GeoInterface.getgeom(::GeoInterface.MultiPointTrait, geom::MyMultiPoint{N}, i) where {N} = MyPoint{N}()
 
-GeoInterface.geomtype(geom::MyCollection) = GeoInterface.GeometryCollectionTrait()
-GeoInterface.ncoord(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N}) where N = N
+GeoInterface.geomtrait(geom::MyCollection) = GeoInterface.GeometryCollectionTrait()
+GeoInterface.ncoord(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N}) where {N} = N
 GeoInterface.ngeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection) = 4
-GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N}, i) where N = MyMultiPolygon{N}()
+GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N}, i) where {N} = MyMultiPolygon{N}()
 
 @testset "plot" begin
     # We just check if they actually run
