@@ -1,8 +1,13 @@
-"""Test whether the required interface for your `geom` has been implemented correctly."""
+"""
+    testgeometry(geom)
+
+Test whether the required interface for your `geom` has been implemented correctly.
+"""
 function testgeometry(geom)
     try
-        @assert isgeometry(geom) "Geom doesn't implement `isgeometry`."
+        @assert isgeometry(geom) "$geom doesn't implement `isgeometry`."
         type = geomtrait(geom)
+        @assert !isnothing(type) "$geom doesn't implement `geomtrait`."
 
         if type == PointTrait()
             n = ncoord(geom)
@@ -16,7 +21,7 @@ function testgeometry(geom)
                 subtype = subtrait(type)
                 if !isnothing(subtype)
                     issub = geomtrait(g2) isa subtype
-                    !issub && error("Implemented hierarchy for this geometry type is incorrect. Subgeometry should be a $subtype")
+                    !issub && error("Implemented hierarchy for $geom type is incorrect. Subgeometry should be a $subtype")
                 end
                 @assert testgeometry(g2) "Subgeometry implementation is not valid."
             end
@@ -32,12 +37,16 @@ function testgeometry(geom)
     return true
 end
 
-"""Test whether the required interface for your `feature` has been implemented correctly."""
+"""
+    testfeature(feature)
+
+Test whether the required interface for your `feature` has been implemented correctly.
+"""
 function testfeature(feature)
     try
-        @assert isfeature(feature)
+        @assert isfeature(feature) "$feature doesn't implement `isfeature`."
         geom = geometry(feature)
-        @assert isgeometry(geom)
+        @assert isgeometry(geom) "geom $geom from $feature doesn't implement `isgeometry`."
         props = properties(feature)
     catch e
         println("You're missing an implementation: $e")
