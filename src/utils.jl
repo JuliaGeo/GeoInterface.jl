@@ -40,8 +40,8 @@ function testfeature(feature)
         @assert isgeometry(geom) "geom $geom from $feature doesn't implement `isgeometry`."
     end
     props = properties(feature)
-    @assert propertynames(props) isa NTuple{<:Any,Symbol}
     if !isnothing(props)
+        @assert first(propertynames(props)) isa Symbol "propertynames of $props does not return an iterable of `Symbol`"
         map(n -> getproperty(props, n), propertynames(props))  
     end
     ext = extent(feature)
