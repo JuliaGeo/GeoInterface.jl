@@ -101,9 +101,10 @@ struct Feature{G,P,E<:Union{Extents.Extent,Nothing}}
         new{G,P,E}(geometry, properties, extent)
     end
 end
-Feature(geometry; properties=(;), extent=nothing) = Feature(geometry, properties, extent)
+Feature(geometry, properties=(;)) = Feature(geometry, properties, nothing)
 Feature(; geometry=nothing, properties=(;), extent=nothing) = Feature(geometry, properties, extent)
 
 isfeature(::Type{<:Feature}) = true
 geometry(f::Feature) = f.geometry
 properties(f::Feature) = f.properties
+extent(f::Feature) = f.extent

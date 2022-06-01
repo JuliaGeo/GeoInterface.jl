@@ -201,20 +201,8 @@ end
 end
 
 @testset "Feature" begin
-    struct Row end
-    struct Point end
-
-    GeoInterface.isgeometry(::Point) = true
-    GeoInterface.geomtrait(::Point) = PointTrait()
-    GeoInterface.ncoord(::PointTrait, geom::Point) = 2
-    GeoInterface.getcoord(::PointTrait, geom::Point, i) = [1, 2][i]
-
-    GeoInterface.isfeature(::Row) = true
-    GeoInterface.geometry(r::Row) = Point()
-    GeoInterface.properties(r::Row) = (; test=1)
-
-    @test GeoInterface.testfeature(Row())
-
+    feature = GeoInterface.Feature((1, 2), (a=10, b=20))
+    @test GeoInterface.testfeature(feature)
 end
 
 @testset "Conversion" begin
@@ -327,5 +315,10 @@ end
         @test GeoInterface.ncoord(geom) == 4
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
 
+    end
+
+    @testset "Vector{Feature}" begin
+        features = [GeoInterface.Feature((1, 2), (a="1", b="2")), GeoInterface.Feature((3, 4), (a="3", b="4"))]
+        @test GeoInterface.testfeaturecollection(features)
     end
 end

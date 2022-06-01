@@ -25,6 +25,20 @@ isfeature(x::T) where {T} = isfeature(T)
 isfeature(::Type{T}) where {T} = false
 
 """
+    GeoInterface.isfeaturecollection(x) => Bool
+
+Check if an object `x` is a collection of features and thus implicitly supports some
+GeoInterface methods. A feature collection is a collection of features, and may also
+contain metatdata for the whole collection, like an `Extent`.
+
+It is recommended that for users implementing `MyType`, they define only
+`isfeaturecollection(::Type{MyType})`. `isfeaturecollection(::MyType)` will then
+automatically delegate to this method.
+"""
+isfeaturecollection(x::T) where {T} = isfeaturecollection(T)
+isfeaturecollection(::Type{T}) where {T} = false
+
+"""
     GeoInterface.geometry(feat) => geom
 
 Retrieve the geometry of `feat`. It is expected that `isgeometry(geom) === true`.
@@ -39,6 +53,22 @@ Retrieve the properties of `feat`. This can be any Iterable that behaves like an
 Ensures backwards compatibility with GeoInterface version 0.
 """
 properties(feat) = nothing
+
+"""
+    GeoInterface.getfeature(collection) => [feature, ...]
+
+Retrieve the features of `collection` as some iterable of features.
+It is expected that `isfeature(feature) === true`.
+"""
+getfeature(collection) = nothing
+getfeature(collection, i::Integer) = nothing
+
+"""
+    GeoInterface.nfeature(collection)
+
+Retrieve the number of features in a feature collection.
+"""
+nfeature(collection) = 0
 
 """
     GeoInterface.geomtrait(geom) => T <: AbstractGeometry

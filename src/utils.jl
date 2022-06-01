@@ -40,5 +40,24 @@ function testfeature(feature)
         @assert isgeometry(geom) "geom $geom from $feature doesn't implement `isgeometry`."
     end
     props = properties(feature)
+    @assert propertynames(props) isa NTuple{<:Any,Symbol}
+    if !isnothing(props)
+        map(n -> getproperty(props, n), propertynames(props))  
+    end
+    ext = extent(feature)
+    @assert ext isa Union{Nothing,Extent}
+    return true
+end
+
+"""
+    testfeaturecollection(featurecollection)
+
+Test whether the required interface for your `featurecollection` has been implemented correctly.
+"""
+function testfeaturecollection(fc)
+    @assert isfeaturecollection(fc) "$feature doesn't implement `isfeature`."
+    @assert isa(nfeature(fc), Integer) "feature collection $featurecollection doesn't return an `Integer` from `nfeatures`."
+    @assert isfeature(getfeature(fc, 1)) "`getfeature(featurecollection, 1)` doesn't return an object where `isfeature(obj) == true`."
+    @assert isfeature(getfeature(fc, nfeature(fc))) "`getfeature(featurecollection, nfeatures(featurecollection))` doesn't return an object where `isfeature(obj) == true`."
     return true
 end
