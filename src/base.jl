@@ -30,5 +30,6 @@ GeoInterface.isfeaturecollection(fc::AbstractVector{<:Union{Missing,T}}) where T
 GeoInterface.nfeature(fc::AbstractVector{<:Union{Missing,T}}) where T = Base.length(fc)
 GeoInterface.getfeature(fc::AbstractVector{<:Union{Missing,T}}) where T = (_checkfeature(T); fc)
 GeoInterface.getfeature(fc::AbstractVector{<:Union{Missing,T}}, i::Integer) where T = (_checkfeature(T); fc[i])
+GeoInterface.coordinates(fc::AbstractVector{<:Union{Missing,T}}) where T = (_checkfeature(T); GeoInterface.coordinates.(fc))
 
 _checkfeature(::Type{T}) where T = isfeature(T) || throw(ArgumentError("$T is not a feature"))

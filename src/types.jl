@@ -108,3 +108,4 @@ isfeature(::Type{<:Feature}) = true
 geometry(f::Feature) = f.geometry
 properties(f::Feature) = f.properties
 extent(f::Feature) = f.extent
+coordinates(f::Feature) = coordinates(geometry(f))

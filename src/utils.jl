@@ -39,9 +39,10 @@ function testfeature(feature)
     if !isnothing(geom)
         @assert isgeometry(geom) "geom $geom from $feature doesn't implement `isgeometry`."
     end
+    @assert coordinates(feature) == coordinates(geometry(feature))
     props = properties(feature)
     if !isnothing(props)
-        @assert first(propertynames(props)) isa Symbol "propertynames of $props does not return an iterable of `Symbol`"
+        @assert first(propertynames(props)) isa Symbol "`propertynames` of $props does not return an iterable of `Symbol`"
         map(n -> getproperty(props, n), propertynames(props))  
     end
     ext = extent(feature)
@@ -58,6 +59,7 @@ function testfeaturecollection(fc)
     @assert isfeaturecollection(fc) "$feature doesn't implement `isfeature`."
     @assert isa(nfeature(fc), Integer) "feature collection $featurecollection doesn't return an `Integer` from `nfeatures`."
     @assert isfeature(getfeature(fc, 1)) "`getfeature(featurecollection, 1)` doesn't return an object where `isfeature(obj) == true`."
+    @assert coordinates(fc) == coordinates.(getfeature(fc))
     @assert isfeature(getfeature(fc, nfeature(fc))) "`getfeature(featurecollection, nfeatures(featurecollection))` doesn't return an object where `isfeature(obj) == true`."
     return true
 end
