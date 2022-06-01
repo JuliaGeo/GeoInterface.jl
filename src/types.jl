@@ -79,3 +79,31 @@ struct MultiSurfaceTrait <: AbstractMultiSurfaceTrait end
 abstract type AbstractMultiPolygonTrait <: AbstractMultiSurfaceTrait end
 "A MultiPolygonTrait is a collection of [`PolygonTrait`](@ref)s."
 struct MultiPolygonTrait <: AbstractMultiPolygonTrait end
+
+"""
+    Feature(geometry, properties=(;), extent=nothing)
+    Feature(; geometry, properties, extent)
+
+A wrapper that allows adding properties and extent to a geometry.
+
+- `geometry`: an object that satisfies `GeoInterface.isgeometry(x) == true`, or `nothing`. 
+- `properties`: an object where `Base.propertynames` returns a 
+    list of `Symbol` names and `Base.getproperty(obje, name)` returns a property value.
+    A `NamedTuple` will often be the easiest object to use.
+- `extent`: an Extents.jl `Extent` object, or `nothing` if the extent is not known.
+"""
+struct Feature{G,P,E<:Union{Extents.Extent,Nothing}}
+    geometry::G
+    properties::P
+    extent::E
+    function Feature(geometry::G, properties::P, extent::E) where {G,P,E}
+        (isnothing(geometry) || isgeometry(geometry)) || throw(ArgumentError(string(typeof(geometry)) * " is not a GeoInterface compatible geometry"))
+        new{G,P,E}(geometry, properties, extent)
+    end
+end
+Feature(geometry; properties=(;), extent=nothing) = Feature(geometry, properties, extent)
+Feature(; geometry=nothing, properties=(;), extent=nothing) = Feature(geometry, properties, extent)
+
+isfeature(::Type{<:Feature}) = true
+geometry(f::Feature) = f.geometry
+properties(f::Feature) = f.properties
