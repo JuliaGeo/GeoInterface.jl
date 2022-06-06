@@ -97,13 +97,17 @@ isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 crs(::AbstractGeometryTrait, geom) = nothing
 extent(::AbstractGeometryTrait, geom) = nothing
 
+# FeatureCollection
+getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))
+
 # Backwards compatibility
-function coordinates(t::AbstractPointTrait, geom)
-    collect(getcoord(t, geom))
+coordinates(t::AbstractPointTrait, geom) = collect(getcoord(t, geom))
+coordinates(t::AbstractGeometryTrait, geom) = collect(coordinates.(getgeom(t, geom)))
+function coordinates(t::AbstractFeatureTrait, feature) 
+    geom = geometry(feature)
+    isnothing(geom) ? [] : coordinates(geom)
 end
-function coordinates(t::AbstractGeometryTrait, geom)
-    collect(coordinates.(getgeom(t, geom)))
-end
+coordinates(t::AbstractFeatureCollectionTrait, fc) = coordinates.(getfeature(fc))
 
 Base.convert(T::Type, ::AbstractGeometryTrait, geom) = error("Conversion is enabled for type $T, but not implemented. Please report this issue to the package maintainer.")
 

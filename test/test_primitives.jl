@@ -205,6 +205,13 @@ end
     @test GeoInterface.testfeature(feature)
 end
 
+@testset "FeatureCollection" begin
+    features = GeoInterface.FeatureCollection(
+        [GeoInterface.Feature((1, 2), (a="1", b="2")), GeoInterface.Feature((3, 4), (a="3", b="4"))]
+    )
+    @test GeoInterface.testfeaturecollection(features)
+end
+
 @testset "Conversion" begin
     struct XCurve end
     struct XPolygon end
@@ -315,10 +322,5 @@ end
         @test GeoInterface.ncoord(geom) == 4
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
 
-    end
-
-    @testset "Vector{Feature}" begin
-        features = [GeoInterface.Feature((1, 2), (a="1", b="2")), GeoInterface.Feature((3, 4), (a="3", b="4"))]
-        @test GeoInterface.testfeaturecollection(features)
     end
 end

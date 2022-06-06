@@ -24,12 +24,3 @@ GeoInterface.geomtrait(::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = 
 GeoInterface.ncoord(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = Base.length(geom)
 GeoInterface.getcoord(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}, i) where {Keys,N,T<:Real} = getindex(geom, i)
 GeoInterface.coordnames(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = Keys
-
-# An AbstractVector of features is a feature collection.
-GeoInterface.isfeaturecollection(fc::AbstractVector{<:Union{Missing,T}}) where T = isfeature(T)
-GeoInterface.nfeature(fc::AbstractVector{<:Union{Missing,T}}) where T = Base.length(fc)
-GeoInterface.getfeature(fc::AbstractVector{<:Union{Missing,T}}) where T = (_checkfeature(T); fc)
-GeoInterface.getfeature(fc::AbstractVector{<:Union{Missing,T}}, i::Integer) where T = (_checkfeature(T); fc[i])
-GeoInterface.coordinates(fc::AbstractVector{<:Union{Missing,T}}) where T = (_checkfeature(T); GeoInterface.coordinates.(fc))
-
-_checkfeature(::Type{T}) where T = isfeature(T) || throw(ArgumentError("$T is not a feature"))

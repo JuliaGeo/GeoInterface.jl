@@ -35,11 +35,13 @@ Test whether the required interface for your `feature` has been implemented corr
 """
 function testfeature(feature)
     @assert isfeature(feature) "$feature doesn't implement `isfeature`."
+    @assert geomtrait(feature) isa AbstractFeatureTrait "$feature does not return an `AbstractFeatureTrait` for `geomtrait`."
     geom = geometry(feature)
     if !isnothing(geom)
         @assert isgeometry(geom) "geom $geom from $feature doesn't implement `isgeometry`."
+        @assert coordinates(feature) == coordinates(geometry(feature))
     end
-    @assert coordinates(feature) == coordinates(geometry(feature))
+
     props = properties(feature)
     if !isnothing(props)
         @assert first(propertynames(props)) isa Symbol "`propertynames` of $props does not return an iterable of `Symbol`"
@@ -56,10 +58,15 @@ end
 Test whether the required interface for your `featurecollection` has been implemented correctly.
 """
 function testfeaturecollection(fc)
-    @assert isfeaturecollection(fc) "$feature doesn't implement `isfeature`."
-    @assert isa(nfeature(fc), Integer) "feature collection $featurecollection doesn't return an `Integer` from `nfeatures`."
-    @assert isfeature(getfeature(fc, 1)) "`getfeature(featurecollection, 1)` doesn't return an object where `isfeature(obj) == true`."
+    @assert isfeaturecollection(fc) "$fc doesn't implement `isfeaturecollection`."
+    @assert geomtrait(fc) isa AbstractFeatureCollectionTrait "$fc does not return an `AbstractFeatureCollectionTrait` for `geomtrait`."
+    @assert isa(nfeature(fc), Integer) "feature collection $fc doesn't return an `Integer` from `nfeatures`."
+    if nfeature(fc) > 0
+        @assert isfeature(getfeature(fc, 1)) "For $fc `getfeature(featurecollection, 1)` does not return an object where `isfeature(obj) == true`."
+        @assert isfeature(getfeature(fc, nfeature(fc))) "For $fc `getfeature(featurecollection, nfeatures(featurecollection))` does not return an object where `isfeature(obj) == true`."
+    else
+        @warn "`nfeatures == 0` for feature collection, cannot test some properties"
+    end
     @assert coordinates(fc) == coordinates.(getfeature(fc))
-    @assert isfeature(getfeature(fc, nfeature(fc))) "`getfeature(featurecollection, nfeatures(featurecollection))` doesn't return an object where `isfeature(obj) == true`."
     return true
 end

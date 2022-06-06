@@ -60,15 +60,15 @@ properties(feat) = nothing
 Retrieve the features of `collection` as some iterable of features.
 It is expected that `isfeature(feature) === true`.
 """
-getfeature(collection) = nothing
-getfeature(collection, i::Integer) = nothing
+getfeature(collection) =  getfeature(geomtrait(collection), collection)
+getfeature(collection, i::Integer) = getfeature(geomtrait(collection), collection, i)
 
 """
     GeoInterface.nfeature(collection)
 
 Retrieve the number of features in a feature collection.
 """
-nfeature(collection) = 0
+nfeature(collection) = nfeature(geomtrait(collection), collection) 
 
 """
     GeoInterface.geomtrait(geom) => T <: AbstractGeometry
@@ -399,7 +399,8 @@ crs(geom) = crs(geomtrait(geom), geom)
 Retrieve the extent (bounding box) for given geom.
 In SF this is defined as `envelope`.
 """
-extent(geom) = extent(geomtrait(geom), geom)
+extent(geom) = nothing #@extent(geomtrait(geom), geom)
+extent(trait, geom) = nothing
 
 """
     bbox(geom) -> T <: Extents.Extent
