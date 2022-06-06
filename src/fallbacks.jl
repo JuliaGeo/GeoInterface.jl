@@ -14,9 +14,9 @@ y(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Y), coordn
 z(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Z), coordnames(geom)))
 m(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:M), coordnames(geom)))
 
-is3d(::AbstractPointTrait, geom) = :Z in coordnames(geom)
-ismeasured(::AbstractPointTrait, geom) = :M in coordnames(geom)
-isempty(T, geom) = false
+is3d(::AbstractGeometryTrait, geom) = :Z in coordnames(geom)
+ismeasured(::AbstractGeometryTrait, geom) = :M in coordnames(geom)
+isempty(::AbstractGeometryTrait, geom) = false
 
 ## Points
 ngeom(::AbstractPointTrait, geom) = 0
