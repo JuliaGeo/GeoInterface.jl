@@ -13,6 +13,13 @@ using Test
     struct MyMultiPolygon end
     struct MyTIN end
     struct MyCollection end
+    struct MyFeature{G,P}
+        geometry::G
+        properties::P
+    end
+    struct MyFeatureCollection{G}
+        geoms::G
+    end
 
     GeoInterface.isgeometry(::MyPoint) = true
     GeoInterface.geomtrait(::MyPoint) = PointTrait()
@@ -65,6 +72,18 @@ using Test
     GeoInterface.geomtrait(::MyCollection) = GeometryCollectionTrait()
     GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
     GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
+
+    GeoInterface.isfeature(::Type{<:MyFeature}) = true
+    GeoInterface.geomtrait(feature::MyFeature) = FeatureTrait()
+    GeoInterface.geometry(f::MyFeature) = f.geometry 
+    GeoInterface.properties(f::MyFeature) = f.properties
+    GeoInterface.extent(f::MyFeature) = nothing
+
+    GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
+    GeoInterface.geomtrait(fc::MyFeatureCollection) = FeatureCollectionTrait()
+    GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = length(fc.geoms)
+    GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
+    GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]
 
     @testset "Point" begin
         geom = MyPoint()
@@ -201,13 +220,13 @@ end
 end
 
 @testset "Feature" begin
-    feature = GeoInterface.Feature((1, 2), (a=10, b=20))
+    feature = MyFeature((1, 2), (a=10, b=20))
     @test GeoInterface.testfeature(feature)
 end
 
 @testset "FeatureCollection" begin
-    features = GeoInterface.FeatureCollection(
-        [GeoInterface.Feature((1, 2), (a="1", b="2")), GeoInterface.Feature((3, 4), (a="3", b="4"))]
+    features = MyFeatureCollection(
+        [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4"))]
     )
     @test GeoInterface.testfeaturecollection(features)
 end
