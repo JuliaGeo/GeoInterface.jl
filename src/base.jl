@@ -24,3 +24,20 @@ GeoInterface.geomtrait(::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = 
 GeoInterface.ncoord(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = Base.length(geom)
 GeoInterface.getcoord(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}, i) where {Keys,N,T<:Real} = getindex(geom, i)
 GeoInterface.coordnames(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where {Keys,N,T<:Real} = Keys
+
+
+# Default features using NamedTuple and AbstractArray
+
+const NamedTupleFeature = NamedTuple{(:geometry,:properties)}
+
+GeoInterface.isfeature(::Type{<:NamedTupleFeature}) = true
+GeoInterface.trait(::NamedTupleFeature) = FeatureTrait()
+GeoInterface.geometry(f::NamedTupleFeature) = f.geometry
+GeoInterface.properties(f::NamedTupleFeature) = f.properties
+
+const ArrayFeatureCollection = AbstractArray{<:NamedTupleFeature}
+
+GeoInterface.isfeaturecollection(::Type{<:ArrayFeatureCollection}) = true
+GeoInterface.trait(::ArrayFeatureCollection) = FeatureCollectionTrait()
+GeoInterface.nfeature(::FeatureCollectionTrait, fc::ArrayFeatureCollection) = Base.length(fc)
+GeoInterface.getfeature(::FeatureCollectionTrait, fc::ArrayFeatureCollection, i::Integer) = fc[i]

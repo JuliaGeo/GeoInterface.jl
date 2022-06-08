@@ -342,4 +342,10 @@ end
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
 
     end
+
+    @testset "NamedTupleFeature" begin
+        feature = (; geometry=(1, 2), properties=(a="x", b="y"))
+        @test GeoInterface.testfeature(feature)
+        @test GeoInterface.testfeaturecollection([feature, feature])
+    end
 end

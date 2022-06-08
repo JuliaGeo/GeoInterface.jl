@@ -34,7 +34,7 @@ end
 Test whether the required interface for your `feature` has been implemented correctly.
 """
 function testfeature(feature)
-    @assert isfeature(feature) "$feature doesn't implement `isfeature`."
+    @assert isfeature(typeof(feature)) "$feature doesn't implement `isfeature`."
     @assert trait(feature) isa AbstractFeatureTrait "$feature does not return an `AbstractFeatureTrait` for `geomtrait`."
     @assert geomtrait(feature) == nothing
     geom = geometry(feature)
@@ -59,7 +59,7 @@ end
 Test whether the required interface for your `featurecollection` has been implemented correctly.
 """
 function testfeaturecollection(fc)
-    @assert isfeaturecollection(fc) "$fc doesn't implement `isfeaturecollection`."
+    @assert isfeaturecollection(typeof(fc)) "$fc doesn't implement `isfeaturecollection`."
     @assert trait(fc) isa AbstractFeatureCollectionTrait "$fc does not return an `AbstractFeatureCollectionTrait` for `geomtrait`."
     @assert geomtrait(fc) == nothing
     @assert isa(nfeature(fc), Integer) "feature collection $fc doesn't return an `Integer` from `nfeatures`."
