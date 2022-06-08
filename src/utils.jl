@@ -35,7 +35,8 @@ Test whether the required interface for your `feature` has been implemented corr
 """
 function testfeature(feature)
     @assert isfeature(feature) "$feature doesn't implement `isfeature`."
-    @assert geomtrait(feature) isa AbstractFeatureTrait "$feature does not return an `AbstractFeatureTrait` for `geomtrait`."
+    @assert trait(feature) isa AbstractFeatureTrait "$feature does not return an `AbstractFeatureTrait` for `geomtrait`."
+    @assert geomtrait(feature) == nothing
     geom = geometry(feature)
     if !isnothing(geom)
         @assert isgeometry(geom) "geom $geom from $feature doesn't implement `isgeometry`."
@@ -59,7 +60,8 @@ Test whether the required interface for your `featurecollection` has been implem
 """
 function testfeaturecollection(fc)
     @assert isfeaturecollection(fc) "$fc doesn't implement `isfeaturecollection`."
-    @assert geomtrait(fc) isa AbstractFeatureCollectionTrait "$fc does not return an `AbstractFeatureCollectionTrait` for `geomtrait`."
+    @assert trait(fc) isa AbstractFeatureCollectionTrait "$fc does not return an `AbstractFeatureCollectionTrait` for `geomtrait`."
+    @assert geomtrait(fc) == nothing
     @assert isa(nfeature(fc), Integer) "feature collection $fc doesn't return an `Integer` from `nfeatures`."
     if nfeature(fc) > 0
         @assert isfeature(getfeature(fc, 1)) "For $fc `getfeature(featurecollection, 1)` does not return an object where `isfeature(obj) == true`."

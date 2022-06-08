@@ -74,13 +74,13 @@ using Test
     GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
 
     GeoInterface.isfeature(::Type{<:MyFeature}) = true
-    GeoInterface.geomtrait(feature::MyFeature) = FeatureTrait()
+    GeoInterface.trait(feature::MyFeature) = FeatureTrait()
     GeoInterface.geometry(f::MyFeature) = f.geometry 
     GeoInterface.properties(f::MyFeature) = f.properties
     GeoInterface.extent(f::MyFeature) = nothing
 
     GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
-    GeoInterface.geomtrait(fc::MyFeatureCollection) = FeatureCollectionTrait()
+    GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
     GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = length(fc.geoms)
     GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
     GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]

@@ -60,15 +60,15 @@ properties(feat) = nothing
 Retrieve the features of `collection` as some iterable of features.
 It is expected that `isfeature(feature) === true`.
 """
-getfeature(collection) =  getfeature(geomtrait(collection), collection)
-getfeature(collection, i::Integer) = getfeature(geomtrait(collection), collection, i)
+getfeature(collection) =  getfeature(trait(collection), collection)
+getfeature(collection, i::Integer) = getfeature(trait(collection), collection, i)
 
 """
     GeoInterface.nfeature(collection)
 
 Retrieve the number of features in a feature collection.
 """
-nfeature(collection) = nfeature(geomtrait(collection), collection) 
+nfeature(collection) = nfeature(trait(collection), collection) 
 
 """
     GeoInterface.geomtrait(geom) => T <: AbstractGeometry
@@ -76,6 +76,16 @@ nfeature(collection) = nfeature(geomtrait(collection), collection)
 Returns the geometry type, such as [`PolygonTrait`](@ref) or [`PointTrait`](@ref).
 """
 geomtrait(geom) = nothing
+
+"""
+    GeoInterface.trait(geom) => T <: AbstractGeometry
+
+Returns the object type, such as [`FeatureTrait`](@ref). 
+For all `isgeometry` objects `trait` is the same as `geomtrait(obj)`,
+e.g. [`PointTrait`](@ref).
+"""
+# trait(geom::T) where T = isgeometry(T) ? geomtrait(geom) : nothing
+trait(geom) = geomtrait(geom)
 
 # All types
 """
@@ -399,7 +409,7 @@ crs(geom) = crs(geomtrait(geom), geom)
 Retrieve the extent (bounding box) for given geom.
 In SF this is defined as `envelope`.
 """
-extent(geom) = nothing #@extent(geomtrait(geom), geom)
+extent(geom) = extent(geomtrait(geom), geom)
 extent(trait, geom) = nothing
 
 """
@@ -584,7 +594,7 @@ ismeasured(geom) = ismeasured(geomtrait(geom), geom)
 Return (an iterator of) point coordinates.
 Ensures backwards compatibility with GeoInterface version 0.
 """
-coordinates(geom) = coordinates(geomtrait(geom), geom)
+coordinates(obj) = coordinates(trait(obj), obj)
 
 """
     convert(type::CustomGeom, geom)
