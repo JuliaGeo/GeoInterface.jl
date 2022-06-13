@@ -13,6 +13,13 @@ using Test
     struct MyMultiPolygon end
     struct MyTIN end
     struct MyCollection end
+    struct MyFeature{G,P}
+        geometry::G
+        properties::P
+    end
+    struct MyFeatureCollection{G}
+        geoms::G
+    end
 
     GeoInterface.isgeometry(::MyPoint) = true
     GeoInterface.geomtrait(::MyPoint) = PointTrait()
@@ -65,6 +72,18 @@ using Test
     GeoInterface.geomtrait(::MyCollection) = GeometryCollectionTrait()
     GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
     GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
+
+    GeoInterface.isfeature(::Type{<:MyFeature}) = true
+    GeoInterface.trait(feature::MyFeature) = FeatureTrait()
+    GeoInterface.geometry(f::MyFeature) = f.geometry 
+    GeoInterface.properties(f::MyFeature) = f.properties
+    GeoInterface.extent(f::MyFeature) = nothing
+
+    GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
+    GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
+    GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = length(fc.geoms)
+    GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
+    GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]
 
     @testset "Point" begin
         geom = MyPoint()
@@ -201,20 +220,15 @@ end
 end
 
 @testset "Feature" begin
-    struct Row end
-    struct Point end
+    feature = MyFeature((1, 2), (a=10, b=20))
+    @test GeoInterface.testfeature(feature)
+end
 
-    GeoInterface.isgeometry(::Point) = true
-    GeoInterface.geomtrait(::Point) = PointTrait()
-    GeoInterface.ncoord(::PointTrait, geom::Point) = 2
-    GeoInterface.getcoord(::PointTrait, geom::Point, i) = [1, 2][i]
-
-    GeoInterface.isfeature(::Row) = true
-    GeoInterface.geometry(r::Row) = Point()
-    GeoInterface.properties(r::Row) = (; test=1)
-
-    @test GeoInterface.testfeature(Row())
-
+@testset "FeatureCollection" begin
+    features = MyFeatureCollection(
+        [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4"))]
+    )
+    @test GeoInterface.testfeaturecollection(features)
 end
 
 @testset "Conversion" begin
@@ -327,5 +341,11 @@ end
         @test GeoInterface.ncoord(geom) == 4
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
 
+    end
+
+    @testset "NamedTupleFeature" begin
+        feature = (; geometry=(1, 2), properties=(a="x", b="y"))
+        @test GeoInterface.testfeature(feature)
+        @test GeoInterface.testfeaturecollection([feature, feature])
     end
 end

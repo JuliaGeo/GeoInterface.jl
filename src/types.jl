@@ -79,3 +79,14 @@ struct MultiSurfaceTrait <: AbstractMultiSurfaceTrait end
 abstract type AbstractMultiPolygonTrait <: AbstractMultiSurfaceTrait end
 "A MultiPolygonTrait is a collection of [`PolygonTrait`](@ref)s."
 struct MultiPolygonTrait <: AbstractMultiPolygonTrait end
+
+
+"An AbstractFeatureTrait for all features"
+abstract type AbstractFeatureTrait end
+"A FeatureTrait holds `geometries`, `properties` and an `extent`"
+struct FeatureTrait <: AbstractFeatureTrait end
+
+"An AbstractFeatureCollectionTrait for all feature collections"
+abstract type AbstractFeatureCollectionTrait end
+"A FeatureCollectionTrait holds objects of `FeatureTrait` and an `extent`"
+struct FeatureCollectionTrait <: AbstractFeatureCollectionTrait end

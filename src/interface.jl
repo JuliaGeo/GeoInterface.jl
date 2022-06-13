@@ -25,6 +25,20 @@ isfeature(x::T) where {T} = isfeature(T)
 isfeature(::Type{T}) where {T} = false
 
 """
+    GeoInterface.isfeaturecollection(x) => Bool
+
+Check if an object `x` is a collection of features and thus implicitly supports some
+GeoInterface methods. A feature collection is a collection of features, and may also
+contain metatdata for the whole collection, like an `Extent`.
+
+It is recommended that for users implementing `MyType`, they define only
+`isfeaturecollection(::Type{MyType})`. `isfeaturecollection(::MyType)` will then
+automatically delegate to this method.
+"""
+isfeaturecollection(x::T) where {T} = isfeaturecollection(T)
+isfeaturecollection(::Type{T}) where {T} = false
+
+"""
     GeoInterface.geometry(feat) => geom
 
 Retrieve the geometry of `feat`. It is expected that `isgeometry(geom) === true`.
@@ -41,11 +55,37 @@ Ensures backwards compatibility with GeoInterface version 0.
 properties(feat) = nothing
 
 """
+    GeoInterface.getfeature(collection) => [feature, ...]
+
+Retrieve the features of `collection` as some iterable of features.
+It is expected that `isfeature(feature) === true`.
+"""
+getfeature(collection) =  getfeature(trait(collection), collection)
+getfeature(collection, i::Integer) = getfeature(trait(collection), collection, i)
+
+"""
+    GeoInterface.nfeature(collection)
+
+Retrieve the number of features in a feature collection.
+"""
+nfeature(collection) = nfeature(trait(collection), collection) 
+
+"""
     GeoInterface.geomtrait(geom) => T <: AbstractGeometry
 
 Returns the geometry type, such as [`PolygonTrait`](@ref) or [`PointTrait`](@ref).
 """
 geomtrait(geom) = nothing
+
+"""
+    GeoInterface.trait(geom) => T <: AbstractGeometry
+
+Returns the object type, such as [`FeatureTrait`](@ref). 
+For all `isgeometry` objects `trait` is the same as `geomtrait(obj)`,
+e.g. [`PointTrait`](@ref).
+"""
+# trait(geom::T) where T = isgeometry(T) ? geomtrait(geom) : nothing
+trait(geom) = geomtrait(geom)
 
 # All types
 """
@@ -370,6 +410,7 @@ Retrieve the extent (bounding box) for given geom.
 In SF this is defined as `envelope`.
 """
 extent(geom) = extent(geomtrait(geom), geom)
+extent(trait, geom) = nothing
 
 """
     bbox(geom) -> T <: Extents.Extent
@@ -553,7 +594,7 @@ ismeasured(geom) = ismeasured(geomtrait(geom), geom)
 Return (an iterator of) point coordinates.
 Ensures backwards compatibility with GeoInterface version 0.
 """
-coordinates(geom) = coordinates(geomtrait(geom), geom)
+coordinates(obj) = coordinates(trait(obj), obj)
 
 """
     convert(type::CustomGeom, geom)
