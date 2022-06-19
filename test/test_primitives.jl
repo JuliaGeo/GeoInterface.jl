@@ -75,7 +75,7 @@ using Test
 
     GeoInterface.isfeature(::Type{<:MyFeature}) = true
     GeoInterface.trait(feature::MyFeature) = FeatureTrait()
-    GeoInterface.geometry(f::MyFeature) = f.geometry 
+    GeoInterface.geometry(f::MyFeature) = f.geometry
     GeoInterface.properties(f::MyFeature) = f.properties
     GeoInterface.extent(f::MyFeature) = nothing
 
