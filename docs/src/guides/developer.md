@@ -50,12 +50,26 @@ Base.convert(::Type{T}, ::LineStringTrait, geom::T) = geom  # fast fallthrough w
 Base.convert(::Type{T}, ::LineStringTrait, geom) = ...  # slow custom conversion based on ngeom and getgeom
 ```
 
-## Required for Feature
+## Required for Feature(Collection)s
+A Feature is a geometry with properties, and in modern parlance, a row in table.
+A FeatureCollection is thus a Vector of Features, often represented as a table.
+
+A Feature implements the following:
 ```julia
 GeoInterface.isfeature(feat::customfeat)::Bool = true
 GeoInterface.properties(feat::customfeat)
 GeoInterface.geometry(feat::customfeat)
 ```
+
+While a FeatureCollection implements the following:
+```julia
+GeoInterface.isfeaturecollection(::Type{customcollection}) = true
+GeoInterface.getfeature(trait(::customcollection), ::customcollection, i)
+GeoInterface.nfeature(trait(::customcollection), ::customcollection)
+GeoInterface.geometrycolumns(::customcollection) = (:geometry,)  # can be multiple!
+```
+
+The `geometrycolumns` enables other packages to know which field in a row, or column in a table, contains the geometry or geometries.
 
 ## GeoSpatial Operations
 ```julia

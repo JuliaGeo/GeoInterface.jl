@@ -43,7 +43,7 @@ export AbstractGeometryTrait,
     MultiPolygonTrait,
     AbstractFeatureTrait,
     FeatureTrait,
-    AbstractCollectionFeatureTrait,
+    AbstractFeatureCollectionTrait,
     FeatureCollectionTrait
 
 
