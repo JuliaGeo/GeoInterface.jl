@@ -28,7 +28,7 @@ GeoInterface.coordnames(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where 
 
 # Default features using NamedTuple and AbstractArray
 
-const NamedTupleFeature = NamedTuple{(:geometry,:properties)}
+const NamedTupleFeature = NamedTuple{(:geometry, :properties)}
 
 GeoInterface.isfeature(::Type{<:NamedTupleFeature}) = true
 GeoInterface.trait(::NamedTupleFeature) = FeatureTrait()
@@ -41,3 +41,4 @@ GeoInterface.isfeaturecollection(::Type{<:ArrayFeatureCollection}) = true
 GeoInterface.trait(::ArrayFeatureCollection) = FeatureCollectionTrait()
 GeoInterface.nfeature(::FeatureCollectionTrait, fc::ArrayFeatureCollection) = Base.length(fc)
 GeoInterface.getfeature(::FeatureCollectionTrait, fc::ArrayFeatureCollection, i::Integer) = fc[i]
+GeoInterface.geometrycolumns(fc::ArrayFeatureCollection) = (:geometry,)
