@@ -46,7 +46,7 @@ function testfeature(feature)
     props = properties(feature)
     if !isnothing(props)
         @assert first(propertynames(props)) isa Symbol "`propertynames` of $props does not return an iterable of `Symbol`"
-        map(n -> getproperty(props, n), propertynames(props))  
+        map(n -> getproperty(props, n), propertynames(props))
     end
     ext = extent(feature)
     @assert ext isa Union{Nothing,Extent}
@@ -70,5 +70,6 @@ function testfeaturecollection(fc)
         @warn "`nfeatures == 0` for feature collection, cannot test some properties"
     end
     @assert coordinates(fc) == coordinates.(getfeature(fc))
+    @assert geometrycolumns(fc) isa NTuple "feature collection $fc doesn't return a `NTuple` from `geometrycolumns`."
     return true
 end

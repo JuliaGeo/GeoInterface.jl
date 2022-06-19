@@ -39,6 +39,14 @@ isfeaturecollection(x::T) where {T} = isfeaturecollection(T)
 isfeaturecollection(::Type{T}) where {T} = false
 
 """
+    GeoInterface.geometrycolumns(featurecollection) => (:geom,)
+
+Retrieve the geometrycolumn(s) of `featurecollection`; the fields (or columns in a table)
+which contain geometries that support GeoInterface.
+"""
+geometrycolumns(featurecollection) = (:geometry,)
+
+"""
     GeoInterface.geometry(feat) => geom
 
 Retrieve the geometry of `feat`. It is expected that `isgeometry(geom) === true`.
@@ -60,7 +68,7 @@ properties(feat) = nothing
 Retrieve the features of `collection` as some iterable of features.
 It is expected that `isfeature(feature) === true`.
 """
-getfeature(collection) =  getfeature(trait(collection), collection)
+getfeature(collection) = getfeature(trait(collection), collection)
 getfeature(collection, i::Integer) = getfeature(trait(collection), collection, i)
 
 """
@@ -68,7 +76,7 @@ getfeature(collection, i::Integer) = getfeature(trait(collection), collection, i
 
 Retrieve the number of features in a feature collection.
 """
-nfeature(collection) = nfeature(trait(collection), collection) 
+nfeature(collection) = nfeature(trait(collection), collection)
 
 """
     GeoInterface.geomtrait(geom) => T <: AbstractGeometry
@@ -80,7 +88,7 @@ geomtrait(geom) = nothing
 """
     GeoInterface.trait(geom) => T <: AbstractGeometry
 
-Returns the object type, such as [`FeatureTrait`](@ref). 
+Returns the object type, such as [`FeatureTrait`](@ref).
 For all `isgeometry` objects `trait` is the same as `geomtrait(obj)`,
 e.g. [`PointTrait`](@ref).
 """
