@@ -42,7 +42,7 @@ function _nt_properties(nt::NamedTuple{K}) where K
     valkeys = reduce(K; init=()) do acc, k
         k == :geometry ? acc : (acc..., k)
     end
-    return nt[valkeys]
+    return NamedTuple{valkeys}(nt)
 end
 
 const MaybeArrayFeatureCollection = AbstractArray{<:NamedTuple}
