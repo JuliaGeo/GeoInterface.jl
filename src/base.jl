@@ -28,17 +28,30 @@ GeoInterface.coordnames(::PointTrait, geom::NamedTuple{Keys,NTuple{N,T}}) where 
 
 # Default features using NamedTuple and AbstractArray
 
-const NamedTupleFeature = NamedTuple{(:geometry, :properties)}
+# Any named tuple with a `:geometry` field is a feature
+_is_namedtuple_feature(::Type{<:NamedTuple{K}}) where K = :geometry in K
+_is_namedtuple_feature(nt::NamedTuple) = _is_namedtuple_feature(typeof(nt))
 
-GeoInterface.isfeature(::Type{<:NamedTupleFeature}) = true
-GeoInterface.trait(::NamedTupleFeature) = FeatureTrait()
-GeoInterface.geometry(f::NamedTupleFeature) = f.geometry
-GeoInterface.properties(f::NamedTupleFeature) = f.properties
+GeoInterface.isfeature(T::Type{<:NamedTuple}) = _is_namedtuple_feature(T)
+GeoInterface.trait(nt::NamedTuple) = _is_namedtuple_feature(nt) ? FeatureTrait() : nothing
+GeoInterface.geometry(nt::NamedTuple) = _is_namedtuple_feature(nt) ? nt.geometry : nothing
+GeoInterface.properties(nt::NamedTuple) = _is_namedtuple_feature(nt) ? _nt_properties(nt) : nothing
 
-const ArrayFeatureCollection = AbstractArray{<:NamedTupleFeature}
+# Use Val to force constant propagation through `reduce`
+function _nt_properties(nt::NamedTuple{K}) where K
+    valkeys = reduce(K; init=()) do acc, k
+        k == :geometry ? acc : (acc..., k)
+    end
+    return nt[valkeys]
+end
 
-GeoInterface.isfeaturecollection(::Type{<:ArrayFeatureCollection}) = true
-GeoInterface.trait(::ArrayFeatureCollection) = FeatureCollectionTrait()
-GeoInterface.nfeature(::FeatureCollectionTrait, fc::ArrayFeatureCollection) = Base.length(fc)
-GeoInterface.getfeature(::FeatureCollectionTrait, fc::ArrayFeatureCollection, i::Integer) = fc[i]
-GeoInterface.geometrycolumns(fc::ArrayFeatureCollection) = (:geometry,)
+const MaybeArrayFeatureCollection = AbstractArray{<:NamedTuple}
+
+_is_array_featurecollection(::Type{<:AbstractArray{T}}) where {T<:NamedTuple} = _is_namedtuple_feature(T)
+_is_array_featurecollection(A::AbstractArray{<:NamedTuple}) = _is_array_featurecollection(typeof(A))
+
+GeoInterface.isfeaturecollection(T::Type{<:MaybeArrayFeatureCollection}) = _is_array_featurecollection(T)
+GeoInterface.trait(fc::MaybeArrayFeatureCollection) = _is_array_featurecollection(fc) ? FeatureCollectionTrait() : nothing
+GeoInterface.nfeature(::FeatureCollectionTrait, fc::MaybeArrayFeatureCollection) = _is_array_featurecollection(fc) ? Base.length(fc) : nothing
+GeoInterface.getfeature(::FeatureCollectionTrait, fc::MaybeArrayFeatureCollection, i::Integer) = _is_array_featurecollection(fc) ? fc[i] : nothing
+GeoInterface.geometrycolumns(fc::MaybeArrayFeatureCollection) = _is_array_featurecollection(fc) ? (:geometry,) : nothing
