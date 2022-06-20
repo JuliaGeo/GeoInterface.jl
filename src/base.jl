@@ -39,10 +39,10 @@ GeoInterface.properties(nt::NamedTuple) = _is_namedtuple_feature(nt) ? _nt_prope
 
 # Use Val to force constant propagation through `reduce`
 function _nt_properties(nt::NamedTuple{K}) where K
-    valkeys = reduce(K; init=()) do acc, k
+    keys = reduce(K; init=()) do acc, k
         k == :geometry ? acc : (acc..., k)
     end
-    return NamedTuple{valkeys}(nt)
+    return NamedTuple{keys}(nt)
 end
 
 const MaybeArrayFeatureCollection = AbstractArray{<:NamedTuple}
