@@ -92,7 +92,6 @@ Returns the object type, such as [`FeatureTrait`](@ref).
 For all `isgeometry` objects `trait` is the same as `geomtrait(obj)`,
 e.g. [`PointTrait`](@ref).
 """
-# trait(geom::T) where T = isgeometry(T) ? geomtrait(geom) : nothing
 trait(geom) = geomtrait(geom)
 
 # All types
