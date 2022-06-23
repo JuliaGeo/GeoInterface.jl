@@ -344,7 +344,9 @@ end
     end
 
     @testset "NamedTupleFeature" begin
-        feature = (; geometry=(1, 2), properties=(a="x", b="y"))
+        feature = (; geometry=(1, 2), a="x", b="y", c="z")
+        GeoInterface.geometry(feature) = (1, 2)
+        @test GeoInterface.properties(feature) == (a="x", b="y", c="z")
         @test GeoInterface.testfeature(feature)
         @test GeoInterface.testfeaturecollection([feature, feature])
     end
