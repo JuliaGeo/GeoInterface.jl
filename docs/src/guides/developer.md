@@ -33,7 +33,7 @@ The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such
 
 There are also optional generic methods that could help with locating this geometry.
 ```julia
-GeoInterface.crs(geomtrait(geom), geom::customgeom)::GeoFormatTypes.GeoFormat}
+GeoInterface.crs(geomtrait(geom), geom::customgeom)::GeoFormatTypes.GeoFormat
 GeoInterface.extent(geomtrait(geom), geom::customgeom)::Extents.Extent
 ```
 
@@ -71,14 +71,14 @@ GeoInterface.geometrycolumns(::customcollection) = (:geometry,)  # can be multip
 
 The `geometrycolumns` enables other packages to know which field in a row, or column in a table, contains the geometry or geometries.
 
-## GeoSpatial Operations
+## Geospatial Operations
 ```julia
 distance(geomtrait(a), geomtrait(b), a, b)
 buffer(geomtrait(geom), geom, distance)
 convexhull(geomtrait(geom), geom)
 ```
 
-## GeoSpatial Relations
+## Geospatial Relations
 These functions are used to describe the relations between geometries as defined in the Dimensionally Extended 9-Intersection Model ([DE-9IM](https://en.wikipedia.org/wiki/DE-9IM)).
 
 ```julia
