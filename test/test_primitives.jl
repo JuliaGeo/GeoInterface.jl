@@ -35,8 +35,6 @@ using Test
     GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
     GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
     GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
-    Base.convert(T::Type{MyCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    Base.convert(::Type{MyCurve}, ::LineStringTrait, geom::MyCurve) = geom
 
     GeoInterface.isgeometry(::MyPolygon) = true
     GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
@@ -235,15 +233,9 @@ end
     struct XCurve end
     struct XPolygon end
 
-    Base.convert(T::Type{XCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    Base.convert(::Type{XCurve}, ::LineStringTrait, geom::XCurve) = geom  # fast fallthrough
-    Base.convert(::Type{XCurve}, ::LineStringTrait, geom) = geom
-
     geom = MyCurve()
-    @test !isnothing(convert(MyCurve, geom))
-
-    Base.convert(T::Type{XPolygon}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    @test_throws Exception convert(MyPolygon, geom)
+    @test GeoInterface.convert(MyCurve, geom) === geom
+    @test_throws Exception GeoInterface.convert(MyPolygon, geom)
 end
 
 @testset "Operations" begin

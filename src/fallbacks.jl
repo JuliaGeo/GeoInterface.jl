@@ -109,7 +109,8 @@ function coordinates(t::AbstractFeatureTrait, feature)
 end
 coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(fc)]
 
-Base.convert(T::Type, ::AbstractGeometryTrait, geom) = error("Conversion is enabled for type $T, but not implemented. Please report this issue to the package maintainer.")
+# no conversion needed
+convert(::Type{T}, ::AbstractTrait, x::T) where {T} = x
 
 # Subtraits
 
