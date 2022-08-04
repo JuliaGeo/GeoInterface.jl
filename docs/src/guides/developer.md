@@ -42,11 +42,14 @@ And lastly, there are many other optional functions for each specific geometry. 
 ### Conversion
 It is useful if others can convert any custom geometry into your
 geometry type, if their custom geometry supports GeoInterface as well.
-This requires the following method, where the implementation should be defined in terms
+This requires the following methods, where the implementation should be defined in terms
 of GeoInterface methods like `ngeom`, `getgeom`, or just `coordinates` calls.
 
 ```julia
-GeoInterface.convert(::Type{T}, ::LineStringTrait, geom) = ...  # slow custom conversion based on ngeom and getgeom
+# This method will get called on GeoInterface.convert(::Type{T}, geom)
+# if geomtrait(geom) == LineStringTrait()
+GeoInterface.convert(::Type{CustomLineString}, ::LineStringTrait, geom) = ...
+GeoInterface.convert(::Type{CustomPolygon}, ::PolygonTrait, geom) = ...
 ```
 
 ## Required for Feature(Collection)s
