@@ -52,5 +52,6 @@ include("interface.jl")
 include("fallbacks.jl")
 include("utils.jl")
 include("base.jl")
+include("wrappers.jl")
 
 end # module

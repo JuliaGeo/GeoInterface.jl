@@ -39,7 +39,9 @@ nhole(t::AbstractPolygonTrait, geom) = nring(t, geom) - 1
 gethole(t::AbstractPolygonTrait, geom) = (getgeom(t, geom, i) for i in 2:ngeom(t, geom))
 gethole(t::AbstractPolygonTrait, geom, i) = getring(t, geom, i + 1)
 npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
-getpoint(t::AbstractPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
+getpoint(t::PolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
+getpoint(t::AbstractPolygonTrait, geom) = getgeom(t, geom)
+getpoint(t::AbstractPolygonTrait, geom, i) = getgeom(t, geom, i)
 
 ## MultiPoint
 npoint(t::AbstractMultiPointTrait, geom) = ngeom(t, geom)
@@ -66,6 +68,10 @@ getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) 
 npatch(t::AbstractPolyhedralSurfaceTrait, geom)::Integer = ngeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom) = getgeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom, i)
+getpoint(t::AbstractPolyhedralSurfaceTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
+
+# Collection
+getpoint(t::AbstractGeometryCollectionTrait, geom) = flatten((getpoint(t, geom, i) for i in 1:ngeom(t, geom)))
 
 ## Default iterator
 getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(t, geom))
