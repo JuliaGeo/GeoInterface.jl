@@ -411,13 +411,12 @@ In SF this is defined as `SRID`.
 crs(geom) = crs(geomtrait(geom), geom)
 
 """
-    extent(geom) -> T <: Extents.Extent
+    extent(obj) -> T <: Extents.Extent
 
-Retrieve the extent (bounding box) for given geom.
+Retrieve the extent (bounding box) for given geom or feature.
 In SF this is defined as `envelope`.
 """
-extent(geom) = extent(geomtrait(geom), geom)
-extent(trait, geom) = nothing
+extent(obj) = extent(trait(obj), obj)
 
 """
     bbox(geom) -> T <: Extents.Extent

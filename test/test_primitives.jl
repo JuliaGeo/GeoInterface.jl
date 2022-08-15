@@ -86,7 +86,6 @@ using Test
     GeoInterface.trait(feature::MyFeature) = FeatureTrait()
     GeoInterface.geometry(f::MyFeature) = f.geometry
     GeoInterface.properties(f::MyFeature) = f.properties
-    GeoInterface.extent(f::MyFeature) = nothing
 
     GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
     GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
@@ -233,13 +232,15 @@ end
 @testset "Feature" begin
     feature = MyFeature((1, 2), (a=10, b=20))
     @test GeoInterface.testfeature(feature)
+    @test GeoInterface.extent(feature) == Extents.Extent(X=(1, 1), Y=(2, 2))
 end
 
 @testset "FeatureCollection" begin
     features = MyFeatureCollection(
-        [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4"))]
+        [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4")), MyFeature(nothing, (a="5", b="6"))]
     )
     @test GeoInterface.testfeaturecollection(features)
+    @test GeoInterface.extent(FeatureCollectionTrait(), features) == Extents.Extent(X=(1, 1), Y=(2, 2))
 end
 
 @testset "Conversion" begin
