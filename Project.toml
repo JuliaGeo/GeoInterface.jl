@@ -1,13 +1,13 @@
 name = "GeoInterface"
 uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 authors = ["JuliaGeo and contributors"]
-version = "1.0.1"
+version = "1.0.2"
 
 [deps]
 Extents = "411431e0-e8b7-467b-b5e0-f676ba4f2910"
 
 [compat]
-Extents = "0.1"
+Extents = "0.1.1"
 julia = "1"
 
 [extras]

@@ -1,4 +1,5 @@
 using GeoInterface
+using Extents
 using Test
 
 @testset "Developer" begin
@@ -33,6 +34,7 @@ using Test
 
     GeoInterface.isgeometry(::MyCurve) = true
     GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
+    GeoInterface.ncoord(::LineStringTrait, geom::MyCurve) = 2
     GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
     GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
     Base.convert(T::Type{MyCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
@@ -40,36 +42,43 @@ using Test
 
     GeoInterface.isgeometry(::MyPolygon) = true
     GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
+    GeoInterface.ncoord(::PolygonTrait, geom::MyPolygon) = 2
     GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2
     GeoInterface.getgeom(::PolygonTrait, geom::MyPolygon, i) = MyCurve()
 
     GeoInterface.isgeometry(::MyTriangle) = true
     GeoInterface.geomtrait(::MyTriangle) = TriangleTrait()
+    GeoInterface.ncoord(::TriangleTrait, geom::MyTriangle) = 2
     GeoInterface.ngeom(::TriangleTrait, geom::MyTriangle) = 3
     GeoInterface.getgeom(::TriangleTrait, geom::MyTriangle, i) = MyCurve()
 
     GeoInterface.isgeometry(::MyMultiPoint) = true
     GeoInterface.geomtrait(::MyMultiPoint) = MultiPointTrait()
+    GeoInterface.ncoord(::MultiPointTrait, geom::MyMultiPoint) = 2
     GeoInterface.ngeom(::MultiPointTrait, geom::MyMultiPoint) = 2
     GeoInterface.getgeom(::MultiPointTrait, geom::MyMultiPoint, i) = MyPoint()
 
     GeoInterface.isgeometry(::MyMultiCurve) = true
     GeoInterface.geomtrait(::MyMultiCurve) = MultiCurveTrait()
+    GeoInterface.ncoord(::MultiCurveTrait, geom::MyMultiCurve) = 2
     GeoInterface.ngeom(::MultiCurveTrait, geom::MyMultiCurve) = 2
     GeoInterface.getgeom(::MultiCurveTrait, geom::MyMultiCurve, i) = MyCurve()
 
     GeoInterface.isgeometry(::MyMultiPolygon) = true
     GeoInterface.geomtrait(::MyMultiPolygon) = MultiPolygonTrait()
+    GeoInterface.ncoord(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
     GeoInterface.ngeom(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
     GeoInterface.getgeom(::MultiPolygonTrait, geom::MyMultiPolygon, i) = MyPolygon()
 
     GeoInterface.isgeometry(::MyTIN) = true
     GeoInterface.geomtrait(::MyTIN) = PolyhedralSurfaceTrait()
+    GeoInterface.ncoord(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
     GeoInterface.ngeom(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
     GeoInterface.getgeom(::PolyhedralSurfaceTrait, geom::MyTIN, i) = MyTriangle()
 
     GeoInterface.isgeometry(::MyCollection) = true
     GeoInterface.geomtrait(::MyCollection) = GeometryCollectionTrait()
+    GeoInterface.ncoord(::GeometryCollectionTrait, geom::MyCollection) = 2
     GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
     GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
 
@@ -94,19 +103,20 @@ using Test
         @test_throws ArgumentError GeoInterface.m(geom)
         @test ncoord(geom) === 2
         @test collect(getcoord(geom)) == [1, 2]
+        @test GeoInterface.coordinates(geom) == [1, 2]
         @test getcoord(geom, 1) === 1
         @test GeoInterface.coordnames(geom) == (:X, :Y)
         @test !GeoInterface.isempty(geom)
         @test !GeoInterface.is3d(geom)
         @test !GeoInterface.ismeasured(geom)
+        @test GeoInterface.extent(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
+        @test GeoInterface.bbox(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
 
         geom = MyEmptyPoint()
         @test GeoInterface.coordnames(geom) == ()
         @test GeoInterface.isempty(geom)
 
         @test isnothing(GeoInterface.crs(geom))
-        @test isnothing(GeoInterface.extent(geom))
-        @test isnothing(GeoInterface.bbox(geom))
     end
 
     @testset "LineString" begin
@@ -186,6 +196,7 @@ using Test
         polygons = GeoInterface.getpolygon(geom)
         polygon = GeoInterface.getpolygon(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[[1, 2], [1, 2]], [[1, 2], [1, 2]]], [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]]
+        @test GeoInterface.extent(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
         @test collect(polygons) == [MyPolygon(), MyPolygon()]
     end
 
