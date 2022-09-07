@@ -39,7 +39,7 @@ RecipesBase.@recipe function f(t::Union{GI.PointTrait,GI.MultiPointTrait}, geom)
     _coordvecs(t, geom)
 end
 
-RecipesBase.@recipe function f(t::Union{GI.LineStringTrait,GI.MultiLineStringTrait}, geom)
+RecipesBase.@recipe function f(t::Union{GI.AbstractLineStringTrait,GI.MultiLineStringTrait}, geom)
     seriestype --> :path
     _coordvecs(t, geom)
 end
@@ -63,7 +63,7 @@ function _coordvecs(::GI.MultiPointTrait, geom)
         _geom2coordvecs!(ntuple(_ -> Array{Float64}(undef, n), 2)..., geom)
     end
 end
-function _coordvecs(::GI.LineStringTrait, geom)
+function _coordvecs(::GI.AbstractLineStringTrait, geom)
     n = GI.npoint(geom)
     if GI.is3d(geom)
         vecs = ntuple(_ -> Array{Float64}(undef, n), 3)
