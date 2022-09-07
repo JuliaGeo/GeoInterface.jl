@@ -8,6 +8,7 @@ abstract type MyAbstractGeom{N} end
 # Implement interface
 struct MyPoint{N} <: MyAbstractGeom{N} end
 struct MyCurve{N} <: MyAbstractGeom{N} end
+struct MyLinearRing{N} <: MyAbstractGeom{N} end
 struct MyPolygon{N} <: MyAbstractGeom{N} end
 struct MyMultiPoint{N} <: MyAbstractGeom{N} end
 struct MyMultiCurve{N} <: MyAbstractGeom{N} end
@@ -31,6 +32,11 @@ GeoInterface.ngeom(::GeoInterface.LineStringTrait, geom::MyCurve) = 3
 GeoInterface.getgeom(::GeoInterface.LineStringTrait, geom::MyCurve{N}, i) where {N} = MyPoint{N}()
 GeoInterface.convert(::Type{MyCurve}, ::GeoInterface.LineStringTrait, geom) = geom
 
+GeoInterface.geomtrait(::MyLinearRing) = GeoInterface.LinearRingTrait()
+GeoInterface.ngeom(::GeoInterface.LinearRingTrait, geom::MyLinearRing) = 3
+GeoInterface.getgeom(::GeoInterface.LinearRingTrait, geom::MyLinearRing{N}, i) where {N} = MyPoint{N}()
+GeoInterface.convert(::Type{MyLinearRing}, ::GeoInterface.LinearRingTrait, geom) = geom
+
 GeoInterface.geomtrait(::MyPolygon) = GeoInterface.PolygonTrait()
 GeoInterface.ngeom(::GeoInterface.PolygonTrait, geom::MyPolygon) = 2
 GeoInterface.getgeom(::GeoInterface.PolygonTrait, geom::MyPolygon{N}, i) where {N} = MyCurve{N}()
@@ -53,6 +59,7 @@ GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{
     # 2d
     plot(MyPoint{2}())
     plot(MyCurve{2}())
+    plot(MyLinearRing{2}())
     plot(MyMultiPoint{2}())
     plot(MyPolygon{2}())
     plot(MyMultiPolygon{2}())
@@ -60,6 +67,7 @@ GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{
     # 3d
     plot(MyPoint{3}())
     plot(MyCurve{3}())
+    plot(MyLinearRing{3}())
     plot(MyMultiPoint{3}())
     plot(MyPolygon{3}())
     plot(MyMultiPolygon{3}())
