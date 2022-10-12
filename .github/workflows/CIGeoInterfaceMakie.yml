@@ -37,6 +37,6 @@ jobs:
         shell: julia --project=GeoInterfaceMakie {0}
         run: |
             using Pkg;
-            pkg"dev . ./GeoInterfaceMakie"
+            pkg"dev . "
             pkg"add Makie LibGEOS"
             include("GeoInterfaceMakie/test/runtests.jl")
