@@ -34,7 +34,7 @@ jobs:
       - uses: julia-actions/cache@v1
       - uses: julia-actions/julia-buildpkg@v1
       - name: Run julia tests
-        shell: julia --project=GeoInterfaceMakie
+        shell: julia --project=GeoInterfaceMakie {0}
         run: |
             using Pkg;
             pkg"dev . ./GeoInterfaceMakie"
