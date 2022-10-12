@@ -1,12 +1,12 @@
 import GeoInterfaceMakie
 using Test
 import LibGEOS
-
-GeoInterfaceMakie.@enable(LibGEOS.AbstractGeometry)
-
 using LibGEOS
 import GeoInterface as GI
 using Makie
+
+GeoInterfaceMakie.@enable(LibGEOS.AbstractGeometry)
+
 @testset "smoketest 2d" begin
     unitsquare = readgeom("POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))")
     bigsquare = readgeom("POLYGON((0 0, 11 0, 11 11, 0 11, 0 0))")
