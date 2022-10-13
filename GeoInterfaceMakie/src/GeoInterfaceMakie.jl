@@ -26,24 +26,26 @@ function pttype(geom)
         GB.Point2f
     end
 end
-@noinline function _points!(out, geom)
-    _points!(out, GI.geomtrait(geom), geom)
+function points(geom)::Union{Vector{GB.Point2f}, Vector{GB.Point3f}}
+    Pt = pttype(geom)
+    out = Pt[]
+    points!(out, geom)
 end
-function _points!(out, t::GI.PointTrait, geom)
-    pt = eltype(out)(GI.getcoord(geom)...)
-    push!(out, pt)
-    return out
-end
-function _points!(out, ::Any, geom)
-    for subgeom in GI.getgeom(geom)
-        _points!(out, GI.geomtrait(subgeom), subgeom)
+@noinline function points!(out, geom)
+    for pt in GI.getpoint(geom)
+        push!(out, _convert(eltype(out), pt))
     end
     out
 end
-function points(geom)::Union{Vector{GB.Point2f}, Vector{GB.Point3f}}
-    Pt = pttype(geom)
-    _points!(Pt[], geom)
+function _convert(::Type{GB.Point2f}, pt)
+    x,y = GI.getcoord(pt)
+    GB.Point2f(x,y)
 end
+function _convert(::Type{GB.Point3f}, pt)
+    x,y,z = GI.getcoord(pt)
+    GB.Point3f(x.y,z)
+end
+
 function basicsgeom(geom)
     t = GI.geomtrait(geom)
     T = basicsgeomtype(t)
