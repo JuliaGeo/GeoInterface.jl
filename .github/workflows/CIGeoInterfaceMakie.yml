@@ -1,4 +1,4 @@
-name: CIGeoInterfaceMakie
+name: GeoInterfaceMakie CI
 on:
   pull_request:
     paths-ignore:
