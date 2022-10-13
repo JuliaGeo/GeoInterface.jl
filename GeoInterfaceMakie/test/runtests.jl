@@ -7,6 +7,21 @@ using Makie
 
 GeoInterfaceMakie.@enable(LibGEOS.AbstractGeometry)
 
+@testset "points" begin
+    points = GeoInterfaceMakie.points
+    pt = LibGEOS.Point(1,2,3)
+    @test points(pt) == [Point3f(1,2,3)]
+
+    unitsquare = readgeom("POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))")
+    @test points(unitsquare) == [
+        Point2f(0.0, 0.0),
+        Point2f(0.0, 1.0),
+        Point2f(1.0, 1.0),
+        Point2f(1.0, 0.0),
+        Point2f(0.0, 0.0),
+    ]
+end
+
 @testset "smoketest 2d" begin
     unitsquare = readgeom("POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))")
     bigsquare = readgeom("POLYGON((0 0, 11 0, 11 11, 0 11, 0 0))")

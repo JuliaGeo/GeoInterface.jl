@@ -29,12 +29,16 @@ end
 function points(geom)::Union{Vector{GB.Point2f}, Vector{GB.Point3f}}
     Pt = pttype(geom)
     out = Pt[]
-    points!(out, geom)
+    points!(out, GI.geomtrait(geom), geom)
 end
-@noinline function points!(out, geom)
+@noinline function points!(out, ::GI.AbstractTrait, geom)
     for pt in GI.getpoint(geom)
         push!(out, _convert(eltype(out), pt))
     end
+    out
+end
+@noinline function points!(out, ::GI.PointTrait, pt)
+    push!(out, _convert(eltype(out), pt))
     out
 end
 function _convert(::Type{GB.Point2f}, pt)
@@ -43,7 +47,7 @@ function _convert(::Type{GB.Point2f}, pt)
 end
 function _convert(::Type{GB.Point3f}, pt)
     x,y,z = GI.getcoord(pt)
-    GB.Point3f(x.y,z)
+    GB.Point3f(x,y,z)
 end
 
 function basicsgeom(geom)

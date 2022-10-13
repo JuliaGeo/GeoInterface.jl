@@ -10,9 +10,9 @@ Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 MakieCore = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
 
 [compat]
-julia = "1.7"
-MakieCore = "0.4"
-Makie = "0.17.13"
+julia = "1.6"
+MakieCore = "0.4 0.5"
+Makie = "0.17.13 0.18"
 GeometryBasics = "0.4.4"
 GeoInterface = "1"
 
