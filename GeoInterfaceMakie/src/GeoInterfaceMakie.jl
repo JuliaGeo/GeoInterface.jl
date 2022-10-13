@@ -74,9 +74,7 @@ end
 
 function expr_enable(Geom)
     quote
-        # import GeoInterfaceMakie.MakieCore
-        # import GeoInterfaceMakie.Makie
-        function $Makie.plottype(geom::$Geom)
+        function $MC.plottype(geom::$Geom)
             $_plottype(geom)
         end
         function $MC.convert_arguments(p::Type{<:$Makie.Poly}, geom::$Geom)
