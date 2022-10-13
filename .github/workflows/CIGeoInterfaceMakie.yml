@@ -5,14 +5,14 @@ on:
       - 'docs/**'
       - '*.md'
     branches:
-      - master
+      - main
       - breaking-release
   push:
     paths-ignore:
       - 'docs/**'
       - '*.md'
     branches:
-      - master
+      - main
       - breaking-release
     tags: '*'
 
