@@ -85,7 +85,12 @@ npoint(::HexagonTrait, geom) = 6
 nring(::HexagonTrait, geom) = 1
 
 # TODO Only simple if it's also not intersecting itself, except for its endpoints
-issimple(t::AbstractCurveTrait, geom) = allunique((getpoint(t, geom, i) for i in 1:npoint(geom)-1)) && allunique((getpoint(t, geom, i) for i in 2:npoint(t, geom)))
+function issimple(t::AbstractCurveTrait, geom)
+    n = npoint(t, geom)
+    n > 1 || return true
+    allunique((getpoint(t, geom, i) for i in 1:n-1)) && 
+    allunique((getpoint(t, geom, i) for i in 2:n))
+end
 isclosed(t::AbstractCurveTrait, geom) = getpoint(t, geom, 1) == getpoint(t, geom, npoint(t, geom))
 isring(t::AbstractCurveTrait, geom) = issimple(t, geom) && isclosed(t, geom)
 
@@ -102,7 +107,10 @@ getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i 
 
 # Backwards compatibility
 coordinates(t::AbstractPointTrait, geom) = collect(getcoord(t, geom))
-coordinates(t::AbstractGeometryTrait, geom) = collect(coordinates.(getgeom(t, geom)))
+function coordinates(t::AbstractGeometryTrait, geom)
+    ngeom(t, geom) > 0 || return []
+    collect(coordinates.(getgeom(t, geom)))
+end
 function coordinates(t::AbstractFeatureTrait, feature) 
     geom = geometry(feature)
     isnothing(geom) ? [] : coordinates(geom)
