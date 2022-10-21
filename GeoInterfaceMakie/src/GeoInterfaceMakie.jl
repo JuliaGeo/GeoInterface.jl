@@ -4,7 +4,6 @@ using GeoInterface
 import MakieCore as MC
 import GeometryBasics as GB
 import GeoInterface as GI
-import Makie
 
 
 function _plottype(geom)
@@ -17,7 +16,7 @@ function plottype_from_geomtrait(::Union{GI.PointTrait, GI.MultiPointTrait})
     MC.Scatter
 end
 function plottype_from_geomtrait(::Union{GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
-    Makie.Poly
+    MC.Poly
 end
 function pttype(geom)
     if GI.is3d(geom)
@@ -63,7 +62,7 @@ basicsgeomtype(::GI.MultiPolygonTrait)    = GB.MultiPolygon
 basicsgeomtype(::GI.LineStringTrait)      = GB.LineString
 basicsgeomtype(::GI.MultiLineStringTrait) = GB.MultiLineString
 
-function _convert_arguments(::Type{<:Makie.Poly}, geom)::Tuple
+function _convert_arguments(::Type{<:MC.Poly}, geom)::Tuple
     geob = basicsgeom(geom)::Union{GB.Polygon, GB.MultiPolygon}
     (geob,)
 end
@@ -77,7 +76,7 @@ function expr_enable(Geom)
         function $MC.plottype(geom::$Geom)
             $_plottype(geom)
         end
-        function $MC.convert_arguments(p::Type{<:$Makie.Poly}, geom::$Geom)
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom)
             $_convert_arguments(p,geom)
         end
         function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom)
@@ -85,9 +84,10 @@ function expr_enable(Geom)
         end
     end
 end
+
 """
 
-    enable(Geom)
+    @enable(Geom)
 
 Enable Makie based plotting for a type `Geom` that implements the geometry interface 
 defined in `GeoInterface`.

@@ -6,19 +6,17 @@ version = "0.1.0"
 [deps]
 GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
-Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 MakieCore = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
 
 [compat]
-julia = "1.6"
-MakieCore = "0.4, 0.5"
-Makie = "0.17.13, 0.18"
-GeometryBasics = "0.4.4"
 GeoInterface = "1"
+GeometryBasics = "0.4.4"
+MakieCore = "0.5.1"
+julia = "1.6"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 LibGEOS = "a90b1aa1-3769-5649-ba7e-abc5a9d163eb"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "LibGEOS"]
