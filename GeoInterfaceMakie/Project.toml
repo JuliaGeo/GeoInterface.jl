@@ -17,6 +17,7 @@ julia = "1.6"
 [extras]
 LibGEOS = "a90b1aa1-3769-5649-ba7e-abc5a9d163eb"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
 
 [targets]
-test = ["Test", "LibGEOS"]
+test = ["Test", "LibGEOS", "Makie"]
