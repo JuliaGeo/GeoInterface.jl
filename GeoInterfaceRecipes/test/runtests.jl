@@ -14,8 +14,12 @@ struct MyMultiPoint{N} <: MyAbstractGeom{N} end
 struct MyMultiCurve{N} <: MyAbstractGeom{N} end
 struct MyMultiPolygon{N} <: MyAbstractGeom{N} end
 struct MyCollection{N} <: MyAbstractGeom{N} end
+struct MyFeature end
+struct MyFeatureCollection end
 
 GeoInterfaceRecipes.@enable_geo_plots MyAbstractGeom
+GeoInterfaceRecipes.@enable_geo_plots MyFeature
+GeoInterfaceRecipes.@enable_geo_plots MyFeatureCollection
 
 GeoInterface.isgeometry(::MyAbstractGeom) = true
 GeoInterface.is3d(::GeoInterface.AbstractGeometryTrait, ::MyAbstractGeom{N}) where {N} = N == 3
@@ -54,6 +58,13 @@ GeoInterface.ncoord(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N
 GeoInterface.ngeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection) = 4
 GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N}, i) where {N} = MyMultiPolygon{N}()
 
+GeoInterface.trait(::MyFeature) = FeatureTrait()
+GeoInterface.trait(::MyFeatureCollection) = FeatureCollectionTrait()
+GeoInterface.getfeature(::GeoInterface.FeatureCollectionTrait, geom::MyFeatureCollection, i) = MyFeature()
+GeoInterface.getfeature(::GeoInterface.FeatureCollectionTrait, geom::MyFeatureCollection) = [MyFeature(), MyFeature()]
+GeoInterface.geometry(geom::MyFeature) = rand((MyPolygon{2}(), MyMultiPolygon{2}()))
+GeoInterface.nfeature(::GeoInterface.FeatureTrait, geom::MyFeature) = 1
+
 @testset "plot" begin
     # We just check if they actually run
     # 2d
@@ -72,4 +83,6 @@ GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{
     plot(MyPolygon{3}())
     plot(MyMultiPolygon{3}())
     plot(MyCollection{3}())
+    plot(MyFeature())
+    plot(MyFeatureCollection())
 end
