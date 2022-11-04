@@ -1,6 +1,7 @@
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://juliageo.github.io/GeoInterface.jl/stable)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://juliageo.github.io/GeoInterface.jl/dev)
 [![CI](https://github.com/JuliaGeo/GeoInterface.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/JuliaGeo/GeoInterface.jl/actions/workflows/CI.yml)
+[![deps](https://juliahub.com/docs/GeoInterface/deps.svg)](https://juliahub.com/ui/Packages/GeoInterface/GJg1M?t=2)
 [![codecov](https://codecov.io/gh/JuliaGeo/GeoInterface.jl/branch/master/graph/badge.svg?token=ccpOaPSi08)](https://codecov.io/gh/JuliaGeo/GeoInterface.jl)
 
 # GeoInterface

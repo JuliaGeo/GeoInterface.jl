@@ -139,21 +139,22 @@ end
 end
 
 @testset "Feature" begin
-    struct Row end
+    feature = Feature((1, 2), (a=10, b=20))
+    @test GeoInterface.testfeature(feature)
+end
 
-    GeoInterface.isfeature(::Row) = true
-    GeoInterface.geometry(r::Row) = Point()
-    GeoInterface.properties(r::Row) = (; test=1)
-
-    @test GeoInterface.testfeature(Row())
-
+@testset "FeatureCollection" begin
+    features = FeatureCollection(
+        [Feature(Point(), (a="1", b="2")), Feature(Polygon(), (a="3", b="4"))]
+    )
+    @test GeoInterface.testfeaturecollection(features)
 end
 
 @testset "Conversion" begin
     struct XCurve end
     struct XPolygon end
 
-    Base.convert(T::Type{XCurve}, geom::X) where {X} = Base.convert(T, geomtype(geom), geom)
+    Base.convert(T::Type{XCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
     Base.convert(::Type{XCurve}, ::LineStringTrait, geom::XCurve) = geom  # fast fallthrough
     Base.convert(::Type{XCurve}, ::LineStringTrait, geom) = geom
 
@@ -168,7 +169,7 @@ end
     struct XGeom end
 
     GeoInterface.isgeometry(::XGeom) = true
-    GeoInterface.geomtype(::XGeom) = PointTrait()
+    GeoInterface.geomtrait(::XGeom) = PointTrait()
     GeoInterface.ncoord(::PointTrait, geom::XGeom) = 2
     GeoInterface.getcoord(::PointTrait, geom::XGeom, i) = [1, 2][i]
 
@@ -221,4 +222,51 @@ end
 
     @test GeoInterface.astext(geom) isa String
     @test GeoInterface.asbinary(geom) isa Vector{UInt8}
+end
+
+@testset "Base Implementations" begin
+
+    @testset "Vector" begin
+        geom = [1, 2]
+        @test testgeometry(geom)
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.ncoord(geom) == 2
+        @test collect(GeoInterface.getcoord(geom)) == geom
+    end
+
+    @testset "Tuple" begin
+        geom = (1, 2)
+        @test testgeometry(geom)
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.ncoord(geom) == 2
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2]
+    end
+
+    @testset "NamedTuple" begin
+        geom = (; X=1, Y=2)
+        @test testgeometry(geom)
+        @test GeoInterface.x(geom) == 1
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2]
+
+        geom = (; X=1, Y=2, Z=3)
+        @test testgeometry(geom)
+        geom = (; X=1, Y=2, Z=3, M=4)
+        @test testgeometry(geom)
+        geom = (; Z=3, X=1, Y=2, M=4)
+        @test testgeometry(geom)
+
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.m(geom) == 4
+        @test GeoInterface.ncoord(geom) == 4
+        @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
+
+    end
+
+    @testset "NamedTupleFeature" begin
+        feature = (; geometry=(1, 2), a="x", b="y", c="z")
+        GeoInterface.geometry(feature) = (1, 2)
+        @test GeoInterface.properties(feature) == (a="x", b="y", c="z")
+        @test GeoInterface.testfeature(feature)
+        @test GeoInterface.testfeaturecollection([feature, feature])
+    end
 end

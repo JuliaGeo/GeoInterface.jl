@@ -25,6 +25,28 @@ isfeature(x::T) where {T} = isfeature(T)
 isfeature(::Type{T}) where {T} = false
 
 """
+    GeoInterface.isfeaturecollection(x) => Bool
+
+Check if an object `x` is a collection of features and thus implicitly supports some
+GeoInterface methods. A feature collection is a collection of features, and may also
+contain metatdata for the whole collection, like an `Extent`.
+
+It is recommended that for users implementing `MyType`, they define only
+`isfeaturecollection(::Type{MyType})`. `isfeaturecollection(::MyType)` will then
+automatically delegate to this method.
+"""
+isfeaturecollection(x::T) where {T} = isfeaturecollection(T)
+isfeaturecollection(::Type{T}) where {T} = false
+
+"""
+    GeoInterface.geometrycolumns(featurecollection) => (:geometry,)
+
+Retrieve the geometrycolumn(s) of `featurecollection`; the fields (or columns in a table)
+which contain geometries that support GeoInterface.
+"""
+geometrycolumns(featurecollection) = (:geometry,)
+
+"""
     GeoInterface.geometry(feat) => geom
 
 Retrieve the geometry of `feat`. It is expected that `isgeometry(geom) === true`.
@@ -41,11 +63,36 @@ Ensures backwards compatibility with GeoInterface version 0.
 properties(feat) = nothing
 
 """
-    GeoInterface.geomtype(geom) => T <: AbstractGeometry
+    GeoInterface.getfeature(collection) => [feature, ...]
+
+Retrieve the features of `collection` as some iterable of features.
+It is expected that `isfeature(feature) === true`.
+"""
+getfeature(collection) = getfeature(trait(collection), collection)
+getfeature(collection, i::Integer) = getfeature(trait(collection), collection, i)
+
+"""
+    GeoInterface.nfeature(collection)
+
+Retrieve the number of features in a feature collection.
+"""
+nfeature(collection) = nfeature(trait(collection), collection)
+
+"""
+    GeoInterface.geomtrait(geom) => T <: AbstractGeometry
 
 Returns the geometry type, such as [`PolygonTrait`](@ref) or [`PointTrait`](@ref).
 """
-geomtype(geom) = nothing
+geomtrait(geom) = nothing
+
+"""
+    GeoInterface.trait(geom) => T <: AbstractGeometry
+
+Returns the object type, such as [`FeatureTrait`](@ref).
+For all `isgeometry` objects `trait` is the same as `geomtrait(obj)`,
+e.g. [`PointTrait`](@ref).
+"""
+trait(geom) = geomtrait(geom)
 
 # All types
 """
@@ -54,28 +101,28 @@ geomtype(geom) = nothing
 Return the number of coordinate dimensions (such as 3 for X,Y,Z) for the geometry.
 Note that SF distinguishes between dimensions, spatial dimensions and topological dimensions, which we do not.
 """
-ncoord(geom) = ncoord(geomtype(geom), geom)
+ncoord(geom) = ncoord(geomtrait(geom), geom)
 
 """
     coordnames(geom) -> Tuple{Symbol}
 
 Return the names of coordinate dimensions (such for (:X,:Y,:Z)) for the geometry.
 """
-coordnames(geom) = coordnames(geomtype(geom), geom)
+coordnames(geom) = coordnames(geomtrait(geom), geom)
 
 """
     isempty(geom) -> Bool
 
 Return `true` when the geometry is empty.
 """
-isempty(geom) = isempty(geomtype(geom), geom)
+isempty(geom) = isempty(geomtrait(geom), geom)
 
 """
     issimple(geom) -> Bool
 
 Return `true` when the geometry is simple, i.e. doesn't cross or touch itself.
 """
-issimple(geom) = issimple(geomtype(geom), geom)
+issimple(geom) = issimple(geomtrait(geom), geom)
 
 """
     getcoord(geom, i) -> Number
@@ -83,11 +130,11 @@ issimple(geom) = issimple(geomtype(geom), geom)
 Return the `i`th coordinate for a given `geom`. A coordinate isa `Real`.
 Note that this is only valid for individual [`AbstractPointTrait`](@ref)s.
 """
-getcoord(geom, i::Integer) = getcoord(geomtype(geom), geom, i)
+getcoord(geom, i::Integer) = getcoord(geomtrait(geom), geom, i)
 """
     getcoord(geom) -> iterator
 """
-getcoord(geom) = getcoord(geomtype(geom), geom)
+getcoord(geom) = getcoord(geomtrait(geom), geom)
 
 # Curve, LineString, MultiPoint
 """
@@ -96,7 +143,7 @@ getcoord(geom) = getcoord(geomtype(geom), geom)
 Return the number of points in given `geom`.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s and [`AbstractMultiPointTrait`](@ref)s.
 """
-npoint(geom) = npoint(geomtype(geom), geom)
+npoint(geom) = npoint(geomtrait(geom), geom)
 
 """
     getpoint(geom, i::Integer) -> Point
@@ -104,14 +151,14 @@ npoint(geom) = npoint(geomtype(geom), geom)
 Return the `i`th Point in given `geom`.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s and [`AbstractMultiPointTrait`](@ref)s.
 """
-getpoint(geom, i::Integer) = getpoint(geomtype(geom), geom, i)
+getpoint(geom, i::Integer) = getpoint(geomtrait(geom), geom, i)
 
 """
     getpoint(geom) -> iterator
 
 Returns an iterator over all points in `geom`.
 """
-getpoint(geom) = getpoint(geomtype(geom), geom)
+getpoint(geom) = getpoint(geomtrait(geom), geom)
 
 # Curve
 """
@@ -120,7 +167,7 @@ getpoint(geom) = getpoint(geomtype(geom), geom)
 Return the first point in the `geom`.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
-startpoint(geom) = startpoint(geomtype(geom), geom)
+startpoint(geom) = startpoint(geomtrait(geom), geom)
 
 """
     endpoint(geom) -> Point
@@ -128,7 +175,7 @@ startpoint(geom) = startpoint(geomtype(geom), geom)
 Return the last point in the `geom`.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
-endpoint(geom) = endpoint(geomtype(geom), geom)
+endpoint(geom) = endpoint(geomtrait(geom), geom)
 
 """
     isclosed(geom) -> Bool
@@ -137,7 +184,7 @@ Return whether the `geom` is closed, i.e. whether
 the `startpoint` is the same as the `endpoint`.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
-isclosed(geom) = isclosed(geomtype(geom), geom)
+isclosed(geom) = isclosed(geomtrait(geom), geom)
 
 """
     isring(geom) -> Bool
@@ -154,7 +201,7 @@ isring(geom) = isclosed(geom) && issimple(geom)
 Return the length of `geom` in its 2d coordinate system.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
-length(geom) = length(geomtype(geom), geom)
+length(geom) = length(geomtrait(geom), geom)
 
 # Surface
 """
@@ -163,7 +210,7 @@ length(geom) = length(geomtype(geom), geom)
 Return the area of `geom` in its 2d coordinate system.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-area(geom) = area(geomtype(geom), geom)
+area(geom) = area(geomtrait(geom), geom)
 
 """
     centroid(geom) -> Point
@@ -172,7 +219,7 @@ The mathematical centroid for this Surface as a Point.
 The result is not guaranteed to be on this Surface.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-centroid(geom) = centroid(geomtype(geom), geom)
+centroid(geom) = centroid(geomtrait(geom), geom)
 
 """
     pointonsurface(geom) -> Point
@@ -180,7 +227,7 @@ centroid(geom) = centroid(geomtype(geom), geom)
 A Point guaranteed to be on this geometry (as opposed to [`centroid`](@ref)).
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-pointonsurface(geom) = pointonsurface(geomtype(geom), geom)
+pointonsurface(geom) = pointonsurface(geomtrait(geom), geom)
 
 """
     boundary(geom) -> Curve
@@ -188,7 +235,7 @@ pointonsurface(geom) = pointonsurface(geomtype(geom), geom)
 Return the boundary of `geom`.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-boundary(geom) = boundary(geomtype(geom), geom)
+boundary(geom) = boundary(geomtrait(geom), geom)
 
 # Polygon/Triangle
 """
@@ -198,7 +245,7 @@ Return the number of rings in given `geom`.
 Note that this is only valid for [`AbstractPolygonTrait`](@ref)s and
 [`AbstractMultiPolygonTrait`](@ref)s
 """
-nring(geom) = nring(geomtype(geom), geom)
+nring(geom) = nring(geomtrait(geom), geom)
 
 """
     getring(geom, i::Integer) -> AbstractCurve
@@ -207,7 +254,7 @@ A specific ring `i` in a polygon or multipolygon (exterior and holes).
 Note that this is only valid for [`AbstractPolygonTrait`](@ref)s and
 [`AbstractMultiPolygonTrait`](@ref)s.
 """
-getring(geom, i::Integer) = getring(geomtype(geom), geom, i)
+getring(geom, i::Integer) = getring(geomtrait(geom), geom, i)
 
 """
     getring(geom) -> iterator
@@ -216,7 +263,7 @@ Returns an iterator over all rings in `geom`.
 Note that this is only valid for [`AbstractPolygonTrait`](@ref)s and
 [`AbstractMultiPolygonTrait`](@ref)s in single-argument form.
 """
-getring(geom) = getring(geomtype(geom), geom)
+getring(geom) = getring(geomtrait(geom), geom)
 
 """
     getexterior(geom) -> Curve
@@ -224,7 +271,7 @@ getring(geom) = getring(geomtype(geom), geom)
 Returns the exterior ring of a Polygon as a `AbstractCurve`.
 Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
-getexterior(geom) = getexterior(geomtype(geom), geom)
+getexterior(geom) = getexterior(geomtrait(geom), geom)
 
 """
     nhole(geom) -> Integer
@@ -232,7 +279,7 @@ getexterior(geom) = getexterior(geomtype(geom), geom)
 Returns the number of holes for this given `geom`.
 Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
-nhole(geom)::Integer = nhole(geomtype(geom), geom)
+nhole(geom)::Integer = nhole(geomtrait(geom), geom)
 
 """
     gethole(geom, i::Integer) -> Curve
@@ -240,7 +287,7 @@ nhole(geom)::Integer = nhole(geomtype(geom), geom)
 Returns the `i`th interior ring for this given `geom`.
 Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
-gethole(geom, i::Integer) = gethole(geomtype(geom), geom, i)
+gethole(geom, i::Integer) = gethole(geomtrait(geom), geom, i)
 
 """
     gethole(geom) -> iterator
@@ -248,7 +295,7 @@ gethole(geom, i::Integer) = gethole(geomtype(geom), geom, i)
 Returns an iterator over all holes in `geom`.
 Note that this is only valid for [`AbstractPolygonTrait`](@ref)s.
 """
-gethole(geom) = gethole(geomtype(geom), geom)
+gethole(geom) = gethole(geomtrait(geom), geom)
 
 # PolyhedralSurface
 """
@@ -257,7 +304,7 @@ gethole(geom) = gethole(geomtype(geom), geom)
 Returns the number of patches for the given `geom`.
 Note that this is only valid for [`AbstractPolyhedralSurfaceTrait`](@ref)s.
 """
-npatch(geom)::Integer = npatch(geomtype(geom), geom)
+npatch(geom)::Integer = npatch(geomtrait(geom), geom)
 
 """
     getpatch(geom, i::Integer) -> AbstractPolygon
@@ -265,7 +312,7 @@ npatch(geom)::Integer = npatch(geomtype(geom), geom)
 Returns the `i`th patch for the given `geom`.
 Note that this is only valid for [`AbstractPolyhedralSurfaceTrait`](@ref)s.
 """
-getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
+getpatch(geom, i::Integer) = getpatch(geomtrait(geom), geom, i)
 
 """
     getpatch(geom) -> iterator
@@ -273,14 +320,14 @@ getpatch(geom, i::Integer) = getpatch(geomtype(geom), geom, i)
 Returns an iterator over all patches in `geom`.
 Note that this is only valid for [`AbstractPolyhedralSurfaceTrait`](@ref)s.
 """
-getpatch(geom) = getpatch(geomtype(geom), geom)
+getpatch(geom) = getpatch(geomtrait(geom), geom)
 
 """
     boundingpolygons(geom, i) -> AbstractMultiPolygon
 
 Returns the collection of polygons in this surface that bounds the `i`th patch in the given `geom`.
 """
-boundingpolygons(geom, i) = boundingpolygons(geomtype(geom), geom, i)
+boundingpolygons(geom, i) = boundingpolygons(geomtrait(geom), geom, i)
 
 # GeometryCollection
 """
@@ -288,21 +335,21 @@ boundingpolygons(geom, i) = boundingpolygons(geomtype(geom), geom, i)
 
 Returns the number of geometries for the given `geom`.
 """
-ngeom(geom) = ngeom(geomtype(geom), geom)
+ngeom(geom) = ngeom(geomtrait(geom), geom)
 
 """
     getgeom(geom, i::Integer) -> AbstractGeometry
 
 Returns the `i`th geometry for the given `geom`.
 """
-getgeom(geom, i::Integer) = getgeom(geomtype(geom), geom, i)
+getgeom(geom, i::Integer) = getgeom(geomtrait(geom), geom, i)
 
 """
     getgeom(geom) -> iterator
 
 Returns an iterator over all geometry components in `geom`.
 """
-getgeom(geom) = getgeom(geomtype(geom), geom)
+getgeom(geom) = getgeom(geomtrait(geom), geom)
 
 # MultiLineString
 """
@@ -311,7 +358,7 @@ getgeom(geom) = getgeom(geomtype(geom), geom)
 Returns the number of curves for the given `geom`.
 Note that this is only valid for [`AbstractMultiLineStringTrait`](@ref)s.
 """
-nlinestring(geom) = nlinestring(geomtype(geom), geom)
+nlinestring(geom) = nlinestring(geomtrait(geom), geom)
 
 """
     getlinestring(geom, i::Integer) -> AbstractCurve
@@ -319,7 +366,7 @@ nlinestring(geom) = nlinestring(geomtype(geom), geom)
 Returns the `i`th linestring for the given `geom`.
 Note that this is only valid for [`AbstractMultiLineStringTrait`](@ref)s.
 """
-getlinestring(geom, i::Integer) = getlinestring(geomtype(geom), geom, i)
+getlinestring(geom, i::Integer) = getlinestring(geomtrait(geom), geom, i)
 
 """
     getlinestring(geom) -> iterator
@@ -327,7 +374,7 @@ getlinestring(geom, i::Integer) = getlinestring(geomtype(geom), geom, i)
 Returns an iterator over all linestrings in a geometry.
 Note that this is only valid for [`AbstractMultiLineStringTrait`](@ref)s.
 """
-getlinestring(geom) = getlinestring(geomtype(geom), geom)
+getlinestring(geom) = getlinestring(geomtrait(geom), geom)
 
 # MultiPolygon
 """
@@ -336,7 +383,7 @@ getlinestring(geom) = getlinestring(geomtype(geom), geom)
 Returns the number of polygons for the given `geom`.
 Note that this is only valid for [`AbstractMultiPolygonTrait`](@ref)s.
 """
-npolygon(geom) = npolygon(geomtype(geom), geom)
+npolygon(geom) = npolygon(geomtrait(geom), geom)
 
 """
     getpolygon(geom, i::Integer) -> AbstractCurve
@@ -344,7 +391,7 @@ npolygon(geom) = npolygon(geomtype(geom), geom)
 Returns the `i`th polygon for the given `geom`.
 Note that this is only valid for [`AbstractMultiPolygonTrait`](@ref)s.
 """
-getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
+getpolygon(geom, i::Integer) = getpolygon(geomtrait(geom), geom, i)
 
 """
     getpolygon(geom) -> iterator
@@ -352,7 +399,7 @@ getpolygon(geom, i::Integer) = getpolygon(geomtype(geom), geom, i)
 Returns an iterator over all polygons in a geometry.
 Note that this is only valid for [`AbstractMultiPolygonTrait`](@ref)s.
 """
-getpolygon(geom) = getpolygon(geomtype(geom), geom)
+getpolygon(geom) = getpolygon(geomtrait(geom), geom)
 
 # Other methods
 """
@@ -361,7 +408,7 @@ getpolygon(geom) = getpolygon(geomtype(geom), geom)
 Retrieve Coordinate Reference System for given geom.
 In SF this is defined as `SRID`.
 """
-crs(geom) = crs(geomtype(geom), geom)
+crs(geom) = crs(geomtrait(geom), geom)
 
 """
     extent(geom) -> T <: Extents.Extent
@@ -369,7 +416,8 @@ crs(geom) = crs(geomtype(geom), geom)
 Retrieve the extent (bounding box) for given geom.
 In SF this is defined as `envelope`.
 """
-extent(geom) = extent(geomtype(geom), geom)
+extent(geom) = extent(geomtrait(geom), geom)
+extent(trait, geom) = nothing
 
 """
     bbox(geom) -> T <: Extents.Extent
@@ -387,7 +435,7 @@ bbox(geom) = extent(geom)
 Returns whether `a` and `b` are equal.
 Equivalent to ([`within`](@ref) && [`contains`](@ref)).
 """
-equals(a, b)::Bool = equals(geomtype(a), geomtype(b), a, b)
+equals(a, b)::Bool = equals(geomtrait(a), geomtrait(b), a, b)
 
 """
     disjoint(a, b) -> Bool
@@ -395,7 +443,7 @@ equals(a, b)::Bool = equals(geomtype(a), geomtype(b), a, b)
 Returns whether `a` and `b` are disjoint.
 Inverse of [`intersects`](@ref).
 """
-disjoint(a, b)::Bool = disjoint(geomtype(a), geomtype(b), a, b)
+disjoint(a, b)::Bool = disjoint(geomtrait(a), geomtrait(b), a, b)
 
 """
     intersects(a, b) -> Bool
@@ -403,14 +451,14 @@ disjoint(a, b)::Bool = disjoint(geomtype(a), geomtype(b), a, b)
 Returns whether `a` and `b` intersect.
 Inverse of [`disjoint`](@ref).
 """
-intersects(a, b)::Bool = intersects(geomtype(a), geomtype(b), a, b)
+intersects(a, b)::Bool = intersects(geomtrait(a), geomtrait(b), a, b)
 
 """
     touches(a, b) -> Bool
 
 Returns whether `a` and `b` touch.
 """
-touches(a, b)::Bool = touches(geomtype(a), geomtype(b), a, b)
+touches(a, b)::Bool = touches(geomtrait(a), geomtrait(b), a, b)
 
 """
     within(a, b) -> Bool
@@ -419,7 +467,7 @@ Returns whether `a` is within `b`.
 The order of arguments is important.
 Equivalent to [`contains`](@ref) with reversed arguments.
 """
-within(a, b)::Bool = within(geomtype(a), geomtype(b), a, b)
+within(a, b)::Bool = within(geomtrait(a), geomtrait(b), a, b)
 
 """
     contains(a, b) -> Bool
@@ -428,28 +476,28 @@ Returns whether `a` contains `b`.
 The order of arguments is important.
 Equivalent to [`within`](@ref) with reversed arguments.
 """
-contains(a, b)::Bool = contains(geomtype(a), geomtype(b), a, b)
+contains(a, b)::Bool = contains(geomtrait(a), geomtrait(b), a, b)
 
 """
     overlaps(a, b) -> Bool
 
 Returns whether `a` and `b` overlap. Also called `covers` in DE-9IM.
 """
-overlaps(a, b)::Bool = overlaps(geomtype(a), geomtype(b), a, b)
+overlaps(a, b)::Bool = overlaps(geomtrait(a), geomtrait(b), a, b)
 
 """
     crosses(a, b) -> Bool
 
 Returns whether `a` and `b` cross.
 """
-crosses(a, b)::Bool = crosses(geomtype(a), geomtype(b), a, b)
+crosses(a, b)::Bool = crosses(geomtrait(a), geomtrait(b), a, b)
 
 """
     relate(a, b, relationmatrix::String) -> Bool
 
 Returns whether `a` and `b` relate, based on the provided relation matrix.
 """
-relate(a, b, relationmatrix)::Bool = relate(geomtype(a), geomtype(b), a, b, relationmatrix)
+relate(a, b, relationmatrix)::Bool = relate(geomtrait(a), geomtrait(b), a, b, relationmatrix)
 
 # Set theory
 """
@@ -457,28 +505,28 @@ relate(a, b, relationmatrix)::Bool = relate(geomtype(a), geomtype(b), a, b, rela
 
 Returns a geometric object that represents the Point set symmetric difference of `a` with `b`.
 """
-symdifference(a, b) = symdifference(geomtype(a), geomtype(b), a, b)
+symdifference(a, b) = symdifference(geomtrait(a), geomtrait(b), a, b)
 
 """
     difference(a, b) -> AbstractGeometry
 
 Returns a geometric object that represents the Point set difference of `a` with `b`
 """
-difference(a, b) = difference(geomtype(a), geomtype(b), a, b)
+difference(a, b) = difference(geomtrait(a), geomtrait(b), a, b)
 
 """
     intersection(a, b) -> AbstractGeometry
 
 Returns a geometric object that represents the Point set intersection of `a` with `b`
 """
-intersection(a, b) = intersection(geomtype(a), geomtype(b), a, b)
+intersection(a, b) = intersection(geomtrait(a), geomtrait(b), a, b)
 
 """
     union(a, b) -> AbstractGeometry
 
 Returns a geometric object that represents the Point set union of `a` with `b`
 """
-union(a, b) = union(geomtype(a), geomtype(b), a, b)
+union(a, b) = union(geomtrait(a), geomtrait(b), a, b)
 
 # Spatial analysis
 """
@@ -486,21 +534,21 @@ union(a, b) = union(geomtype(a), geomtype(b), a, b)
 
 Returns the shortest distance between `a` with `b`.
 """
-distance(a, b) = distance(geomtype(a), geomtype(b), a, b)
+distance(a, b) = distance(geomtrait(a), geomtrait(b), a, b)
 
 """
     buffer(geom, distance) -> AbstractGeometry
 
 Returns a geometric object that represents a buffer of the given `geom` with `distance`.
 """
-buffer(geom, distance) = buffer(geomtype(geom), geom, distance)
+buffer(geom, distance) = buffer(geomtrait(geom), geom, distance)
 
 """
     convexhull(geom) -> AbstractCurve
 
 Returns a geometric object that represents the convex hull of the given `geom`.
 """
-convexhull(geom) = convexhull(geomtype(geom), geom)
+convexhull(geom) = convexhull(geomtrait(geom), geom)
 
 """
     x(geom) -> Number
@@ -508,7 +556,7 @@ convexhull(geom) = convexhull(geomtype(geom), geom)
 Return the :X coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
-x(geom) = x(geomtype(geom), geom)
+x(geom) = x(geomtrait(geom), geom)
 
 """
     y(geom) -> Number
@@ -516,7 +564,7 @@ x(geom) = x(geomtype(geom), geom)
 Return the :Y coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
-y(geom) = y(geomtype(geom), geom)
+y(geom) = y(geomtrait(geom), geom)
 
 """
     z(geom) -> Number
@@ -524,7 +572,7 @@ y(geom) = y(geomtype(geom), geom)
 Return the :Z coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
-z(geom) = z(geomtype(geom), geom)
+z(geom) = z(geomtrait(geom), geom)
 
 """
     m(geom) -> Number
@@ -532,20 +580,20 @@ z(geom) = z(geomtype(geom), geom)
 Return the :M coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 """
-m(geom) = m(geomtype(geom), geom)
+m(geom) = m(geomtrait(geom), geom)
 
 """
     is3d(geom) -> Bool
 
 Return whether the given `geom` has a :Z coordinate.
 """
-is3d(geom) = is3d(geomtype(geom), geom)
+is3d(geom) = is3d(geomtrait(geom), geom)
 """
     ismeasured(geom) -> Bool
 
 Return whether the given `geom` has a :M coordinate.
 """
-ismeasured(geom) = ismeasured(geomtype(geom), geom)
+ismeasured(geom) = ismeasured(geomtrait(geom), geom)
 
 """
     coordinates(geom) -> Vector
@@ -553,7 +601,7 @@ ismeasured(geom) = ismeasured(geomtype(geom), geom)
 Return (an iterator of) point coordinates.
 Ensures backwards compatibility with GeoInterface version 0.
 """
-coordinates(geom) = coordinates(geomtype(geom), geom)
+coordinates(obj) = coordinates(trait(obj), obj)
 
 """
     convert(type::CustomGeom, geom)
@@ -561,18 +609,18 @@ coordinates(geom) = coordinates(geomtype(geom), geom)
 Convert `geom` into the `CustomGeom` type if both geom as the CustomGeom package
 have implemented GeoInterface.
 """
-convert(T, geom) = convert(T, geomtype(geom), geom)
+convert(T, geom) = convert(T, geomtrait(geom), geom)
 
 """
     astext(geom) -> WKT
 
 Convert `geom` into Well Known Text (WKT) representation, such as `POINT (30 10)`.
 """
-astext(geom) = astext(geomtype(geom), geom)
+astext(geom) = astext(geomtrait(geom), geom)
 
 """
     asbinary(geom) -> WKB
 
 Convert `geom` into Well Known Binary (WKB) representation, such as `000000000140000000000000004010000000000000`.
 """
-asbinary(geom) = asbinary(geomtype(geom), geom)
+asbinary(geom) = asbinary(geomtrait(geom), geom)

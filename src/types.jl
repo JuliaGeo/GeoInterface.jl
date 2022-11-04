@@ -1,5 +1,7 @@
+"An AbstractTrait type for all geometries, features and feature collections."
+abstract type AbstractTrait end
 "An AbstractGeometryTrait type for all geometries."
-abstract type AbstractGeometryTrait end
+abstract type AbstractGeometryTrait <: AbstractTrait end
 
 "An AbstractGeometryCollectionTrait type for all geometrycollections."
 abstract type AbstractGeometryCollectionTrait <: AbstractGeometryTrait end
@@ -79,3 +81,14 @@ struct MultiSurfaceTrait <: AbstractMultiSurfaceTrait end
 abstract type AbstractMultiPolygonTrait <: AbstractMultiSurfaceTrait end
 "A MultiPolygonTrait is a collection of [`PolygonTrait`](@ref)s."
 struct MultiPolygonTrait <: AbstractMultiPolygonTrait end
+
+
+"An AbstractFeatureTrait for all features"
+abstract type AbstractFeatureTrait <: AbstractTrait end
+"A FeatureTrait holds `geometries`, `properties` and an `extent`"
+struct FeatureTrait <: AbstractFeatureTrait end
+
+"An AbstractFeatureCollectionTrait for all feature collections"
+abstract type AbstractFeatureCollectionTrait <: AbstractTrait end
+"A FeatureCollectionTrait holds objects of `FeatureTrait` and an `extent`"
+struct FeatureCollectionTrait <: AbstractFeatureCollectionTrait end
