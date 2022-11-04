@@ -1,73 +1,11 @@
 using GeoInterface
+using GeoInterface.TestGeometry
 using Test
 
 @testset "Developer" begin
-    # Implement interface
-    struct MyPoint end
-    struct MyEmptyPoint end
-    struct MyCurve end
-    struct MyPolygon end
-    struct MyTriangle end
-    struct MyMultiPoint end
-    struct MyMultiCurve end
-    struct MyMultiPolygon end
-    struct MyTIN end
-    struct MyCollection end
-
-    GeoInterface.isgeometry(::MyPoint) = true
-    GeoInterface.geomtype(::MyPoint) = PointTrait()
-    GeoInterface.ncoord(::PointTrait, geom::MyPoint) = 2
-    GeoInterface.getcoord(::PointTrait, geom::MyPoint, i) = [1, 2][i]
-
-    GeoInterface.isgeometry(::MyEmptyPoint) = true
-    GeoInterface.geomtype(::MyEmptyPoint) = PointTrait()
-    GeoInterface.ncoord(::PointTrait, geom::MyEmptyPoint) = 0
-    GeoInterface.isempty(::PointTrait, geom::MyEmptyPoint) = true
-
-    GeoInterface.isgeometry(::MyCurve) = true
-    GeoInterface.geomtype(::MyCurve) = LineStringTrait()
-    GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
-    GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
-    Base.convert(T::Type{MyCurve}, geom::X) where {X} = Base.convert(T, geomtype(geom), geom)
-    Base.convert(::Type{MyCurve}, ::LineStringTrait, geom::MyCurve) = geom
-
-    GeoInterface.isgeometry(::MyPolygon) = true
-    GeoInterface.geomtype(::MyPolygon) = PolygonTrait()
-    GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2
-    GeoInterface.getgeom(::PolygonTrait, geom::MyPolygon, i) = MyCurve()
-
-    GeoInterface.isgeometry(::MyTriangle) = true
-    GeoInterface.geomtype(::MyTriangle) = TriangleTrait()
-    GeoInterface.ngeom(::TriangleTrait, geom::MyTriangle) = 3
-    GeoInterface.getgeom(::TriangleTrait, geom::MyTriangle, i) = MyCurve()
-
-    GeoInterface.isgeometry(::MyMultiPoint) = true
-    GeoInterface.geomtype(::MyMultiPoint) = MultiPointTrait()
-    GeoInterface.ngeom(::MultiPointTrait, geom::MyMultiPoint) = 2
-    GeoInterface.getgeom(::MultiPointTrait, geom::MyMultiPoint, i) = MyPoint()
-
-    GeoInterface.isgeometry(::MyMultiCurve) = true
-    GeoInterface.geomtype(::MyMultiCurve) = MultiCurveTrait()
-    GeoInterface.ngeom(::MultiCurveTrait, geom::MyMultiCurve) = 2
-    GeoInterface.getgeom(::MultiCurveTrait, geom::MyMultiCurve, i) = MyCurve()
-
-    GeoInterface.isgeometry(::MyMultiPolygon) = true
-    GeoInterface.geomtype(::MyMultiPolygon) = MultiPolygonTrait()
-    GeoInterface.ngeom(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
-    GeoInterface.getgeom(::MultiPolygonTrait, geom::MyMultiPolygon, i) = MyPolygon()
-
-    GeoInterface.isgeometry(::MyTIN) = true
-    GeoInterface.geomtype(::MyTIN) = PolyhedralSurfaceTrait()
-    GeoInterface.ngeom(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
-    GeoInterface.getgeom(::PolyhedralSurfaceTrait, geom::MyTIN, i) = MyTriangle()
-
-    GeoInterface.isgeometry(::MyCollection) = true
-    GeoInterface.geomtype(::MyCollection) = GeometryCollectionTrait()
-    GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
-    GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
 
     @testset "Point" begin
-        geom = MyPoint()
+        geom = Point()
         @test testgeometry(geom)
         @test GeoInterface.x(geom) === 1
         @test GeoInterface.y(geom) === 2
@@ -81,7 +19,7 @@ using Test
         @test !GeoInterface.is3d(geom)
         @test !GeoInterface.ismeasured(geom)
 
-        geom = MyEmptyPoint()
+        geom = EmptyPoint()
         @test GeoInterface.coordnames(geom) == ()
         @test GeoInterface.isempty(geom)
 
@@ -91,7 +29,7 @@ using Test
     end
 
     @testset "LineString" begin
-        geom = MyCurve()
+        geom = Curve()
         @test testgeometry(geom)
 
         @test GeoInterface.npoint(geom) == 2  # defaults to ngeom
@@ -111,7 +49,7 @@ using Test
     end
 
     @testset "Polygon" begin
-        geom = MyPolygon()
+        geom = Polygon()
         @test testgeometry(geom)
         # Test that half a implementation yields an error
 
@@ -124,11 +62,11 @@ using Test
         line = GeoInterface.gethole(geom, 1)
         line = GeoInterface.getexterior(geom)
         @test GeoInterface.npoint(geom) == 4
-        @test collect(GeoInterface.getpoint(geom)) == [MyPoint(), MyPoint(), MyPoint(), MyPoint()]
+        @test collect(GeoInterface.getpoint(geom)) == [Point(), Point(), Point(), Point()]
 
         @test_throws MethodError GeoInterface.area(geom)
 
-        geom = MyTriangle()
+        geom = Triangle()
         @test testgeometry(geom)
         @test GeoInterface.nring(geom) == 1
         @test GeoInterface.nhole(geom) == 0
@@ -136,60 +74,60 @@ using Test
     end
 
     @testset "MultiPoint" begin
-        geom = MyMultiPoint()
+        geom = MultiPoint()
         @test testgeometry(geom)
 
         @test GeoInterface.npoint(geom) == 2
         points = GeoInterface.getpoint(geom)
         point = GeoInterface.getpoint(geom, 1)
         @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
-        @test collect(points) == [MyPoint(), MyPoint()]
+        @test collect(points) == [Point(), Point()]
 
         @test !GeoInterface.issimple(geom)
     end
 
     @testset "MultiLineString" begin
-        geom = MyMultiCurve()
+        geom = MultiCurve()
         @test testgeometry(geom)
 
         @test GeoInterface.nlinestring(geom) == 2
         lines = GeoInterface.getlinestring(geom)
         line = GeoInterface.getlinestring(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]
-        @test collect(lines) == [MyCurve(), MyCurve()]
+        @test collect(lines) == [Curve(), Curve()]
     end
 
     @testset "MultiPolygon" begin
-        geom = MyMultiPolygon()
+        geom = MultiPolygon()
         @test testgeometry(geom)
 
         @test GeoInterface.npolygon(geom) == 2
         polygons = GeoInterface.getpolygon(geom)
         polygon = GeoInterface.getpolygon(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[[1, 2], [1, 2]], [[1, 2], [1, 2]]], [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]]
-        @test collect(polygons) == [MyPolygon(), MyPolygon()]
+        @test collect(polygons) == [Polygon(), Polygon()]
     end
 
     @testset "Surface" begin
-        geom = MyTIN()
+        geom = TIN()
         @test testgeometry(geom)
 
         @test GeoInterface.npatch(geom) == 2
         polygons = GeoInterface.getpatch(geom)
         polygon = GeoInterface.getpatch(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[[1, 2], [1, 2]], [[1, 2], [1, 2]], [[1, 2], [1, 2]]], [[[1, 2], [1, 2]], [[1, 2], [1, 2]], [[1, 2], [1, 2]]]]
-        @test collect(polygons) == [MyTriangle(), MyTriangle()]
+        @test collect(polygons) == [Triangle(), Triangle()]
     end
 
     @testset "GeometryCollection" begin
-        geom = MyCollection()
+        geom = Collection()
         @test testgeometry(geom)
 
         @test GeoInterface.ngeom(geom) == 2
         geoms = GeoInterface.getgeom(geom)
         thing = GeoInterface.getgeom(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]
-        @test collect(geoms) == [MyCurve(), MyCurve()]
+        @test collect(geoms) == [Curve(), Curve()]
     end
 
 end
@@ -202,12 +140,6 @@ end
 
 @testset "Feature" begin
     struct Row end
-    struct Point end
-
-    GeoInterface.isgeometry(::Point) = true
-    GeoInterface.geomtype(::Point) = PointTrait()
-    GeoInterface.ncoord(::PointTrait, geom::Point) = 2
-    GeoInterface.getcoord(::PointTrait, geom::Point, i) = [1, 2][i]
 
     GeoInterface.isfeature(::Row) = true
     GeoInterface.geometry(r::Row) = Point()
@@ -225,11 +157,11 @@ end
     Base.convert(::Type{XCurve}, ::LineStringTrait, geom::XCurve) = geom  # fast fallthrough
     Base.convert(::Type{XCurve}, ::LineStringTrait, geom) = geom
 
-    geom = MyCurve()
-    @test !isnothing(convert(MyCurve, geom))
+    geom = Curve()
+    @test !isnothing(convert(Curve, geom))
 
     Base.convert(T::Type{XPolygon}, geom::X) where {X} = Base.convert(T, geomtype(geom), geom)
-    @test_throws Exception convert(MyPolygon, geom)
+    @test_throws Exception convert(Polygon, geom)
 end
 
 @testset "Operations" begin

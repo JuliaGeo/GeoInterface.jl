@@ -45,5 +45,6 @@ include("types.jl")
 include("interface.jl")
 include("fallbacks.jl")
 include("utils.jl")
+include("test_geometry.jl")
 
 end # module
