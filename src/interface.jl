@@ -426,9 +426,10 @@ crs(geom) = crs(trait(geom), geom)
 crs(trait, geom) = nothing
 
 """
-    affine(raster) -> L, T
+    affine(raster) -> (<:AbstractMatrix{T}, <:AbstractVector{T}) where T<:Real
 
 Retrieve the affine transformation for a raster.
+An affine transform consists of a linear transformation and a translation.
 """
 affine(raster) = affine(trait(raster), raster)
 affine(trait, raster) = nothing

@@ -85,8 +85,8 @@ function testraster(raster)
     @assert isnothing(geomtrait(raster))
     @assert !isnothing(crs(raster)) "Raster $raster doesn't return anything for `crs`"
     l, t = affine(raster)
-    @assert l isa AbstractMatrix "Raster $raster doesn't return an `AbstractMatrix` for `affine`"
-    @assert t isa AbstractVector "Raster $raster doesn't return an `AbstractVector` for `affine`"
+    @assert l isa AbstractMatrix{<:Real} "Raster $raster doesn't return an `AbstractMatrix{<:Real}` for `affine`"
+    @assert t isa AbstractVector{<:Real} "Raster $raster doesn't return an `AbstractVector{<:Real}` for `affine`"
     @assert size(l)[1] == size(l)[2] "Raster $raster doesn't return a square matrix for `affine`"
     @assert size(l)[1] == Base.length(t) "Raster $raster doesn't return the same dimensions for the linear and translation part of `affine`"
     ex = extent(raster)
