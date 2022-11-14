@@ -94,6 +94,20 @@ e.g. [`PointTrait`](@ref).
 """
 trait(geom) = geomtrait(geom)
 
+"""
+    GeoInterface.israster(x) => Bool
+
+Check if an object `x` is a raster and thus implicitly supports some
+GeoInterface methods. A raster requires the crs, extent and affine methodes to be defined.
+
+It is recommended that for users implementing `MyType`, they define only
+`israster(::Type{MyType})`. `israster(::MyType)` will then
+automatically delegate to this method.
+"""
+israster(x::T) where {T} = israster(T)
+israster(::Type{T}) where {T} = false
+
+
 # All types
 """
     ncoord(geom) -> Integer
@@ -408,7 +422,16 @@ getpolygon(geom) = getpolygon(geomtrait(geom), geom)
 Retrieve Coordinate Reference System for given geom.
 In SF this is defined as `SRID`.
 """
-crs(geom) = crs(geomtrait(geom), geom)
+crs(geom) = crs(trait(geom), geom)
+crs(trait, geom) = nothing
+
+"""
+    affine(raster) -> L, T
+
+Retrieve the affine transformation for a raster.
+"""
+affine(raster) = affine(trait(raster), raster)
+affine(trait, raster) = nothing
 
 """
     extent(geom) -> T <: Extents.Extent
@@ -416,7 +439,7 @@ crs(geom) = crs(geomtrait(geom), geom)
 Retrieve the extent (bounding box) for given geom.
 In SF this is defined as `envelope`.
 """
-extent(geom) = extent(geomtrait(geom), geom)
+extent(geom) = extent(trait(geom), geom)
 extent(trait, geom) = nothing
 
 """

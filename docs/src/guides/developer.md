@@ -9,7 +9,7 @@ it could be useful to also implement some optional methods if they apply or are 
 If your package also supports geospatial operations on geometries--such as intersections--, please
 also implement those interfaces where applicable.
 
-Last but not least, we also provide an interface for features--geometries with properties--if applicable.
+Last but not least, we also provide an interface for rasters and features--geometries with properties--if applicable.
 
 ## Required for Geometry
 
@@ -49,6 +49,13 @@ Base.convert(::Type{T}, geom) where T<:AbstractPackageType = Base.convert(T, geo
 Base.convert(::Type{T}, ::LineStringTrait, geom::T) = geom  # fast fallthrough without conversion
 Base.convert(::Type{T}, ::LineStringTrait, geom) = ...  # slow custom conversion based on ngeom and getgeom
 ```
+
+## Required for Rasters
+GeoInterface.israster(raster::customrast)::Bool = true
+GeoInterface.extent(raster::customrast)::Bool = true
+GeoInterface.crs(raster::customrast)::Bool = true
+GeoInterface.affine(raster::customrast)::Bool = true
+
 
 ## Required for Feature(Collection)s
 A Feature is a geometry with properties, and in modern parlance, a row in table.

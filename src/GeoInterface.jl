@@ -44,7 +44,8 @@ export AbstractGeometryTrait,
     AbstractFeatureTrait,
     FeatureTrait,
     AbstractFeatureCollectionTrait,
-    FeatureCollectionTrait
+    FeatureCollectionTrait,
+    RasterTrait
 
 
 include("types.jl")
