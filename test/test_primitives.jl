@@ -316,7 +316,9 @@ end
     end
 
     @testset "Tuple" begin
-        geom = (1, 2)
+        geom = (1, 2.0f0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
         @test GeoInterface.ncoord(geom) == 2
@@ -324,14 +326,16 @@ end
     end
 
     @testset "NamedTuple" begin
-        geom = (; X=1, Y=2)
+        geom = (; X=1, Y=2.0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
 
-        geom = (; X=1, Y=2, Z=3)
+        geom = (; X=1.0, Y=2.0, Z=0x03)
         @test testgeometry(geom)
-        geom = (; X=1, Y=2, Z=3, M=4)
+        geom = (; X=1, Y=2, Z=3.0f0, M=4.0)
         @test testgeometry(geom)
         geom = (; Z=3, X=1, Y=2, M=4)
         @test testgeometry(geom)
