@@ -26,7 +26,8 @@ for (i, pointtype) in enumerate((PointTuple2, PointTuple3, PointTuple4))
 end
 
 
-const NamedTuplePoints = Union{
+# Define all possible NamedTuple points
+const NamedTuplePoint = Union{
     NamedTuple{(:X, :Y),<:PointTuple2},
     NamedTuple{(:Y, :X),<:PointTuple2},
     NamedTuple{(:X, :Y, :Z),<:PointTuple3},
@@ -68,16 +69,16 @@ const NamedTuplePoints = Union{
 }
 
 _keys(::Type{<:NamedTuple{K}}) where K = K
-# Custom coordinate order/names NamedTuple
-GeoInterface.isgeometry(::Type{T}) where {T<:NamedTuplePoints} = all(in(default_coord_names), _keys(T))
-GeoInterface.geomtrait(::NamedTuplePoints) where {Keys} = PointTrait()
-GeoInterface.ncoord(::PointTrait, geom::NamedTuplePoints) where {Keys} = Base.length(geom)
-GeoInterface.getcoord(::PointTrait, geom::NamedTuplePoints, i) where {Keys} = getindex(geom, i)
-GeoInterface.coordnames(::PointTrait, geom::NamedTuplePoints) = _keys(typeof(geom))
-GeoInterface.x(::PointTrait, geom::NamedTuplePoints, i) where {Keys} = geom.X
-GeoInterface.y(::PointTrait, geom::NamedTuplePoints, i) where {Keys} = geom.Y
-GeoInterface.z(::PointTrait, geom::NamedTuplePoints, i) where {Keys} = geom.Z
-GeoInterface.m(::PointTrait, geom::NamedTuplePoints, i) where {Keys} = geom.M
+GeoInterface.isgeometry(::Type{T}) where {T<:NamedTuplePoint} = all(in(default_coord_names), _keys(T))
+GeoInterface.geomtrait(::NamedTuplePoint) = PointTrait()
+GeoInterface.ncoord(::PointTrait, geom::NamedTuplePoint) = Base.length(geom)
+GeoInterface.getcoord(::PointTrait, geom::NamedTuplePoint, i) = getindex(geom, i)
+GeoInterface.coordnames(::PointTrait, geom::NamedTuplePoint) = _keys(typeof(geom))
+GeoInterface.x(::PointTrait, geom::NamedTuplePoint, i) = geom.X
+GeoInterface.y(::PointTrait, geom::NamedTuplePoint, i) = geom.Y
+GeoInterface.z(::PointTrait, geom::NamedTuplePoint, i) = geom.Z
+GeoInterface.m(::PointTrait, geom::NamedTuplePoint, i) = geom.M
+
 
 # Default features using NamedTuple and AbstractArray
 
