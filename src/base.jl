@@ -74,10 +74,10 @@ GeoInterface.geomtrait(::NamedTuplePoint) = PointTrait()
 GeoInterface.ncoord(::PointTrait, geom::NamedTuplePoint) = Base.length(geom)
 GeoInterface.getcoord(::PointTrait, geom::NamedTuplePoint, i) = getindex(geom, i)
 GeoInterface.coordnames(::PointTrait, geom::NamedTuplePoint) = _keys(typeof(geom))
-GeoInterface.x(::PointTrait, geom::NamedTuplePoint, i) = geom.X
-GeoInterface.y(::PointTrait, geom::NamedTuplePoint, i) = geom.Y
-GeoInterface.z(::PointTrait, geom::NamedTuplePoint, i) = geom.Z
-GeoInterface.m(::PointTrait, geom::NamedTuplePoint, i) = geom.M
+GeoInterface.x(::PointTrait, geom::NamedTuplePoint) = geom.X
+GeoInterface.y(::PointTrait, geom::NamedTuplePoint) = geom.Y
+GeoInterface.z(::PointTrait, geom::NamedTuplePoint) = geom.Z
+GeoInterface.m(::PointTrait, geom::NamedTuplePoint) = geom.M
 
 
 # Default features using NamedTuple and AbstractArray
