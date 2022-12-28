@@ -334,7 +334,7 @@ end
         @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
-        @test GeoInterface.y(geom) == 1
+        @test GeoInterface.y(geom) == 2.0
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
 
         geom = (; X=1, Y=2, Z=3.0f0, M=4.0)
