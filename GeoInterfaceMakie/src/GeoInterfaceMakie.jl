@@ -62,9 +62,13 @@ basicsgeomtype(::GI.MultiPolygonTrait)    = GB.MultiPolygon
 basicsgeomtype(::GI.LineStringTrait)      = GB.LineString
 basicsgeomtype(::GI.MultiLineStringTrait) = GB.MultiLineString
 
-function _convert_arguments(::Type{<:MC.Poly}, geom)::Tuple
+function _convert_arguments(t::Type{<:MC.Poly}, geom)::Tuple
     geob = basicsgeom(geom)::Union{GB.Polygon, GB.MultiPolygon}
-    (geob,)
+    MC.convert_arguments(t,geob)
+end
+function _convert_arguments(t::Type{<:MC.Lines}, geom)::Tuple
+    geob = basicsgeom(geom)
+    MC.convert_arguments(t, geob)
 end
 function _convert_arguments(::MC.PointBased, geom)::Tuple
     pts = points(geom)
@@ -80,6 +84,9 @@ function expr_enable(Geom)
             $_convert_arguments(p,geom)
         end
         function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom)
+            $_convert_arguments(p,geom)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom)
             $_convert_arguments(p,geom)
         end
     end
