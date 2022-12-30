@@ -605,8 +605,12 @@ coordinates(obj) = coordinates(trait(obj), obj)
 
 """
     convert(type::CustomGeom, geom)
+    convert(module::Module, geom)
 
 Create a `CustomGeom` from any `geom` that implements the GeoInterface.
+
+Can also convert to a `Module`, which finds the corresponding
+geom type for the trait using the modules `geointerface_traittype` method.
 """
 convert(T, geom) = convert(T, geomtrait(geom), geom)
 convert(::Type{T}, x::T) where {T} = x  # no-op
