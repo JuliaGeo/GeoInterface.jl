@@ -606,10 +606,10 @@ coordinates(obj) = coordinates(trait(obj), obj)
 """
     convert(type::CustomGeom, geom)
 
-Convert `geom` into the `CustomGeom` type if both geom as the CustomGeom package
-have implemented GeoInterface.
+Create a `CustomGeom` from any `geom` that implements the GeoInterface.
 """
 convert(T, geom) = convert(T, geomtrait(geom), geom)
+convert(::Type{T}, x::T) where {T} = x  # no-op
 
 """
     astext(geom) -> WKT
