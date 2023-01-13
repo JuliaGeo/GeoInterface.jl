@@ -367,18 +367,19 @@ end
         @test GeoInterface.testfeaturecollection([feature, feature])
     end
 
-    module ConvertTestModule
-        using GeoInterface
-        struct TestPolygon end
-        geointerface_traittype(::GeoInterface.PolygonTrait) = TestPolygon
-
-        GeoInterface.isgeometry(::TestPolygon) = true
-        GeoInterface.geomtrait(::TestPolygon) = PolygonTrait()
-        GeoInterface.ngeom(::PolygonTrait, geom::TestPolygon) = 2
-        GeoInterface.getgeom(::PolygonTrait, geom::TestPolygon, i) = TestCurve()
-        GeoInterface.convert(::Type{<:TestPolygon}, ::PolygonTrait, geom) = TestPolygon()
-    end
-
-    @test GeoInterface.convert(ConvertTestModule, MyPolygon()) == ConvertTestModule.TestPolygon()
 
 end
+
+module ConvertTestModule
+    using GeoInterface
+    struct TestPolygon end
+    geointerface_traittype(::GeoInterface.PolygonTrait) = TestPolygon
+
+    GeoInterface.isgeometry(::TestPolygon) = true
+    GeoInterface.geomtrait(::TestPolygon) = PolygonTrait()
+    GeoInterface.ngeom(::PolygonTrait, geom::TestPolygon) = 2
+    GeoInterface.getgeom(::PolygonTrait, geom::TestPolygon, i) = TestCurve()
+    GeoInterface.convert(::Type{<:TestPolygon}, ::PolygonTrait, geom) = TestPolygon()
+end
+
+@test GeoInterface.convert(ConvertTestModule, MyPolygon()) == ConvertTestModule.TestPolygon()
