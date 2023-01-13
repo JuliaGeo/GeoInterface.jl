@@ -103,13 +103,11 @@ getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i 
 # Backwards compatibility
 coordinates(t::AbstractPointTrait, geom) = collect(getcoord(t, geom))
 coordinates(t::AbstractGeometryTrait, geom) = collect(coordinates.(getgeom(t, geom)))
-function coordinates(t::AbstractFeatureTrait, feature) 
+function coordinates(t::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? [] : coordinates(geom)
 end
 coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(fc)]
-
-Base.convert(T::Type, ::AbstractGeometryTrait, geom) = error("Conversion is enabled for type $T, but not implemented. Please report this issue to the package maintainer.")
 
 # Subtraits
 

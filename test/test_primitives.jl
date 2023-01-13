@@ -37,8 +37,6 @@ using Test
     GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
     GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
     GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
-    Base.convert(T::Type{MyCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    Base.convert(::Type{MyCurve}, ::LineStringTrait, geom::MyCurve) = geom
 
     GeoInterface.isgeometry(::MyPolygon) = true
     GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
@@ -248,15 +246,9 @@ end
     struct XCurve end
     struct XPolygon end
 
-    Base.convert(T::Type{XCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    Base.convert(::Type{XCurve}, ::LineStringTrait, geom::XCurve) = geom  # fast fallthrough
-    Base.convert(::Type{XCurve}, ::LineStringTrait, geom) = geom
-
     geom = MyCurve()
-    @test !isnothing(convert(MyCurve, geom))
-
-    Base.convert(T::Type{XPolygon}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    @test_throws Exception convert(MyPolygon, geom)
+    @test GeoInterface.convert(MyCurve, geom) === geom
+    @test_throws Exception GeoInterface.convert(MyPolygon, geom)
 end
 
 @testset "Operations" begin
@@ -329,31 +321,55 @@ end
     end
 
     @testset "Tuple" begin
-        geom = (1, 2)
+        geom = (1, 2.0f0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2.0f0
         @test GeoInterface.ncoord(geom) == 2
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
     end
 
     @testset "NamedTuple" begin
-        geom = (; X=1, Y=2)
+        geom = (; X=1, Y=2.0)
+        @test GeoInterface.is3d(geom) == false
+        @test GeoInterface.ismeasured(geom) == false
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2.0
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
 
-        geom = (; X=1, Y=2, Z=3)
+        geom = (; X=1, Y=2, Z=3.0f0, M=4.0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom)
+        @test GeoInterface.coordnames(geom) == (:X, :Y, :Z, :M)
+        @test GeoInterface.ncoord(geom) == 4
         @test testgeometry(geom)
-        geom = (; X=1, Y=2, Z=3, M=4)
+        @test GeoInterface.x(geom) === 1
+        @test GeoInterface.y(geom) === 2
+        @test GeoInterface.z(geom) === 3.0f0
+        @test GeoInterface.m(geom) === 4.0
+        @test GeoInterface.ncoord(geom) == 4
+        @test GeoInterface.getcoord(geom, 1) === 1
+        @test GeoInterface.getcoord(geom, 2) === 2
+        @test GeoInterface.getcoord(geom, 3) === 3.0f0
+        @test GeoInterface.getcoord(geom, 4) === 4.0
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2, 3, 4]
+
+        geom = (; X=1.0, Y=2.0, Z=0x03)
         @test testgeometry(geom)
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom) == false
+        @test GeoInterface.coordnames(geom) == (:X, :Y, :Z)
         geom = (; Z=3, X=1, Y=2, M=4)
         @test testgeometry(geom)
-
-        @test GeoInterface.x(geom) == 1
-        @test GeoInterface.m(geom) == 4
-        @test GeoInterface.ncoord(geom) == 4
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
-
+        @test GeoInterface.coordnames(geom) == (:Z, :X, :Y, :M)
     end
 
     @testset "NamedTupleFeature" begin

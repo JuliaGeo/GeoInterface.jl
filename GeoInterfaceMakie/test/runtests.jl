@@ -22,6 +22,15 @@ GeoInterfaceMakie.@enable(LibGEOS.AbstractGeometry)
     ]
 end
 
+@testset "Makie plotting LibGEOS MultiLineString shows additional lines #83" begin
+    mls = readgeom("MULTILINESTRING ((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))")
+    expected = [[0.0, 0.0], [3.0, 0.0], [3.0, 3.0], [0.0, 3.0], [0.0, 0.0], 
+                [NaN, NaN], 
+                [1.0, 1.0], [2.0, 1.0], [2.0, 2.0], [1.0, 2.0], [1.0, 1.0]]
+
+    @test isequal(Makie.convert_arguments(Makie.Lines, mls), (expected,))
+end
+
 @testset "smoketest 2d" begin
     unitsquare = readgeom("POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))")
     bigsquare = readgeom("POLYGON((0 0, 11 0, 11 11, 0 11, 0 0))")

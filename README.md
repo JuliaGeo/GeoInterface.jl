@@ -16,5 +16,3 @@ knowing the specifics of each individual package. In that regard it is similar t
 
 Packages which support the GeoInterface.jl interface can be found in
 [INTEGRATIONS.md](INTEGRATIONS.md).
-
-We thank Julia Computing for supporting contributions to this package.
