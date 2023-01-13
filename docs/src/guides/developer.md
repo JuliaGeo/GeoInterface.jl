@@ -33,8 +33,8 @@ The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such
 
 There are also optional generic methods that could help with locating this geometry.
 ```julia
-GeoInterface.crs(geomtrait(geom), geom::customgeom)::GeoFormatTypes.GeoFormat
-GeoInterface.extent(geomtrait(geom), geom::customgeom)::Extents.Extent
+GeoInterface.crs(trait(geom), geom::customgeom)::GeoFormatTypes.CoordinateReferenceSystem
+GeoInterface.extent(trait(geom), geom::customgeom)::Extents.Extent
 ```
 
 And lastly, there are many other optional functions for each specific geometry. GeoInterface provides fallback implementations based on the generic functions above, but these are not optimized. These are detailed in [Fallbacks](@ref).
@@ -53,11 +53,16 @@ GeoInterface.convert(::Type{CustomPolygon}, ::PolygonTrait, geom) = ...
 ```
 
 ## Required for Rasters
-GeoInterface.israster(raster::customrast)::Bool = true
-GeoInterface.extent(raster::customrast)::Bool = true
-GeoInterface.crs(raster::customrast)::Bool = true
-GeoInterface.affine(raster::customrast)::Bool = true
-
+A Raster is something that is an AbstractArray
+```julia
+GeoInterface.israster(raster::customraster)::Bool = true
+GeoInterface.trait(::customraster) = RasterTrait()
+GeoInterface.extent(::RasterTrait, raster::customraster)::Extents.Extent
+GeoInterface.crs(::RasterTrait, raster::customraster)::GeoFormatTypes.CoordinateReferenceSystem
+GeoInterface.affine(::RasterTrait, raster::customraster) = [1 0; 0 1], [0, 0]
+GeoInterface.index(::RasterTrait, raster::customraster, x::Real, y::Real) -> i::Int, j::Int
+GeoInterface.coords(::RasterTrait, raster::customraster, i::Int, j::Int) -> x::Real, y::Real
+```
 
 ## Required for Feature(Collection)s
 A Feature is a geometry with properties, and in modern parlance, a row in table.

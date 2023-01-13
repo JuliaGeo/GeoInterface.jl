@@ -88,7 +88,9 @@ using Test
     GeoInterface.israster(::Type{<:Raster}) = true
     GeoInterface.trait(::Raster) = RasterTrait()
     GeoInterface.extent(::RasterTrait, ::Raster) = Extents.Extent()
-    GeoInterface.crs(::RasterTrait, ::Raster) = ""
+    GeoInterface.crs(::RasterTrait, ::Raster) = GeoFormatTypes.EPSG(4326)
+    GeoInterface.index(::RasterTrait, ::Raster, x, y) = (1, 2)
+    GeoInterface.coords(::RasterTrait, ::Raster, i, j) = (1.0, 2.0)
     GeoInterface.affine(::RasterTrait, ::Raster) = [1 0; 0 1], [0, 0]
 
     @testset "Point" begin

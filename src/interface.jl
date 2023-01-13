@@ -98,7 +98,9 @@ trait(geom) = geomtrait(geom)
     GeoInterface.israster(x) => Bool
 
 Check if an object `x` is a raster and thus implicitly supports some
-GeoInterface methods. A raster requires the crs, extent and affine methodes to be defined.
+GeoInterface methods. A raster requires the crs, extent and affine methods to be defined.
+
+If the raster is not affine, the `index`` and `coords` methods needs to be implemented.
 
 It is recommended that for users implementing `MyType`, they define only
 `israster(::Type{MyType})`. `israster(::MyType)` will then
@@ -430,9 +432,30 @@ crs(trait, geom) = nothing
 
 Retrieve the affine transformation for a raster.
 An affine transform consists of a linear transformation and a translation.
+Defaults to nothing, as this is not defined for all raster types.
+If the raster is not affine, `index` and `coords` should be defined instead.
 """
 affine(raster) = affine(trait(raster), raster)
 affine(trait, raster) = nothing
+
+
+"""
+    index(raster, x, y) -> Tuple{<:Integer, <:Integer}
+
+Retrieve the logical indices i, j for a given coordinate x, y.
+Coordinates are allowed to be outside the raster extent, it's up to the caller to check
+the validity.
+"""
+index(raster, x, y) = index(trait(raster), raster, x, y)
+index(trait, raster, x, y) = nothing
+
+"""
+    coords(raster, i, j) -> Tuple{<:Real, <:Real}
+
+Retrieve the coordinates x, y for a given logical indices i, j.
+"""
+coords(raster, i, j) = coords(trait(raster), raster, i, j)
+coords(trait, raster, i, j) = nothing
 
 """
     extent(geom) -> T <: Extents.Extent
