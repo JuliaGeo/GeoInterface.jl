@@ -1,4 +1,5 @@
 using GeoInterface
+using Extents
 using Test
 
 @testset "Developer" begin
@@ -20,6 +21,7 @@ using Test
     struct MyFeatureCollection{G}
         geoms::G
     end
+    struct Raster end
 
     GeoInterface.isgeometry(::MyPoint) = true
     GeoInterface.geomtrait(::MyPoint) = PointTrait()
@@ -82,6 +84,14 @@ using Test
     GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = length(fc.geoms)
     GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
     GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]
+
+    GeoInterface.israster(::Type{<:Raster}) = true
+    GeoInterface.trait(::Raster) = RasterTrait()
+    GeoInterface.extent(::RasterTrait, ::Raster) = Extents.Extent()
+    GeoInterface.crs(::RasterTrait, ::Raster) = GeoFormatTypes.EPSG(4326)
+    GeoInterface.index(::RasterTrait, ::Raster, x, y) = (1, 2)
+    GeoInterface.coords(::RasterTrait, ::Raster, i, j) = (1.0, 2.0)
+    GeoInterface.affine(::RasterTrait, ::Raster) = [1 0; 0 1], [0, 0]
 
     @testset "Point" begin
         geom = MyPoint()
@@ -227,6 +237,11 @@ end
         [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4"))]
     )
     @test GeoInterface.testfeaturecollection(features)
+end
+
+@testset "Raster" begin
+    raster = Raster()
+    @test GeoInterface.testraster(raster)
 end
 
 @testset "Conversion" begin

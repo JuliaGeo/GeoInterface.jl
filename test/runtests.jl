@@ -1,3 +1,4 @@
+using GeoFormatTypes
 using GeoInterface
 using Documenter
 using Test

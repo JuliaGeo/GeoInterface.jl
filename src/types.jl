@@ -90,5 +90,9 @@ struct FeatureTrait <: AbstractFeatureTrait end
 
 "An AbstractFeatureCollectionTrait for all feature collections"
 abstract type AbstractFeatureCollectionTrait <: AbstractTrait end
-"A FeatureCollectionTrait holds objects of `FeatureTrait` and an `extent`"
+"A FeatureCollectionTrait holds objects of `FeatureTrait`"
 struct FeatureCollectionTrait <: AbstractFeatureCollectionTrait end
+
+"An AbstractRasterTrait for all rasters"
+abstract type AbstractRasterTrait <: AbstractTrait end
+struct RasterTrait <: AbstractRasterTrait end

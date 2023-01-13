@@ -9,7 +9,7 @@ it could be useful to also implement some optional methods if they apply or are 
 If your package also supports geospatial operations on geometries--such as intersections--, please
 also implement those interfaces where applicable.
 
-Last but not least, we also provide an interface for features--geometries with properties--if applicable.
+Last but not least, we also provide an interface for rasters and features--geometries with properties--if applicable.
 
 ## Required for Geometry
 
@@ -33,8 +33,8 @@ The `ngeom` and `getgeom` are aliases for their geom specific counterparts, such
 
 There are also optional generic methods that could help with locating this geometry.
 ```julia
-GeoInterface.crs(geomtrait(geom), geom::customgeom)::GeoFormatTypes.GeoFormat
-GeoInterface.extent(geomtrait(geom), geom::customgeom)::Extents.Extent
+GeoInterface.crs(trait(geom), geom::customgeom)::GeoFormatTypes.CoordinateReferenceSystem
+GeoInterface.extent(trait(geom), geom::customgeom)::Extents.Extent
 ```
 
 And lastly, there are many other optional functions for each specific geometry. GeoInterface provides fallback implementations based on the generic functions above, but these are not optimized. These are detailed in [Fallbacks](@ref).
@@ -50,6 +50,18 @@ of GeoInterface methods like `ngeom`, `getgeom`, or just `coordinates` calls.
 # if geomtrait(geom) == LineStringTrait()
 GeoInterface.convert(::Type{CustomLineString}, ::LineStringTrait, geom) = ...
 GeoInterface.convert(::Type{CustomPolygon}, ::PolygonTrait, geom) = ...
+```
+
+## Required for Rasters
+A Raster is something that is an AbstractArray
+```julia
+GeoInterface.israster(raster::customraster)::Bool = true
+GeoInterface.trait(::customraster) = RasterTrait()
+GeoInterface.extent(::RasterTrait, raster::customraster)::Extents.Extent
+GeoInterface.crs(::RasterTrait, raster::customraster)::GeoFormatTypes.CoordinateReferenceSystem
+GeoInterface.affine(::RasterTrait, raster::customraster) = [1 0; 0 1], [0, 0]
+GeoInterface.index(::RasterTrait, raster::customraster, x::Real, y::Real) -> i::Int, j::Int
+GeoInterface.coords(::RasterTrait, raster::customraster, i::Int, j::Int) -> x::Real, y::Real
 ```
 
 ## Required for Feature(Collection)s

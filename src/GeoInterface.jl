@@ -2,6 +2,7 @@ module GeoInterface
 
 using Extents
 using Base.Iterators: flatten
+using InteractiveUtils: supertypes
 
 export testgeometry, isgeometry, trait, geomtrait, ncoord, getcoord, ngeom, getgeom
 
@@ -44,7 +45,8 @@ export AbstractGeometryTrait,
     AbstractFeatureTrait,
     FeatureTrait,
     AbstractFeatureCollectionTrait,
-    FeatureCollectionTrait
+    FeatureCollectionTrait,
+    RasterTrait
 
 
 include("types.jl")

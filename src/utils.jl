@@ -36,7 +36,7 @@ Test whether the required interface for your `feature` has been implemented corr
 function testfeature(feature)
     @assert isfeature(typeof(feature)) "$feature doesn't implement `isfeature`."
     @assert trait(feature) isa AbstractFeatureTrait "$feature does not return an `AbstractFeatureTrait` for `geomtrait`."
-    @assert geomtrait(feature) == nothing
+    @assert isnothing(geomtrait(feature))
     geom = geometry(feature)
     if !isnothing(geom)
         @assert isgeometry(geom) "geom $geom from $feature doesn't implement `isgeometry`."
@@ -61,7 +61,7 @@ Test whether the required interface for your `featurecollection` has been implem
 function testfeaturecollection(fc)
     @assert isfeaturecollection(typeof(fc)) "$fc doesn't implement `isfeaturecollection`."
     @assert trait(fc) isa AbstractFeatureCollectionTrait "$fc does not return an `AbstractFeatureCollectionTrait` for `geomtrait`."
-    @assert geomtrait(fc) == nothing
+    @assert isnothing(geomtrait(fc))
     @assert isa(nfeature(fc), Integer) "feature collection $fc doesn't return an `Integer` from `nfeatures`."
     if nfeature(fc) > 0
         @assert isfeature(getfeature(fc, 1)) "For $fc `getfeature(featurecollection, 1)` does not return an object where `isfeature(obj) == true`."
@@ -71,5 +71,32 @@ function testfeaturecollection(fc)
     end
     @assert coordinates(fc) == coordinates.(getfeature(fc))
     @assert geometrycolumns(fc) isa NTuple "feature collection $fc doesn't return a `NTuple` from `geometrycolumns`."
+    return true
+end
+
+"""
+    testraster(raster)
+
+Test whether the required interface for your `raster` has been implemented correctly.
+"""
+function testraster(raster)
+    @assert israster(typeof(raster)) "$raster doesn't implement `israster`."
+    @assert trait(raster) isa AbstractRasterTrait "$raster does not return an `AbstractRasterTrait` for `trait`."
+
+    am = affine(raster)
+    if !isnothing(am)
+        @assert Base.length(am) == 2 "Raster $raster doesn't return a Tuple of length 2 for `affine`"
+        l, t = am
+        @assert l isa AbstractMatrix{<:Real} "Raster $raster doesn't return an `AbstractMatrix{<:Real}` for `affine`"
+        @assert t isa AbstractVector{<:Real} "Raster $raster doesn't return an `AbstractVector{<:Real}` for `affine`"
+        @assert size(l)[1] == size(l)[2] "Raster $raster doesn't return a square matrix for `affine`"
+        @assert size(l)[1] == Base.length(t) "Raster $raster doesn't return the same dimensions for the linear and translation part of `affine`"
+    end
+
+    @assert index(raster, 1.0, 1.0) isa NTuple{2,<:Integer} "Raster $raster doesn't return a `NTuple{2,<:Real}` for `index`."
+    @assert coords(raster, 1, 1) isa NTuple{2,<:Real} "Raster $raster doesn't return a `NTuple{2,<:Integer}` for `coords`."
+
+    @assert :CoordinateReferenceSystemFormat in Symbol.(supertypes(typeof(crs(raster)))) "Raster $raster doesn't return a CoordinateReferenceSystemFormat for `crs`."
+    @assert extent(raster) isa Extent "Raster $raster doesn't return an `Extent` for `extent`"
     return true
 end
