@@ -115,7 +115,7 @@ coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in ge
 # corresponding geometry type
 function convert(package::Module, geom)
     t = trait(geom)
-    convert(package.geointerface_traittype(t), t, geom)
+    convert(package.geointerface_geomtype(t), t, geom)
 end
 
 # Subtraits
