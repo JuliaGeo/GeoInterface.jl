@@ -109,6 +109,15 @@ function coordinates(t::AbstractFeatureTrait, feature)
 end
 coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(fc)]
 
+# Package level `GeoInterface.convert` method
+# Packages must implement their own `traittype` method
+# that accepts a GeoInterface.jl trait and returns the
+# corresponding geometry type
+function convert(package::Module, geom)
+    t = trait(geom)
+    convert(package.geointerface_geomtype(t), t, geom)
+end
+
 # Subtraits
 
 """
