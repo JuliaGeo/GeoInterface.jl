@@ -384,3 +384,4 @@ module ConvertTestModule
 end
 
 @test GeoInterface.convert(ConvertTestModule, MyPolygon()) == ConvertTestModule.TestPolygon()
+@test_throws GeoInterface.convert(ConvertTestModule, MyPolygon()) == ConvertTestModule.TestPolygon()
