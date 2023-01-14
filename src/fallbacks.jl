@@ -115,6 +115,7 @@ coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in ge
 # corresponding geometry type
 function convert(package::Module, geom)
     t = trait(geom)
+    isdefined(package, :geointerface_geomtype) || throw(ArgumentError("$package does not implement `geointerface_geomtype`. Please request this be implemented in a github issue."))
     convert(package.geointerface_geomtype(t), t, geom)
 end
 
