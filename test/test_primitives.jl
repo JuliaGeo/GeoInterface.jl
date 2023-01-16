@@ -1,4 +1,5 @@
 using GeoInterface
+using Extents
 using Test
 
 # Implement interface
@@ -74,7 +75,7 @@ GeoInterface.isfeature(::Type{<:MyFeature}) = true
 GeoInterface.trait(feature::MyFeature) = FeatureTrait()
 GeoInterface.geometry(f::MyFeature) = f.geometry
 GeoInterface.properties(f::MyFeature) = f.properties
-GeoInterface.extent(f::MyFeature) = nothing
+GeoInterface.extent(::FeatureTrait, f::MyFeature) = nothing
 
 GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
 GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
@@ -93,19 +94,21 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test_throws ArgumentError GeoInterface.m(geom)
         @test ncoord(geom) === 2
         @test collect(getcoord(geom)) == [1, 2]
+        @test GeoInterface.coordinates(geom) == [1, 2]
         @test getcoord(geom, 1) === 1
         @test GeoInterface.coordnames(geom) == (:X, :Y)
         @test !GeoInterface.isempty(geom)
         @test !GeoInterface.is3d(geom)
         @test !GeoInterface.ismeasured(geom)
+        @test GeoInterface.extent(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
+        @test GeoInterface.bbox(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
+        @test isnothing(GeoInterface.extent(geom, fallback=false))
 
         geom = MyEmptyPoint()
         @test GeoInterface.coordnames(geom) == ()
         @test GeoInterface.isempty(geom)
 
         @test isnothing(GeoInterface.crs(geom))
-        @test isnothing(GeoInterface.extent(geom))
-        @test isnothing(GeoInterface.bbox(geom))
     end
 
     @testset "LineString" begin
@@ -185,6 +188,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         polygons = GeoInterface.getpolygon(geom)
         polygon = GeoInterface.getpolygon(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[[1, 2], [1, 2]], [[1, 2], [1, 2]]], [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]]
+        @test GeoInterface.extent(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
         @test collect(polygons) == [MyPolygon(), MyPolygon()]
     end
 
@@ -221,13 +225,15 @@ end
 @testset "Feature" begin
     feature = MyFeature((1, 2), (a=10, b=20))
     @test GeoInterface.testfeature(feature)
+    @test GeoInterface.extent(feature) == Extents.Extent(X=(1, 1), Y=(2, 2))
 end
 
 @testset "FeatureCollection" begin
     features = MyFeatureCollection(
-        [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4"))]
+        [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4")), MyFeature(nothing, (a="5", b="6"))]
     )
     @test GeoInterface.testfeaturecollection(features)
+    @test GeoInterface.extent(features) == Extents.Extent(X=(1, 1), Y=(2, 2))
 end
 
 @testset "Conversion" begin
@@ -372,15 +378,15 @@ end
 end
 
 module ConvertTestModule
-    using GeoInterface
-    struct TestPolygon end
-    geointerface_geomtype(::GeoInterface.PolygonTrait) = TestPolygon
+using GeoInterface
+struct TestPolygon end
+geointerface_geomtype(::GeoInterface.PolygonTrait) = TestPolygon
 
-    GeoInterface.isgeometry(::TestPolygon) = true
-    GeoInterface.geomtrait(::TestPolygon) = PolygonTrait()
-    GeoInterface.ngeom(::PolygonTrait, geom::TestPolygon) = 2
-    GeoInterface.getgeom(::PolygonTrait, geom::TestPolygon, i) = TestCurve()
-    GeoInterface.convert(::Type{<:TestPolygon}, ::PolygonTrait, geom) = TestPolygon()
+GeoInterface.isgeometry(::TestPolygon) = true
+GeoInterface.geomtrait(::TestPolygon) = PolygonTrait()
+GeoInterface.ngeom(::PolygonTrait, geom::TestPolygon) = 2
+GeoInterface.getgeom(::PolygonTrait, geom::TestPolygon, i) = TestCurve()
+GeoInterface.convert(::Type{<:TestPolygon}, ::PolygonTrait, geom) = TestPolygon()
 end
 
 module BadModule

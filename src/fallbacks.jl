@@ -95,7 +95,6 @@ issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
 crs(::AbstractGeometryTrait, geom) = nothing
-extent(::AbstractGeometryTrait, geom) = nothing
 
 # FeatureCollection
 getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))
@@ -107,7 +106,20 @@ function coordinates(t::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? [] : coordinates(geom)
 end
-coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(fc)]
+coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(t, fc)]
+
+extent(::AbstractTrait, _) = nothing
+function calc_extent(t::AbstractPointTrait, geom)
+    coords = collect(getcoord(t, geom))
+    names = coordnames(geom)
+    return Extent(NamedTuple{names}(zip(coords, coords)))
+end
+calc_extent(t::AbstractGeometryTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
+function calc_extent(::AbstractFeatureTrait, feature)
+    geom = geometry(feature)
+    isnothing(geom) ? nothing : extent(geom)
+end
+calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
 
 # Package level `GeoInterface.convert` method
 # Packages must implement their own `traittype` method
