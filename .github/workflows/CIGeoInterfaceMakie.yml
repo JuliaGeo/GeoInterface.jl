@@ -1,4 +1,4 @@
-name: GeoInterfaceRecipes CI
+name: GeoInterfaceMakie CI
 on:
   pull_request:
     paths-ignore:
@@ -17,12 +17,12 @@ on:
     tags: '*'
 
 concurrency:
-  group: cairomakie-${{ github.ref }}
+  group: makie-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   test:
-    name: GeoInterfaceRecipes Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
+    name: GeoInterfaceMakie Julia ${{ matrix.version }} - ${{ matrix.os }} - ${{ matrix.arch }} - ${{ github.event_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -47,11 +47,11 @@ jobs:
         run: |
           using Pkg;
           # dev mono repo versions
-          pkg"dev . ./GeoInterfaceRecipes"
+          pkg"dev . ./GeoInterfaceMakie"
       - name: Run the tests
         continue-on-error: true
         run: >
-          julia --color=yes --project=monorepo -e 'using Pkg; Pkg.test("GeoInterfaceRecipes", coverage=true)'
+          julia --color=yes --project=monorepo -e 'using Pkg; Pkg.test("GeoInterfaceMakie", coverage=true)'
           && echo "TESTS_SUCCESSFUL=true" >> $GITHUB_ENV
       - name: Exit if tests failed
         if: ${{ env.TESTS_SUCCESSFUL != 'true' }}

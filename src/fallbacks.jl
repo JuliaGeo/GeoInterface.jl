@@ -102,7 +102,7 @@ getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i 
 # Backwards compatibility
 coordinates(t::AbstractPointTrait, geom) = collect(getcoord(t, geom))
 coordinates(t::AbstractGeometryTrait, geom) = collect(coordinates.(getgeom(t, geom)))
-function coordinates(::AbstractFeatureTrait, feature)
+function coordinates(t::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? [] : coordinates(geom)
 end
@@ -121,7 +121,15 @@ function calc_extent(::AbstractFeatureTrait, feature)
 end
 calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
 
-Base.convert(T::Type, ::AbstractGeometryTrait, geom) = error("Conversion is enabled for type $T, but not implemented. Please report this issue to the package maintainer.")
+# Package level `GeoInterface.convert` method
+# Packages must implement their own `traittype` method
+# that accepts a GeoInterface.jl trait and returns the
+# corresponding geometry type
+function convert(package::Module, geom)
+    t = trait(geom)
+    isdefined(package, :geointerface_geomtype) || throw(ArgumentError("$package does not implement `geointerface_geomtype`. Please request this be implemented in a github issue."))
+    convert(package.geointerface_geomtype(t), t, geom)
+end
 
 # Subtraits
 

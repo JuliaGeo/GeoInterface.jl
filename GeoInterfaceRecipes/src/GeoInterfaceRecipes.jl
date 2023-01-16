@@ -19,7 +19,7 @@ macro enable_geo_plots(typ)
               @nospecialize
               series_list = RecipesBase.RecipeData[]
               RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
-              Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.geomtrait(geom), geom)))
+              Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.trait(geom), geom)))
               return series_list
         end
         function RecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::Base.AbstractVector{<:Base.Union{Base.Missing,<:($(esc(typ)))}})
@@ -27,7 +27,7 @@ macro enable_geo_plots(typ)
               series_list = RecipesBase.RecipeData[]
               RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
               for g in Base.skipmissing(geom)
-                  Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.geomtrait(g), g)))
+                  Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.trait(g), g)))
               end
               return series_list
         end
@@ -39,7 +39,7 @@ RecipesBase.@recipe function f(t::Union{GI.PointTrait,GI.MultiPointTrait}, geom)
     _coordvecs(t, geom)
 end
 
-RecipesBase.@recipe function f(t::Union{GI.LineStringTrait,GI.MultiLineStringTrait}, geom)
+RecipesBase.@recipe function f(t::Union{GI.AbstractLineStringTrait,GI.MultiLineStringTrait}, geom)
     seriestype --> :path
     _coordvecs(t, geom)
 end
@@ -50,6 +50,11 @@ RecipesBase.@recipe function f(t::Union{GI.PolygonTrait,GI.MultiPolygonTrait}, g
 end
 
 RecipesBase.@recipe f(::GI.GeometryCollectionTrait, collection) = collect(getgeom(collection))
+
+# Features
+RecipesBase.@recipe f(t::GI.FeatureTrait, feature) = GI.geometry(feature)
+
+RecipesBase.@recipe f(t::GI.FeatureCollectionTrait, fc) = collect(GI.getfeature(fc))
 
 # Convert coordinates to the form used by Plots.jl
 _coordvecs(::GI.PointTrait, geom) = [tuple(GI.coordinates(geom)...)]
@@ -63,7 +68,7 @@ function _coordvecs(::GI.MultiPointTrait, geom)
         _geom2coordvecs!(ntuple(_ -> Array{Float64}(undef, n), 2)..., geom)
     end
 end
-function _coordvecs(::GI.LineStringTrait, geom)
+function _coordvecs(::GI.AbstractLineStringTrait, geom)
     n = GI.npoint(geom)
     if GI.is3d(geom)
         vecs = ntuple(_ -> Array{Float64}(undef, n), 3)
@@ -125,6 +130,7 @@ function _coordvecs(::GI.MultiPolygonTrait, geom)
         return loop!(vecs, geom)
     end
 end
+
 
 _coordvec(n) = Array{Float64}(undef, n)
 

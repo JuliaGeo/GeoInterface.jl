@@ -2,96 +2,88 @@ using GeoInterface
 using Extents
 using Test
 
+# Implement interface
+struct MyPoint end
+struct MyEmptyPoint end
+struct MyCurve end
+struct MyPolygon end
+struct MyTriangle end
+struct MyMultiPoint end
+struct MyMultiCurve end
+struct MyMultiPolygon end
+struct MyTIN end
+struct MyCollection end
+struct MyFeature{G,P}
+    geometry::G
+    properties::P
+end
+struct MyFeatureCollection{G}
+    geoms::G
+end
+
+GeoInterface.isgeometry(::MyPoint) = true
+GeoInterface.geomtrait(::MyPoint) = PointTrait()
+GeoInterface.ncoord(::PointTrait, geom::MyPoint) = 2
+GeoInterface.getcoord(::PointTrait, geom::MyPoint, i) = [1, 2][i]
+
+GeoInterface.isgeometry(::MyEmptyPoint) = true
+GeoInterface.geomtrait(::MyEmptyPoint) = PointTrait()
+GeoInterface.ncoord(::PointTrait, geom::MyEmptyPoint) = 0
+GeoInterface.isempty(::PointTrait, geom::MyEmptyPoint) = true
+
+GeoInterface.isgeometry(::MyCurve) = true
+GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
+GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
+GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
+
+GeoInterface.isgeometry(::MyPolygon) = true
+GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
+GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2
+GeoInterface.getgeom(::PolygonTrait, geom::MyPolygon, i) = MyCurve()
+
+GeoInterface.isgeometry(::MyTriangle) = true
+GeoInterface.geomtrait(::MyTriangle) = TriangleTrait()
+GeoInterface.ngeom(::TriangleTrait, geom::MyTriangle) = 3
+GeoInterface.getgeom(::TriangleTrait, geom::MyTriangle, i) = MyCurve()
+
+GeoInterface.isgeometry(::MyMultiPoint) = true
+GeoInterface.geomtrait(::MyMultiPoint) = MultiPointTrait()
+GeoInterface.ngeom(::MultiPointTrait, geom::MyMultiPoint) = 2
+GeoInterface.getgeom(::MultiPointTrait, geom::MyMultiPoint, i) = MyPoint()
+
+GeoInterface.isgeometry(::MyMultiCurve) = true
+GeoInterface.geomtrait(::MyMultiCurve) = MultiCurveTrait()
+GeoInterface.ngeom(::MultiCurveTrait, geom::MyMultiCurve) = 2
+GeoInterface.getgeom(::MultiCurveTrait, geom::MyMultiCurve, i) = MyCurve()
+
+GeoInterface.isgeometry(::MyMultiPolygon) = true
+GeoInterface.geomtrait(::MyMultiPolygon) = MultiPolygonTrait()
+GeoInterface.ngeom(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
+GeoInterface.getgeom(::MultiPolygonTrait, geom::MyMultiPolygon, i) = MyPolygon()
+
+GeoInterface.isgeometry(::MyTIN) = true
+GeoInterface.geomtrait(::MyTIN) = PolyhedralSurfaceTrait()
+GeoInterface.ngeom(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
+GeoInterface.getgeom(::PolyhedralSurfaceTrait, geom::MyTIN, i) = MyTriangle()
+
+GeoInterface.isgeometry(::MyCollection) = true
+GeoInterface.geomtrait(::MyCollection) = GeometryCollectionTrait()
+GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
+GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
+
+GeoInterface.isfeature(::Type{<:MyFeature}) = true
+GeoInterface.trait(feature::MyFeature) = FeatureTrait()
+GeoInterface.geometry(f::MyFeature) = f.geometry
+GeoInterface.properties(f::MyFeature) = f.properties
+GeoInterface.extent(::FeatureTrait, f::MyFeature) = nothing
+
+GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
+GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
+GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = length(fc.geoms)
+GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
+GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]
+
 @testset "Developer" begin
-    # Implement interface
-    struct MyPoint end
-    struct MyEmptyPoint end
-    struct MyCurve end
-    struct MyPolygon end
-    struct MyTriangle end
-    struct MyMultiPoint end
-    struct MyMultiCurve end
-    struct MyMultiPolygon end
-    struct MyTIN end
-    struct MyCollection end
-    struct MyFeature{G,P}
-        geometry::G
-        properties::P
-    end
-    struct MyFeatureCollection{G}
-        geoms::G
-    end
-
-    GeoInterface.isgeometry(::MyPoint) = true
-    GeoInterface.geomtrait(::MyPoint) = PointTrait()
-    GeoInterface.ncoord(::PointTrait, geom::MyPoint) = 2
-    GeoInterface.getcoord(::PointTrait, geom::MyPoint, i) = [1, 2][i]
-
-    GeoInterface.isgeometry(::MyEmptyPoint) = true
-    GeoInterface.geomtrait(::MyEmptyPoint) = PointTrait()
-    GeoInterface.ncoord(::PointTrait, geom::MyEmptyPoint) = 0
-    GeoInterface.isempty(::PointTrait, geom::MyEmptyPoint) = true
-
-    GeoInterface.isgeometry(::MyCurve) = true
-    GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
-    GeoInterface.ncoord(::LineStringTrait, geom::MyCurve) = 2
-    GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
-    GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
-    Base.convert(T::Type{MyCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    Base.convert(::Type{MyCurve}, ::LineStringTrait, geom::MyCurve) = geom
-
-    GeoInterface.isgeometry(::MyPolygon) = true
-    GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
-    GeoInterface.ncoord(::PolygonTrait, geom::MyPolygon) = 2
-    GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2
-    GeoInterface.getgeom(::PolygonTrait, geom::MyPolygon, i) = MyCurve()
-
-    GeoInterface.isgeometry(::MyTriangle) = true
-    GeoInterface.geomtrait(::MyTriangle) = TriangleTrait()
-    GeoInterface.ncoord(::TriangleTrait, geom::MyTriangle) = 2
-    GeoInterface.ngeom(::TriangleTrait, geom::MyTriangle) = 3
-    GeoInterface.getgeom(::TriangleTrait, geom::MyTriangle, i) = MyCurve()
-
-    GeoInterface.isgeometry(::MyMultiPoint) = true
-    GeoInterface.geomtrait(::MyMultiPoint) = MultiPointTrait()
-    GeoInterface.ncoord(::MultiPointTrait, geom::MyMultiPoint) = 2
-    GeoInterface.ngeom(::MultiPointTrait, geom::MyMultiPoint) = 2
-    GeoInterface.getgeom(::MultiPointTrait, geom::MyMultiPoint, i) = MyPoint()
-
-    GeoInterface.isgeometry(::MyMultiCurve) = true
-    GeoInterface.geomtrait(::MyMultiCurve) = MultiCurveTrait()
-    GeoInterface.ncoord(::MultiCurveTrait, geom::MyMultiCurve) = 2
-    GeoInterface.ngeom(::MultiCurveTrait, geom::MyMultiCurve) = 2
-    GeoInterface.getgeom(::MultiCurveTrait, geom::MyMultiCurve, i) = MyCurve()
-
-    GeoInterface.isgeometry(::MyMultiPolygon) = true
-    GeoInterface.geomtrait(::MyMultiPolygon) = MultiPolygonTrait()
-    GeoInterface.ncoord(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
-    GeoInterface.ngeom(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
-    GeoInterface.getgeom(::MultiPolygonTrait, geom::MyMultiPolygon, i) = MyPolygon()
-
-    GeoInterface.isgeometry(::MyTIN) = true
-    GeoInterface.geomtrait(::MyTIN) = PolyhedralSurfaceTrait()
-    GeoInterface.ncoord(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
-    GeoInterface.ngeom(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
-    GeoInterface.getgeom(::PolyhedralSurfaceTrait, geom::MyTIN, i) = MyTriangle()
-
-    GeoInterface.isgeometry(::MyCollection) = true
-    GeoInterface.geomtrait(::MyCollection) = GeometryCollectionTrait()
-    GeoInterface.ncoord(::GeometryCollectionTrait, geom::MyCollection) = 2
-    GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
-    GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
-
-    GeoInterface.isfeature(::Type{<:MyFeature}) = true
-    GeoInterface.trait(feature::MyFeature) = FeatureTrait()
-    GeoInterface.geometry(f::MyFeature) = f.geometry
-    GeoInterface.properties(f::MyFeature) = f.properties
-
-    GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
-    GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
-    GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = length(fc.geoms)
-    GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
-    GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]
 
     @testset "Point" begin
         geom = MyPoint()
@@ -248,15 +240,9 @@ end
     struct XCurve end
     struct XPolygon end
 
-    Base.convert(T::Type{XCurve}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    Base.convert(::Type{XCurve}, ::LineStringTrait, geom::XCurve) = geom  # fast fallthrough
-    Base.convert(::Type{XCurve}, ::LineStringTrait, geom) = geom
-
     geom = MyCurve()
-    @test !isnothing(convert(MyCurve, geom))
-
-    Base.convert(T::Type{XPolygon}, geom::X) where {X} = Base.convert(T, geomtrait(geom), geom)
-    @test_throws Exception convert(MyPolygon, geom)
+    @test GeoInterface.convert(MyCurve, geom) === geom
+    @test_throws Exception GeoInterface.convert(MyPolygon, geom)
 end
 
 @testset "Operations" begin
@@ -329,31 +315,55 @@ end
     end
 
     @testset "Tuple" begin
-        geom = (1, 2)
+        geom = (1, 2.0f0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2.0f0
         @test GeoInterface.ncoord(geom) == 2
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
     end
 
     @testset "NamedTuple" begin
-        geom = (; X=1, Y=2)
+        geom = (; X=1, Y=2.0)
+        @test GeoInterface.is3d(geom) == false
+        @test GeoInterface.ismeasured(geom) == false
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2.0
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
 
-        geom = (; X=1, Y=2, Z=3)
+        geom = (; X=1, Y=2, Z=3.0f0, M=4.0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom)
+        @test GeoInterface.coordnames(geom) == (:X, :Y, :Z, :M)
+        @test GeoInterface.ncoord(geom) == 4
         @test testgeometry(geom)
-        geom = (; X=1, Y=2, Z=3, M=4)
+        @test GeoInterface.x(geom) === 1
+        @test GeoInterface.y(geom) === 2
+        @test GeoInterface.z(geom) === 3.0f0
+        @test GeoInterface.m(geom) === 4.0
+        @test GeoInterface.ncoord(geom) == 4
+        @test GeoInterface.getcoord(geom, 1) === 1
+        @test GeoInterface.getcoord(geom, 2) === 2
+        @test GeoInterface.getcoord(geom, 3) === 3.0f0
+        @test GeoInterface.getcoord(geom, 4) === 4.0
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2, 3, 4]
+
+        geom = (; X=1.0, Y=2.0, Z=0x03)
         @test testgeometry(geom)
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom) == false
+        @test GeoInterface.coordnames(geom) == (:X, :Y, :Z)
         geom = (; Z=3, X=1, Y=2, M=4)
         @test testgeometry(geom)
-
-        @test GeoInterface.x(geom) == 1
-        @test GeoInterface.m(geom) == 4
-        @test GeoInterface.ncoord(geom) == 4
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
-
+        @test GeoInterface.coordnames(geom) == (:Z, :X, :Y, :M)
     end
 
     @testset "NamedTupleFeature" begin
@@ -363,4 +373,24 @@ end
         @test GeoInterface.testfeature(feature)
         @test GeoInterface.testfeaturecollection([feature, feature])
     end
+
+
 end
+
+module ConvertTestModule
+using GeoInterface
+struct TestPolygon end
+geointerface_geomtype(::GeoInterface.PolygonTrait) = TestPolygon
+
+GeoInterface.isgeometry(::TestPolygon) = true
+GeoInterface.geomtrait(::TestPolygon) = PolygonTrait()
+GeoInterface.ngeom(::PolygonTrait, geom::TestPolygon) = 2
+GeoInterface.getgeom(::PolygonTrait, geom::TestPolygon, i) = TestCurve()
+GeoInterface.convert(::Type{<:TestPolygon}, ::PolygonTrait, geom) = TestPolygon()
+end
+
+module BadModule
+end
+
+@test GeoInterface.convert(ConvertTestModule, MyPolygon()) == ConvertTestModule.TestPolygon()
+@test_throws ArgumentError GeoInterface.convert(BadModule, MyPolygon()) == ConvertTestModule.TestPolygon()

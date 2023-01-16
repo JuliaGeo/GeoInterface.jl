@@ -411,7 +411,7 @@ In SF this is defined as `SRID`.
 crs(geom) = crs(geomtrait(geom), geom)
 
 """
-    extent(obj, fallback=true) -> T <: Extents.Extent
+    extent(obj; fallback=true) -> T <: Extents.Extent
 
 Retrieve the extent (bounding box) for given geom or feature.
 In SF this is defined as `envelope`.
@@ -611,11 +611,15 @@ coordinates(obj) = coordinates(trait(obj), obj)
 
 """
     convert(type::CustomGeom, geom)
+    convert(module::Module, geom)
 
-Convert `geom` into the `CustomGeom` type if both geom as the CustomGeom package
-have implemented GeoInterface.
+Create a `CustomGeom` from any `geom` that implements the GeoInterface.
+
+Can also convert to a `Module`, which finds the corresponding
+geom type for the trait using the modules `geointerface_traittype` method.
 """
 convert(T, geom) = convert(T, geomtrait(geom), geom)
+convert(::Type{T}, x::T) where {T} = x  # no-op
 
 """
     astext(geom) -> WKT
