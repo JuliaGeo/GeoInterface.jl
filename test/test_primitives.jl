@@ -383,4 +383,8 @@ module ConvertTestModule
     GeoInterface.convert(::Type{<:TestPolygon}, ::PolygonTrait, geom) = TestPolygon()
 end
 
+module BadModule
+end
+
 @test GeoInterface.convert(ConvertTestModule, MyPolygon()) == ConvertTestModule.TestPolygon()
+@test_throws ArgumentError GeoInterface.convert(BadModule, MyPolygon()) == ConvertTestModule.TestPolygon()
