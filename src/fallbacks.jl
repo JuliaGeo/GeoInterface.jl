@@ -108,17 +108,18 @@ function coordinates(::AbstractFeatureTrait, feature)
 end
 coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(t, fc)]
 
-function extent(t::AbstractPointTrait, geom)
+extent(::AbstractTrait, _) = nothing
+function calc_extent(t::AbstractPointTrait, geom)
     coords = collect(getcoord(t, geom))
     names = coordnames(geom)
     return Extent(NamedTuple{names}(zip(coords, coords)))
 end
-extent(t::AbstractGeometryTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
-function extent(::AbstractFeatureTrait, feature)
+calc_extent(t::AbstractGeometryTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
+function calc_extent(::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? nothing : extent(geom)
 end
-extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
+calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
 
 Base.convert(T::Type, ::AbstractGeometryTrait, geom) = error("Conversion is enabled for type $T, but not implemented. Please report this issue to the package maintainer.")
 

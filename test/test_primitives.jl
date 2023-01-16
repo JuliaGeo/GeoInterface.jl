@@ -110,6 +110,7 @@ using Test
         @test !GeoInterface.ismeasured(geom)
         @test GeoInterface.extent(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
         @test GeoInterface.bbox(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
+        @test isnothing(GeoInterface.extent(geom, fallback=false))
 
         geom = MyEmptyPoint()
         @test GeoInterface.coordnames(geom) == ()
@@ -240,7 +241,7 @@ end
         [MyFeature(MyPoint(), (a="1", b="2")), MyFeature(MyPolygon(), (a="3", b="4")), MyFeature(nothing, (a="5", b="6"))]
     )
     @test GeoInterface.testfeaturecollection(features)
-    @test GeoInterface.extent(FeatureCollectionTrait(), features) == Extents.Extent(X=(1, 1), Y=(2, 2))
+    @test GeoInterface.extent(features) == Extents.Extent(X=(1, 1), Y=(2, 2))
 end
 
 @testset "Conversion" begin

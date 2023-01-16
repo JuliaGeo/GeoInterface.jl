@@ -411,12 +411,19 @@ In SF this is defined as `SRID`.
 crs(geom) = crs(geomtrait(geom), geom)
 
 """
-    extent(obj) -> T <: Extents.Extent
+    extent(obj, fallback=true) -> T <: Extents.Extent
 
 Retrieve the extent (bounding box) for given geom or feature.
 In SF this is defined as `envelope`.
+
+When `fallback` is true, and the obj does not have an extent,
+it is calculated from the coordinates of all geometries in `obj`.
 """
-extent(obj) = extent(trait(obj), obj)
+function extent(obj; fallback=true)
+    ex = extent(trait(obj), obj)
+    isnothing(ex) && fallback && return calc_extent(trait(obj), obj)
+    return nothing
+end
 
 """
     bbox(geom) -> T <: Extents.Extent
