@@ -109,6 +109,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test GeoInterface.isempty(geom)
 
         @test isnothing(GeoInterface.crs(geom))
+        @test isnothing(GeoInterface.crs([]))
     end
 
     @testset "LineString" begin
