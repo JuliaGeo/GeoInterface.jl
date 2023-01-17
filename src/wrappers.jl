@@ -168,7 +168,9 @@ function Point(geom)
     end
 end
 
-_ncoord_error(ncoords) = throw(ArgumentError("Point can have 2 to 4 coords, got $ncoords"))
+@noinline _ncoord_error(ncoords) = throw(ArgumentError("Point can have 2 to 4 coords, got $ncoords"))
+@noinline _no_z_error() = throw(ArgumentError("Point has no `Z` coordinate"))
+@noinline _no_m_error() = throw(ArgumentError("Point has no `M` coordinate"))
 
 isgeometry(::Type{<:Point}) = true
 geomtrait(geom::Point) = PointTrait()
@@ -177,8 +179,14 @@ getcoord(trait::PointTrait, geom::Point, i::Integer) = getcoord(trait, parent(ge
 
 x(trait::PointTrait, geom::Point) = x(trait, parent(geom))
 y(trait::PointTrait, geom::Point) = y(trait, parent(geom))
-z(trait::PointTrait, geom::Point) = z(trait, parent(geom))
-m(trait::PointTrait, geom::Point) = m(trait, parent(geom))
+function z(trait::PointTrait, geom::Point)
+    is3d(geom) || _no_z_error()
+    z(trait, parent(geom))
+end
+function m(trait::PointTrait, geom::Point)
+    ismeasured(geom) || _no_m_error()
+    m(trait, parent(geom))
+end
 
 function Base.:(==)(g1::Point, g2::Point)
     x(g1) == x(g2) && y(g1) == y(g2) && is3d(g1) == is3d(g2) && ismeasured(g1) == ismeasured(g2) || return false
