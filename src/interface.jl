@@ -561,6 +561,8 @@ convexhull(geom) = convexhull(geomtrait(geom), geom)
 
 Return the :X coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For `Tuple` and `Vector` points, the first value is returned.
 """
 x(geom) = x(geomtrait(geom), geom)
 
@@ -569,6 +571,8 @@ x(geom) = x(geomtrait(geom), geom)
 
 Return the :Y coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For `Tuple` and `Vector` points, the second value is returned.
 """
 y(geom) = y(geomtrait(geom), geom)
 
@@ -577,14 +581,22 @@ y(geom) = y(geomtrait(geom), geom)
 
 Return the :Z coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For length 3 `Tuple` and `Vector` points, the third value is returned.
 """
 z(geom) = z(geomtrait(geom), geom)
 
 """
     m(geom) -> Number
 
-Return the :M coordinate of the given `geom`.
+Return the :M (measured) coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For length 4 `Tuple` and `Vector` points, the fouth value
+is returned. 
+
+Length 3 `Tuple` and `Vector` points can *not* represent measured points,
+and will throw an `ArgumentError`.
 """
 m(geom) = m(geomtrait(geom), geom)
 
