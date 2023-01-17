@@ -1,30 +1,62 @@
 using Test
 import GeoInterface as GI
-using BenchmarkTools
-using ProfileView
 
 # Point
 point = GI.Point(1, 2)
 @test !GI.ismeasured(point) 
 @test !GI.is3d(point) 
-@test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
 @test point == GI.Point(point)
+GI.x(point) == 1
+GI.y(point) == 2
+@test_throws ArgumentError GI.z(point)
+@test_throws ArgumentError GI.m(point)
+@test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
+
+# 3D Point 
 pointz = GI.Point(1, 2, 3)
 @test !GI.ismeasured(pointz) 
 @test GI.is3d(pointz) 
-pointz = GI.Point(1, 2, 3, 4)
-@test GI.ismeasured(pointz) 
-@test GI.is3d(pointz) 
-@test pointz == GI.Point(pointz)
-@btime pointz == pointz
-@test point != GI.Point(pointz)
+GI.z(pointz) == 3
+
+# 3D measured point
+pointzm = GI.Point(1, 2, 3, 4)
+pointzm = GI.Point(1, 2, 3, 4)
+@test GI.ismeasured(pointzm) 
+@test GI.is3d(pointzm) 
+@test pointz == GI.Point(pointzm)
+@test point != GI.Point(pointzm)
+@test GI.z(pointzm) == 3
+@test GI.m(pointzm) == 4
+
+# Measured point
 pointm = GI.Point((X=1, Y=2, M=3))
 @test_throws MethodError GI.Point(; X=1, Y=2, T=3)
 @test GI.ismeasured(pointm) 
 @test !GI.is3d(pointm) 
 @test pointm == GI.Point(pointm)
 @test point != GI.Point(pointm)
+@test GI.x(pointm) == 1
+@test GI.y(pointm) == 2
+@test_throws ArgumentError GI.z(pointm)
+@test GI.m(pointm) == 3
+
+# Point made from an array
 pointa = GI.Point([1, 2, 3])
+@test GI.ismeasured([1, 2, 3]) 
+@test !GI.is3d(point) 
+using BenchmarkTools
+geom = [1, 2, 3, 4]
+@benchmark (@inbounds GI.y($geom))
+f(geom) = return @inbounds GI.y(geom);
+g(geom) = return GI.y(geom);
+function h(geom)
+    @inbounds geom[2]
+i(geom) = geom[2]
+
+@benchmark f($geom)
+@benchmark g($geom)
+@test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
+pointm = GI.Point([1, 2, 3, 4])
 @test !GI.ismeasured(point) 
 @test !GI.is3d(point) 
 @test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
