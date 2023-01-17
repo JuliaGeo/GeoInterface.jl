@@ -350,6 +350,8 @@ end
         @test GeoInterface.trait(geom) isa PointTrait
         @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
+        @test !GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
         @test GeoInterface.x(geom) === 1
         @test GeoInterface.y(geom) === 2.0f0
         @test_throws ArgumentError GeoInterface.z(geom)
@@ -360,6 +362,8 @@ end
         @test GeoInterface.trait(geom) isa PointTrait
         @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
+        @test GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
         @test GeoInterface.x(geom) === 1
         @test GeoInterface.y(geom) === 2
         @test GeoInterface.z(geom) === 3.0
@@ -370,6 +374,8 @@ end
         @test GeoInterface.trait(geom) isa PointTrait
         @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom)
         @test GeoInterface.x(geom) === 1
         @test GeoInterface.y(geom) === 2
         @test GeoInterface.z(geom) === 3
