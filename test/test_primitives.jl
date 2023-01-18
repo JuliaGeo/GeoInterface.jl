@@ -308,10 +308,41 @@ end
 
     @testset "Vector" begin
         geom = [1, 2]
+        @test !GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
         @test testgeometry(geom)
-        @test GeoInterface.x(geom) == 1
-        @test GeoInterface.ncoord(geom) == 2
         @test collect(GeoInterface.getcoord(geom)) == geom
+        @test GeoInterface.ncoord(geom) == 2
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2
+        @test_throws ArgumentError GeoInterface.z(geom)
+        @test_throws ArgumentError GeoInterface.m(geom)
+        geom = [1, 2, 3]
+        @test testgeometry(geom)
+        @test collect(GeoInterface.getcoord(geom)) == geom
+        @test GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2
+        @test GeoInterface.z(geom) == 3
+        @test_throws ArgumentError GeoInterface.m(geom)
+        geom = [1, 2, 3, 4]
+        @test testgeometry(geom)
+        @test collect(GeoInterface.getcoord(geom)) == geom
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom)
+        @test GeoInterface.ncoord(geom) == 4
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2
+        @test GeoInterface.z(geom) == 3
+        @test GeoInterface.m(geom) == 4
+        geom = [1, 2, 3, 4, 5]
+        @test !GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
+        @test_throws ArgumentError GeoInterface.x(geom)
+        @test_throws ArgumentError GeoInterface.y(geom)
+        @test_throws ArgumentError GeoInterface.z(geom)
+        @test_throws ArgumentError GeoInterface.m(geom)
     end
 
     @testset "Tuple" begin
@@ -319,10 +350,48 @@ end
         @test GeoInterface.trait(geom) isa PointTrait
         @test GeoInterface.geomtrait(geom) isa PointTrait
         @test testgeometry(geom)
-        @test GeoInterface.x(geom) == 1
-        @test GeoInterface.y(geom) == 2.0f0
+        @test !GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
+        @test GeoInterface.x(geom) === 1
+        @test GeoInterface.y(geom) === 2.0f0
+        @test_throws ArgumentError GeoInterface.z(geom)
+        @test_throws ArgumentError GeoInterface.m(geom)
         @test GeoInterface.ncoord(geom) == 2
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
+        geom = (1, 2, 3.0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
+        @test testgeometry(geom)
+        @test GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
+        @test GeoInterface.x(geom) === 1
+        @test GeoInterface.y(geom) === 2
+        @test GeoInterface.z(geom) === 3.0
+        @test_throws ArgumentError GeoInterface.m(geom)
+        @test GeoInterface.ncoord(geom) == 3
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2, 3]
+        geom = (1, 2, 3, 4.0)
+        @test GeoInterface.trait(geom) isa PointTrait
+        @test GeoInterface.geomtrait(geom) isa PointTrait
+        @test testgeometry(geom)
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom)
+        @test GeoInterface.x(geom) === 1
+        @test GeoInterface.y(geom) === 2
+        @test GeoInterface.z(geom) === 3
+        @test GeoInterface.m(geom) === 4.0
+        @test GeoInterface.ncoord(geom) == 4
+        @test collect(GeoInterface.getcoord(geom)) == [1, 2, 3, 4]
+        geom = (1, 2, 3, 4.0, 5)
+        @test GeoInterface.isgeometry(geom) == false
+        @test GeoInterface.trait(geom) isa Nothing
+        @test GeoInterface.geomtrait(geom) isa Nothing
+        @test_throws MethodError GeoInterface.x(geom)
+        @test_throws MethodError GeoInterface.y(geom)
+        @test_throws MethodError GeoInterface.z(geom)
+        @test_throws MethodError GeoInterface.m(geom)
+        @test_throws MethodError GeoInterface.ncoord(geom) == 4
+        @test_throws MethodError GeoInterface.getcoord(geom)
     end
 
     @testset "NamedTuple" begin
@@ -334,7 +403,19 @@ end
         @test testgeometry(geom)
         @test GeoInterface.x(geom) == 1
         @test GeoInterface.y(geom) == 2.0
+        @test_throws ArgumentError GeoInterface.z(geom)
+        @test_throws ArgumentError GeoInterface.m(geom)
         @test collect(GeoInterface.getcoord(geom)) == [1, 2]
+
+        geom = (; X=1.0, Y=2.0, Z=0x03)
+        @test testgeometry(geom)
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom) == false
+        @test GeoInterface.coordnames(geom) == (:X, :Y, :Z)
+        @test GeoInterface.x(geom) == 1
+        @test GeoInterface.y(geom) == 2.0
+        @test GeoInterface.z(geom) == 0x03
+        @test_throws ArgumentError GeoInterface.m(geom)
 
         geom = (; X=1, Y=2, Z=3.0f0, M=4.0)
         @test GeoInterface.trait(geom) isa PointTrait
@@ -355,15 +436,20 @@ end
         @test GeoInterface.getcoord(geom, 4) === 4.0
         @test collect(GeoInterface.getcoord(geom)) == [1, 2, 3, 4]
 
-        geom = (; X=1.0, Y=2.0, Z=0x03)
-        @test testgeometry(geom)
-        @test GeoInterface.is3d(geom)
-        @test GeoInterface.ismeasured(geom) == false
-        @test GeoInterface.coordnames(geom) == (:X, :Y, :Z)
         geom = (; Z=3, X=1, Y=2, M=4)
         @test testgeometry(geom)
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
         @test GeoInterface.coordnames(geom) == (:Z, :X, :Y, :M)
+
+        geom = (; A=0, X=1, Y=2, Z=3.0f0, M=4.0)
+        @test GeoInterface.trait(geom) isa Nothing
+        @test GeoInterface.geomtrait(geom) isa Nothing
+        @test_throws MethodError GeoInterface.x(geom)
+        @test_throws MethodError GeoInterface.y(geom)
+        @test_throws MethodError GeoInterface.z(geom)
+        @test_throws MethodError GeoInterface.m(geom)
+        @test_throws MethodError GeoInterface.ncoord(geom) == 4
+        @test_throws MethodError GeoInterface.getcoord(geom)
     end
 
     @testset "NamedTupleFeature" begin
