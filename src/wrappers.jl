@@ -133,7 +133,6 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     end
     @eval extent(trait::$trait, wrapper::$geomtype) = wrapper.extent
 end
-# :nring, :getring, :getexterior, :nhole, :gethole
 
 struct Point{T,Z,M} <: WrapperGeometry{T,Z,M}
     geom::T
