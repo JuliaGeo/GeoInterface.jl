@@ -9,11 +9,11 @@ export Point, EmptyPoint, LineString, Polygon, Triangle, MultiPoint, MultiCurve,
 Provides geometry wrappers that accept any GeoInterface compatible
 objects. These can be usefull for building custom geometries, or in tests.
 """
-abstract type WrapperGeometry{T,Z,M} end
+abstract type WrapperGeometry{Z,M,T} end
 
 isgeometry(::Type{<:WrapperGeometry}) = true
-is3d(::WrapperGeometry{<:Any,Z}) where Z = Z
-ismeasured(::WrapperGeometry{<:Any,<:Any,M})  where M = M
+is3d(::WrapperGeometry{Z}) where Z = Z
+ismeasured(::WrapperGeometry{<:Any,M})  where M = M
 
 Base.parent(geom::WrapperGeometry) = geom.geom
 # Here converting means wrapping
@@ -34,7 +34,7 @@ const geomtype = geointerface_geomtype
 
 # Interface methods
 # With indexing
-function getgeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{T}, i) where T
+function getgeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}, i) where T
     isgeometry(T) ? getgeom(trait, parent(geom), i) : parent(geom)[i]
 end
 getpoint(trait::AbstractGeometryTrait, geom::WrapperGeometry, i) = getpoint(trait, parent(geom), i)
@@ -58,7 +58,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         (:PolyhedralSurface, :PolyhedralSurfaceTrait, :Polygon, :PolygonTrait, nothing, 3),
     )
     @eval begin
-        struct $geomtype{T,Z,M,E} <: WrapperGeometry{T,Z,M}
+        struct $geomtype{Z,M,T,E} <: WrapperGeometry{Z,M,T}
             geom::T
             extent::E
         end
@@ -71,7 +71,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             geomtrait(geom) isa $trait || _argument_error(T, $trait)
             Z = is3d(geom)
             M = ismeasured(geom)
-            return $geomtype{T,Z,M,E}(geom, extent)
+            return $geomtype{Z,M,T,E}(geom, extent)
         # Otherwise wrap an array of child geometries
         elseif geom isa AbstractArray
             child = first(geom)
@@ -83,7 +83,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 end
                 Z = is3d(first(geom))
                 M = ismeasured(first(geom))
-                return $geomtype{T,Z,M,E}(geom, extent)
+                return $geomtype{Z,M,T,E}(geom, extent)
             # Where we have nested points, as in `coordinates(geom)`
             else
                 if child isa AbstractArray
@@ -93,7 +93,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                         M = ismeasured(first(child))
                         childtype = $childtype
                         newgeom = childtype.(geom)
-                        return $geomtype{typeof(newgeom),Z,M,E}(newgeom, extent)
+                        return $geomtype{Z,M,typeof(newgeom),E}(newgeom, extent)
                     elseif $nesting === 3
                         all(child) do child2
                             child2 isa AbstractArray && all(child3 -> geomtrait(child3) isa PointTrait, child2) 
@@ -102,7 +102,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                         M = ismeasured(first(first(child)))
                         childtype = $childtype
                         newgeom = childtype.(geom)
-                        return $geomtype{typeof(newgeom),Z,M,E}(newgeom, extent)
+                        return $geomtype{Z,M,typeof(newgeom),E}(newgeom, extent)
                     else
                         _wrong_child_error($geomtype, $child_trait, child)
                     end
@@ -134,9 +134,10 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     @eval extent(trait::$trait, wrapper::$geomtype) = wrapper.extent
 end
 
-struct Point{T,Z,M} <: WrapperGeometry{T,Z,M}
+struct Point{Z,M,T} <: WrapperGeometry{Z,M,T}
     geom::T
 end
+Point{Z,M}(geom::T) where {Z,M,T} = Point{Z,M,T}(geom)
 function Point(x::Real, y::Real, args::Real...)
     Base.length(args) < 3 || _ncoord_error(Base.length(args) + 2)
     return Point((x, y, args...))
@@ -154,17 +155,13 @@ end
 function Point(geom)
     geomtrait(geom) isa PointTrait || _parent_type_error(geom)
     if is3d(geom) && ismeasured(geom)
-        g = (X=x(geom), Y=y(geom), Z=z(geom), M=m(geom))
-        return Point{typeof(g),true,true}(g)
+        return Point{true,true,typeof(geom)}(geom)
     elseif is3d(geom)
-        g = (X=x(geom), Y=y(geom), Z=z(geom))
-        return Point{typeof(g),true,false}(g)
+        return Point{true,false,typeof(geom)}(geom)
     elseif ismeasured(geom)
-        g = (X=x(geom), Y=y(geom), M=m(geom))
-        return Point{typeof(g),false,true}(g)
+        return Point{false,true,typeof(geom)}(geom)
     else
-        g = (X=x(geom), Y=y(geom))
-        return Point{typeof(g),false,false}(g)
+        return Point{false,false,typeof(geom)}(geom)
     end
 end
 
@@ -179,14 +176,13 @@ getcoord(trait::PointTrait, geom::Point, i::Integer) = getcoord(trait, parent(ge
 
 x(trait::PointTrait, geom::Point) = x(trait, parent(geom))
 y(trait::PointTrait, geom::Point) = y(trait, parent(geom))
-function z(trait::PointTrait, geom::Point)
-    is3d(geom) || _no_z_error()
-    z(trait, parent(geom))
-end
-function m(trait::PointTrait, geom::Point)
-    ismeasured(geom) || _no_m_error()
-    m(trait, parent(geom))
-end
+z(trait::PointTrait, geom::Point{true}) = z(trait, parent(geom))
+z(trait::PointTrait, geom::Point{false}) = _no_z_error()
+m(trait::PointTrait, geom::Point{<:Any,false}) = _no_m_error()
+m(trait::PointTrait, geom::Point{<:Any,true}) = m(trait, parent(geom))
+# Special-case vector and tuple points so we can force them to be measured while not 3d
+m(trait::PointTrait, geom::Point{false,true,<:PointTuple3}) = parent(geom)[3]
+m(trait::PointTrait, geom::Point{false,true,<:Vector{<:Real}}) = parent(geom)[3]
 
 function Base.:(==)(g1::Point, g2::Point)
     x(g1) == x(g2) && y(g1) == y(g2) && is3d(g1) == is3d(g2) && ismeasured(g1) == ismeasured(g2) || return false
