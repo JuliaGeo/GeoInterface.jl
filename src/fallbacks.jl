@@ -22,6 +22,9 @@ isempty(::AbstractGeometryTrait, geom) = false
 ngeom(::AbstractPointTrait, geom) = 0
 getgeom(::AbstractPointTrait, geom) = nothing
 getgeom(::AbstractPointTrait, geom, i) = nothing
+getpoint(::AbstractPointTrait, geom, i) = geom # Helps generic `gepoint` work with mixed types
+getpoint(::AbstractPointTrait, geom) = (geom,) # getpoint without i always returns an iterable
+npoint(::AbstractPointTrait, geom, i) = 1
 
 ## LineStrings
 npoint(t::AbstractCurveTrait, geom) = ngeom(t, geom)
@@ -71,7 +74,7 @@ getpatch(t::AbstractPolyhedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom,
 getpoint(t::AbstractPolyhedralSurfaceTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
 
 # Collection
-getpoint(t::AbstractGeometryCollectionTrait, geom) = flatten((getpoint(t, geom, i) for i in 1:ngeom(t, geom)))
+getpoint(t::AbstractGeometryCollectionTrait, collection) = flatten((p for p in getpoint(g)) for g in getgeom(collection))
 
 ## Default iterator
 getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(t, geom))

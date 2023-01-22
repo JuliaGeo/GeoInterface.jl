@@ -41,6 +41,7 @@ getpoint(trait::AbstractGeometryTrait, geom::WrapperGeometry, i) = getpoint(trai
 gethole(trait::AbstractGeometryTrait, geom::WrapperGeometry, i) = gethole(trait, parent(geom), i)
 
 for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
+        (:Line, :LineTrait, :Point, :PointTrait, ==(2), 1),
         (:LineString, :LineStringTrait, :Point, :PointTrait, >=(2), 1),
         (:LinearRing, :LinearRingTrait, :Point, :PointTrait, >=(3), 1),
         (:Triangle, :TriangleTrait, :Point, :PointTrait, ==(3), 1),
@@ -113,7 +114,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             _parent_type_error(geom)
         end
     end
-    @eval function ngeom(wrapper::$geomtype)
+    @eval function ngeom(trait::$trait, wrapper::$geomtype)
         p = parent(wrapper)
         if isgeometry(p)
             return ngeom(p)
@@ -130,7 +131,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             return p
         end
     end
-    @eval extent(wrapper::$geomtype) = wrapper.extent
+    @eval extent(trait::$trait, wrapper::$geomtype) = wrapper.extent
 end
 # :nring, :getring, :getexterior, :nhole, :gethole
 

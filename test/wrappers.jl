@@ -61,6 +61,12 @@ pointm = GI.Point([1, 2, 3, 4])
 @test !GI.is3d(point) 
 @test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
 
+# Line
+line = GI.Line([(1, 2), (3, 4)])
+@test line == GI.Line(line) 
+@test GI.getgeom(line, 1) === (1, 2)
+@test GI.getgeom(line) == [(1, 2), (3, 4)]
+
 # LineString
 linestring = GI.LineString([(1, 2), (3, 4)])
 @test linestring == GI.LineString(linestring) 
@@ -107,8 +113,11 @@ tin = GI.TIN([triangle])
 @test_throws ArgumentError GI.TIN([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 
 # GeometryCollection
-collection = GI.GeometryCollection([linestring, linearring, triangle, quad, hex, multipoint, (1, 2)])
-GI.getpoint(collection)
+geoms = [line, linestring, linearring, triangle, quad, hex, multipoint, (1, 2)]
+collection = GI.GeometryCollection(geoms)
+@test collection == GI.GeometryCollection(collection)
+@test GI.getgeom(collection) == geoms
+@test collect(GI.getpoint(collection)) == vcat(map(collect ∘ GI.getpoint, geoms)...)
 
 # MultiCurve
 multicurve = GI.MultiCurve([linestring, linearring])
