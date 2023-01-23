@@ -422,7 +422,7 @@ it is calculated from the coordinates of all geometries in `obj`.
 function extent(obj; fallback=true)
     ex = extent(trait(obj), obj)
     isnothing(ex) && fallback && return calc_extent(trait(obj), obj)
-    return nothing
+    return ex
 end
 
 """

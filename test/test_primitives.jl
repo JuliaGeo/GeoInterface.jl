@@ -75,7 +75,7 @@ GeoInterface.isfeature(::Type{<:MyFeature}) = true
 GeoInterface.trait(feature::MyFeature) = FeatureTrait()
 GeoInterface.geometry(f::MyFeature) = f.geometry
 GeoInterface.properties(f::MyFeature) = f.properties
-GeoInterface.extent(::FeatureTrait, f::MyFeature) = nothing
+GeoInterface.extent(::FeatureTrait, f::MyFeature) = Extent(X=(1, 1), Y=(2, 2))
 
 GeoInterface.isfeaturecollection(fc::Type{<:MyFeatureCollection}) = true
 GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
