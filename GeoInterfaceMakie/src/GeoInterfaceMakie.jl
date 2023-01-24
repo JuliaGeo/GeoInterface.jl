@@ -20,12 +20,12 @@ function plottype_from_geomtrait(::Union{GI.PolygonTrait,GI.MultiPolygonTrait, G
 end
 function pttype(geom)
     if GI.is3d(geom)
-        GB.Point3f
+        GB.Point3{Float64}
     else
-        GB.Point2f
+        GB.Point2{Float64}
     end
 end
-function points(geom)::Union{Vector{GB.Point2f}, Vector{GB.Point3f}}
+function points(geom)::Union{Vector{GB.Point2{Float64}}, Vector{GB.Point3{Float64}}}
     Pt = pttype(geom)
     out = Pt[]
     points!(out, GI.geomtrait(geom), geom)
@@ -40,13 +40,13 @@ end
     push!(out, _convert(eltype(out), pt))
     out
 end
-function _convert(::Type{GB.Point2f}, pt)
+function _convert(::Type{GB.Point2{Float64}, pt)
     x,y = GI.getcoord(pt)
-    GB.Point2f(x,y)
+    GB.Point2{Float64}(x,y)
 end
-function _convert(::Type{GB.Point3f}, pt)
+function _convert(::Type{GB.Point3{Float64}}, pt)
     x,y,z = GI.getcoord(pt)
-    GB.Point3f(x,y,z)
+    GB.Point3{Float64}(x,y,z)
 end
 
 function basicsgeom(geom)
@@ -83,11 +83,20 @@ function expr_enable(Geom)
         function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom)
             $_convert_arguments(p,geom)
         end
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::AbstractArray{<: $Geom})
+            $_convert_arguments.((p,),geom)
+        end
         function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom)
             $_convert_arguments(p,geom)
         end
+        function $MC.convert_arguments(p::$MC.PointBased, geom::AbstractArray{<: $Geom})
+            $_convert_arguments.((p,),geom)
+        end
         function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom)
             $_convert_arguments(p,geom)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::AbstractArray{<: $Geom})
+            $_convert_arguments.((p,),geom)
         end
     end
 end
