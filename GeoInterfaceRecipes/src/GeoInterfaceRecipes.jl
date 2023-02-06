@@ -44,7 +44,7 @@ RecipesBase.@recipe function f(t::Union{GI.AbstractLineStringTrait,GI.MultiLineS
     _coordvecs(t, geom)
 end
 
-RecipesBase.@recipe function f(t::Union{GI.PolygonTrait,GI.MultiPolygonTrait}, geom)
+RecipesBase.@recipe function f(t::Union{GI.PolygonTrait,GI.MultiPolygonTrait,GI.LinearRingTrait}, geom)
     seriestype --> :shape
     _coordvecs(t, geom)
 end
@@ -97,6 +97,14 @@ function _coordvecs(::GI.MultiLineStringTrait, geom)
     else
         vecs = ntuple(_ -> Array{Float64}(undef, n), 2)
         return loop!(vecs, geom)
+    end
+end
+function _coordvecs(::GI.LinearRingTrait, geom)
+    points = GI.getpoint(geom)
+    if GI.is3d(geom)
+        return getcoord.(points, 1), getcoord.(points, 2), getcoord.(points, 3)
+    else
+        return getcoord.(points, 1), getcoord.(points, 2)
     end
 end
 function _coordvecs(::GI.PolygonTrait, geom)
