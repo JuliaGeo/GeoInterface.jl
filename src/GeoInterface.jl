@@ -54,7 +54,7 @@ include("utils.jl")
 include("base.jl")
 include("geometry_wrappers.jl")
 
-using .Geometries
-using .Geometries: geointerface_geomtype
+using .Wrappers
+using .Wrappers: geointerface_geomtype
 
 end # module
