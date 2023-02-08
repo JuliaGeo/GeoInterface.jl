@@ -71,7 +71,7 @@ getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) 
 npatch(t::AbstractPolyhedralSurfaceTrait, geom)::Integer = ngeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom) = getgeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom, i)
-getpoint(t::AbstractPolyhedralSurfaceTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
+getpoint(t::AbstractPolyhedralSurfaceTrait, geom) = flatten((p for p in getpoint(g)) for g in getgeom(t, geom))
 
 # Collection
 getpoint(t::AbstractGeometryCollectionTrait, collection) = flatten((p for p in getpoint(g)) for g in getgeom(collection))

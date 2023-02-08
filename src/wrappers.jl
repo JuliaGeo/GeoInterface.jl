@@ -22,25 +22,32 @@ module Wrappers
 
 import Extents
 
-import ..GeoInterface: AbstractGeometryTrait, PointTrait, LineTrait, LineStringTrait, LinearRingTrait, TriangleTrait,
-       QuadTrait, PentagonTrait, HexagonTrait, RectangleTrait, MultiPointTrait, PolygonTrait, MultiLineStringTrait, 
-       MultiCurveTrait, MultiPolygonTrait, TINTrait, GeometryCollectionTrait, PolyhedralSurfaceTrait, 
-       FeatureTrait, FeatureCollectionTrait, PointTuple3
+import ..GeoInterface: AbstractGeometryTrait, PointTrait, LineTrait, LineStringTrait, LinearRingTrait,
+       MultiPointTrait, PolygonTrait, MultiLineStringTrait, MultiCurveTrait, MultiPolygonTrait,
+       AbstractCurveTrait, GeometryCollectionTrait, FeatureTrait, FeatureCollectionTrait, PointTuple3
 
-import ..GeoInterface: isgeometry, isfeature, isfeaturecollection, trait, geomtrait, is3d, ismeasured, getgeom,
-       getpoint, gethole, getring, ngeom, npoint, nhole, convert, x, y, z, m, getfeature, nfeature, properties, extent, crs
+# import PolyhedralSurfaceTrait, TINTrait, TriangleTrait, QuadTrait, PentagonTrait, HexagonTrait, RectangleTrait,
 
-export Point, EmptyPoint, LineString, Polygon, Triangle, MultiPoint, MultiCurve, MultiPolygon, MultiLineString, TIN, Collection, Feature, FeatureCollection
+import ..GeoInterface: isgeometry, isfeature, isfeaturecollection, is3d, ismeasured,
+       trait, geomtrait, convert, x, y, z, m, extent, crs,
+       getgeom, getpoint, getring, gethole, getcoord,
+       ngeom, npoint, nring, nhole, ncoord,
+       nfeature, getfeature, geometry, properties
+
+export Point, Line, LineString, LinearRing, Polygon, MultiPoint, MultiPolygon, MultiLineString, MultiCurve,
+    GeometryCollection, Feature, FeatureCollection
+
+# export Triangle, Pentagon, Hexagon, TIN
 
 # Implement interface
 
 """
-    WrapperGeometry{Z,M,T}
+    abstract type WrapperGeometry{Z,M,T}
 
 Provides geometry wrappers that wrap any GeoInterface compatible
-objects, or vectors or their child object.
+objects, or vectors or their child objects.
 
-These can be usefull for building custom geometries, in tests,
+These can be useful for building custom geometries, in tests,
 and in packages with no direct dependencies on specific geometry
 types.
 
@@ -49,10 +56,6 @@ to indicate if a z dimension or measures are present. They are
 usually detected from the wrapped object, but can be added manually
 e.g. for `Tuple` or `Vector` points to have the third value used as
 measures.
-
-# Example
-
-
 """
 abstract type WrapperGeometry{Z,M,T} end
 
@@ -63,10 +66,10 @@ ismeasured(::WrapperGeometry{<:Any,M})  where M = M
 Base.parent(geom::WrapperGeometry) = geom.geom
 
 function Base.:(==)(g1::WrapperGeometry, g2::WrapperGeometry)
-    all(((a, b),) -> a == b, zip(GeoInterface.getgeom(g1), GeoInterface.getgeom(g2)))
+    all(((a, b),) -> a == b, zip(getgeom(g1), getgeom(g2)))
 end
 function Base.:(!=)(g1::WrapperGeometry, g2::WrapperGeometry)
-    any(!=, zip(GeoInterface.getgeom(g1), GeoInterface.getgeom(g2)))
+    any(!=, zip(getgeom(g1), getgeom(g2)))
 end
 
 geointerface_geomtype(trait) = geomtype(typeof(trait))
@@ -85,27 +88,28 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         (:Line, :LineTrait, :Point, :PointTrait, ==(2), 1),
         (:LineString, :LineStringTrait, :Point, :PointTrait, >=(2), 1),
         (:LinearRing, :LinearRingTrait, :Point, :PointTrait, >=(3), 1),
-        (:Triangle, :TriangleTrait, :Point, :PointTrait, ==(3), 1),
-        (:Quad, :QuadTrait, :Point, :PointTrait, ==(4), 1),
-        (:Pentagon, :PentagonTrait, :Point, :PointTrait, ==(4), 1),
-        (:Hexagon, :HexagonTrait, :Point, :PointTrait, ==(6), 1),
-        (:Rectangle, :RectangleTrait, :Point, :PointTrait, nothing, 1),
         (:MultiPoint, :MultiPointTrait, :Point, :PointTrait, nothing, 1),
-        (:Polygon, :PolygonTrait, :LinearRing, :LineStringTrait, nothing, 2),
+        (:Polygon, :PolygonTrait, :LinearRing, :LinearRingTrait, nothing, 2),
         (:MultiLineString, :MultiLineStringTrait, :LineString, :LineStringTrait, nothing, 2),
         (:MultiCurve, :MultiCurveTrait, :LineString, :AbstractCurveTrait, nothing, 2),
         (:MultiPolygon, :MultiPolygonTrait, :Polygon, :PolygonTrait, nothing, 3),
-        (:TIN, :TINTrait, :Triangle, :TriangleTrait, nothing, 2),
         (:GeometryCollection, :GeometryCollectionTrait, :AbstractGeometry, :AbstractGeometryTrait, nothing, nothing),
-        (:PolyhedralSurface, :PolyhedralSurfaceTrait, :Polygon, :PolygonTrait, nothing, 3),
+        # TODO
+        # (:Triangle, :TriangleTrait, :Point, :PointTrait, ==(3), 1),
+        # (:Quad, :QuadTrait, :Point, :PointTrait, ==(4), 1),
+        # (:Pentagon, :PentagonTrait, :Point, :PointTrait, ==(4), 1),
+        # (:Hexagon, :HexagonTrait, :Point, :PointTrait, ==(6), 1),
+        # (:Rectangle, :RectangleTrait, :Point, :PointTrait, nothing, 1),
+        # (:TIN, :TINTrait, :Triangle, :TriangleTrait, nothing, 2),
+        # (:PolyhedralSurface, :PolyhedralSurfaceTrait, :Polygon, :PolygonTrait, nothing, 3),
     )
 
     # Prepare docstring example
     childname = lowercase(string(childtype))
     example_child_geoms = if geomtype == :Polygon
-        "child_geoms = [interior, ring, ring]"
+        "[interior, hole1, hole2]"
     else
-        "child_geoms = [$(childname)1, $(childname)2, $(childname)3))]"
+        "[$(childname)1, $(childname)2, $(childname)3))]"
     end
     docstring = """
         $geomtype
@@ -121,20 +125,21 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
 
     ## Parameters (optional)
 
+    These are usually detected from the parent object properties.
+
     - `Z`: `true` or `false` if there is a z dimension.
     - `M`: `true` or `false` if there are measures.
 
-    # Example
+    ## Examples
 
     ```julia
-    $geomtype(geometry)
+    geom = $geomtype(geometry)
     ```
 
-    Or with child object of `$child_trait()`:
+    Or with child objects with [`$child_trait`](@ref):
 
     ```julia
-    $example_child_geoms
-    $geomtype(child_geoms)
+    geom = $geomtype($example_child_geoms)
     ```
     """
     @eval begin
@@ -150,6 +155,8 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         convert(::Type{$geomtype}, ::$trait, geom) = $geomtype(geom)
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
+        extent(::$trait, geom::$geomtype) =
+            isnothing(geom.extent) && isgeometry(parent(geom)) ? extent(parent(geom)) : geom.extent
     end
     @eval function $geomtype{Z,M}(geom::T; extent::E=nothing) where {Z,M,T,E}
         Z isa Union{Bool,Nothing} || throw(ArgumentError("Z Parameter must be `true`, `false` or `nothing`"))
@@ -226,7 +233,6 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             return p
         end
     end
-    @eval extent(trait::$trait, wrapper::$geomtype) = wrapper.extent
 end
 
 @noinline _wrong_child_error(geomtype, C, child) = throw(ArgumentError("$geomtype must have child objects with trait $C, got $(typeof(child)) with trait $(geomtrait(child))"))
@@ -266,7 +272,7 @@ struct Point{Z,M,T} <: WrapperGeometry{Z,M,T}
 end
 function Point{Z,M}(geom::T) where {Z,M,T}
     expected_coords = 2 + Z + M
-    ncoords(geom) == expected_coords || _coord_length_error(Z, M, ncoords(geom))
+    ncoord(geom) == expected_coords || _coord_length_error(Z, M, ncoord(geom))
     Point{Z,M,T}(geom)
 end
 Point(x::Real, y::Real, args::Real...) = Point((x, y, args...))
@@ -296,7 +302,7 @@ end
 
 isgeometry(::Type{<:Point}) = true
 geomtrait(geom::Point) = PointTrait()
-ncoord(trit::PointTrait, geom::Point) = ncoord(trait, parent(geom))
+ncoord(trait::PointTrait, geom::Point) = ncoord(trait, parent(geom))
 getcoord(trait::PointTrait, geom::Point, i::Integer) = getcoord(trait, parent(geom), i)
 convert(::Type{Point}, ::PointTrait, geom) = Point(geom)
 convert(::Type{Point}, ::PointTrait, geom::Point) = geom
@@ -333,43 +339,75 @@ Base.:(!=)(g1::Point, g2::Point) = !(g1 == g2)
 
 A Feature wrapper.
 
+## Arguments
+
 - `geometry`: any GeoInterface compatible geometry object, or `nothing`.
 
-# Keywords
+## Keywords
 
 - `properties`: any object that defines `propertynames` and `getproperty`
 - `crs`: Any GeoFormatTypes.jl crs type, or `nothing`
 - `extent`: An Extents.jl `Extent` or `nothing`
+
+## Example
+
+```julia
+feature = Feature(geom; properties=(a=1, b="2"), crs=EPSG(4326))
+```
 """
-struct Feature{G,P,C,E<:Union{Extents.Extent,Nothing}}
-    geometry::G
-    properties::P
+struct Feature{T,C,E<:Union{Extents.Extent,Nothing}}
+    parent::T
     crs::C
     extent::E
 end
-Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing) =
-    Feature(geometry, properties, crs, extent)
+function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
+    if isfeature(geometry)
+        Feature(geometry, crs, extent)
+    else
+        # Wrap a NamedTuple feature
+        Feature((; geometry, properties...), crs, extent)
+    end
+end
+
+Base.parent(f::Feature) = f.parent
 
 isfeature(::Type{<:Feature}) = true
-trait(feature::Feature) = FeatureTrait()
-geometry(f::Feature) = f.geometry
-properties(f::Feature) = f.properties
-extent(f::Feature) = f.extent
-crs(f::Feature) = f.crs
+trait(::Feature) = FeatureTrait()
+geometry(f::Feature) = geometry(parent(f))
+properties(f::Feature) = properties(parent(f))
+extent(f::Feature) =
+    isfeature(parent(f)) && isnothing(f.extent) ? extent(parent(f)) : f.extent
+crs(f::Feature) =
+    isfeature(parent(f)) && isnothing(f.crs) ? crs(parent(f)) : f.crs
 
 """
     FeatureCollection(features; [crs, extent])
 
 A FeatureCollection wrapper.
 
+## Arguments
+
 - `features`: an `AbstractArray` of GeoInterface compatible features.
     Iterables are accepted but will be collected to an `Array`.
 
-# Keywords
+## Keywords
 
 - `crs`: Any GeoFormatTypes.jl crs type, or `nothing`
 - `extent`: An Extents.jl `Extent` or `nothing`
 
+## Examples
+
+```julia
+fc = FeatureCollection([feature1, feature2, feature3];
+    crs=EPSG(4326), extent=Extent(X=(11.0, 34.0), Y=(45.7, 78.0))
+)
+```
+
+Or wrap another `FeatureColection`, e.g. if it has no crs attached:
+
+```julia
+fc = FeatureCollection(featurecollection, crs=EPSG(4326))
+```
 """
 struct FeatureCollection{P,C,E}
     parent::P
@@ -394,23 +432,13 @@ trait(fc::FeatureCollection) = FeatureCollectionTrait()
 function nfeature(::FeatureCollectionTrait, fc::FeatureCollection)
     isfeaturecollection(parent(fc)) ? nfeature(t, parent(fc)) : length(fc.geoms)
 end
-getfeature(::FeatureCollectionTrait, fc::FeatureCollection) = fc.features
-function getfeature(t::FeatureCollectionTrait, fc::FeatureCollection, i::Integer)
+getfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
+    isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc)) : fc.features
+getfeature(t::FeatureCollectionTrait, fc::FeatureCollection, i::Integer) =
     isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc), i) : fc.features[i]
-end
-function extent(fc::FeatureCollection)
-    if isfeaturecollection(parent(fc)) && isnothing(fc.extent)
-        extent(parent(fc))
-    else
-        fc.extent
-    end
-end
-function crs(fc::FeatureCollection)
-    if isfeaturecollection(parent(fc)) && isnothing(fc.crs)
-        crs(parent(fc))
-    else
-        fc.crs
-    end
-end
+extent(fc::FeatureCollection) =
+    isfeaturecollection(parent(fc)) && isnothing(fc.extent) ? extent(parent(fc)) : fc.extent
+crs(fc::FeatureCollection) =
+    isfeaturecollection(parent(fc)) && isnothing(fc.crs) ? crs(parent(fc)) : fc.crs
 
 end # module
