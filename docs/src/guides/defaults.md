@@ -104,3 +104,5 @@ crs and extents to any GeoInterface.jl compatible geometries.
 - [`Feature`](@ref)
 - [`FeatureCollection`](@ref)
 
+Wrappers are not exported by default because they are very common names used by
+other packages. To use them directly, run `using GeoInterface.Wrappers`.
