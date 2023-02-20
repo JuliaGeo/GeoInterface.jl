@@ -152,6 +152,7 @@ multipolygon = GI.MultiPolygon(multipolygon_coords)
 
 # Feature
 feature = GI.Feature(multipolygon; properties=(x=1, y=2, z=3))
+@test feature === GI.Feature(feature)
 @test GI.geometry(feature) === multipolygon
 @test GI.properties(feature) === (x=1, y=2, z=3)
 @test GI.crs(feature) == nothing
@@ -164,7 +165,7 @@ feature = GI.Feature(multipolygon;
 @test GI.properties(feature) === (x=1, y=2, z=3)
 @test GI.crs(feature) == EPSG(4326)
 @test GI.extent(feature) == GI.extent(multipolygon) 
-@test GI.testfeature(feature1)
+@test GI.testfeature(feature)
 
 # Feature Collection
 fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))

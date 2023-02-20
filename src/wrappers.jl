@@ -252,9 +252,13 @@ measures or z dimension.
 
 ```jldoctest
 using GeoInterface
+using GeoInterface.Wrappers
 point = Point{false,true}([1, 2, 3])
-@asssert GeoInterface.ismeasured(point) == true
-@asssert GeoInterface.is3d(point) == false
+@assert GeoInterface.ismeasured(point) == true
+@assert GeoInterface.is3d(point) == false
+GeoInterface.m(point)
+# output
+3
 ```
 """
 struct Point{Z,M,T} <: WrapperGeometry{Z,M,T}
@@ -350,8 +354,8 @@ struct Feature{T,C,E<:Union{Extents.Extent,Nothing}}
     crs::C
     extent::E
 end
-function Feature(fc::FeatureCollection; crs=crs(fc), extent=extent(fc))
-    Feature(parent(fc), crs, extent)
+function Feature(f::Feature; crs=f.crs, extent=f.extent)
+    Feature(parent(f), crs, extent)
 end
 function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
     if isfeature(geometry)
