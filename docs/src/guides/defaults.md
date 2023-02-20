@@ -59,3 +59,48 @@ GeoInterface.y(b) == 2
 c = (;X=1, Y=2, Z=3)
 GeoInterface.z(c) == 3
 ```
+
+# Wrapper types
+
+It is common that a package does not implement all objects supported by
+GeoInterface.jl, and may lack the ability to define features. It is useful
+to define generic objects that can be used in testing and for scripting where
+geometries need to be constructed from components. Using generic wrappers 
+means this is backend agnostic: the same code will work if geometries come from
+GeoJSON.jl, Shapefile.jl, LibGEOS.jl, or other packages defining GeoInterface.jl
+traits.
+
+Wrapper types are provided for constructing geometries out of any lower-level
+components that implement GeoInterface.jl traits. These wrappers can wrap
+objects of the same trait (possibly to add extent data), vectors of child
+objects, or nested vectors of lower level children, such as points.
+
+As an example, we can construct a polygon from any GeoInterface.jl compatible 
+geometries that return `LinearRingTrait` from `GeoInterface.geomtrait`:
+
+```julia
+poly = Polygon([interior, hole1, hole2])
+```
+
+See the API documentation for each wrapper for more details.
+
+- [`Point`](@ref)
+- [`Line`](@ref)
+- [`LineString`](@ref)
+- [`LinearRing`](@ref)
+- [`Polygon`](@ref)
+- [`MultiLineString`](@ref)
+- [`MultiPolygon`](@ref)
+- [`MultiPoint`](@ref)
+- [`PolyhedralSurface`](@ref)
+- [`GeometryCollection`](@ref)
+
+Wrappers for Triangle, Hexagon and some other geometries are yet to be implemented.
+Please make a GitHub issue if you need them.
+
+Feature and FeatureCollection wrappers are also provided, to add properties,
+crs and extents to any GeoInterface.jl compatible geometries.
+
+- [`Feature`](@ref)
+- [`FeatureCollection`](@ref)
+
