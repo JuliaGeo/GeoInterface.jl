@@ -118,7 +118,6 @@ geoms = [line, linestring, linearring, multipoint, (1, 2)]
 collection = GI.GeometryCollection(geoms)
 @test collection == GI.GeometryCollection(collection)
 @test GI.getgeom(collection) == geoms
-@test collect(GI.getpoint(collection)) == vcat(map(collect ∘ GI.getpoint, geoms)...)
 @test GI.testgeometry(collection)
 
 # MultiCurve
@@ -137,6 +136,15 @@ multipolygon = GI.MultiPolygon([polygon])
 @test_throws ArgumentError GI.MultiPolygon([[[[(1, 2), (3, 4), (3, 2), (1, 4)]]]])
 @test GI.testgeometry(multipolygon)
 
+# PolyhedralSurface
+polyhedralsurface = GI.PolyhedralSurface([polygon, polygon])
+@test polyhedralsurface == GI.PolyhedralSurface(polyhedralsurface)
+@test GI.getgeom(polyhedralsurface, 1) === polygon
+@test collect(GI.getgeom(polyhedralsurface)) == [polygon, polygon]
+@test GI.getgeom(polyhedralsurface, 1) == polygon
+@test collect(GI.getpoint(polyhedralsurface)) == vcat(collect(GI.getpoint(polygon)), collect(GI.getpoint(polygon)))
+@test GI.testgeometry(polyhedralsurface)
+
 # Round-trip coordinates
 multipolygon_coords = [[[[1, 2], [3, 4], [3, 2], [1, 4]]]]
 multipolygon = GI.MultiPolygon(multipolygon_coords)
@@ -147,30 +155,31 @@ feature = GI.Feature(multipolygon; properties=(x=1, y=2, z=3))
 @test GI.geometry(feature) === multipolygon
 @test GI.properties(feature) === (x=1, y=2, z=3)
 @test GI.crs(feature) == nothing
-@test GI.extent(feature) == 
-GI.extent(multipolygon) 
+@test GI.extent(feature) == GI.extent(multipolygon) 
 @test GI.testfeature(feature)
 feature = GI.Feature(multipolygon; 
-    properties=(x=1, y=2, z=3), crs=EPSG(4326), extent=Extents.Extent(X = (1, 3), Y = (2, 4))
+    properties=(x=1, y=2, z=3), crs=EPSG(4326), extent=extent(multipolygon)
 )
 @test GI.geometry(feature) === multipolygon
 @test GI.properties(feature) === (x=1, y=2, z=3)
 @test GI.crs(feature) == EPSG(4326)
 @test GI.extent(feature) == GI.extent(multipolygon) 
-@test GI.testfeature(feature)
+@test GI.testfeature(feature1)
 
 # Feature Collection
-feature = Feature(multipolygon; properties=(x=1, y=2, z=3)) 
-@test GI.getgeom(multipolygon, 1) === polygon
-@test collect(GI.getpoint(multipolygon)) == collect(GI.getpoint(polygon))
-@test_throws ArgumentError GI.MultiPolygon([[[[(1, 2), (3, 4), (3, 2), (1, 4)]]]])
+fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
+@test fc === GI.FeatureCollection(fc)
+@test GI.crs(fc) == EPSG(4326)
+# TODO this should return 
+@test GI.extent(fc) == fc.extent
+@test GI.getfeature(fc, 1) === feature
 @test GI.testgeometry(multipolygon)
 
 
 # TODO
 
 # # Triangle
-# triangle = GI.Triangle([(1, 2, 3), (3, 4, 5), (3, 2, 1)])
+# triangle = GI.Triangle([[(1, 2, 3), (3, 4, 5), (3, 2, 1)]])
 # @test triangle == GI.Triangle(triangle)
 # @test GI.getgeom(triangle, 1) === (1, 2, 3)
 # @test_throws ArgumentError GI.Triangle([[(1, 2, 3), (3, 4, 5), (3, 2, 1)]])
@@ -178,33 +187,36 @@ feature = Feature(multipolygon; properties=(x=1, y=2, z=3))
 
 #rectangle = GI.Rectangle([(1, 2), (3, 4), (3, 2)])
 
-# Quad
+# # Quad
 # quad = GI.Quad([(1, 2), (3, 4), (3, 2), (1, 4)])
 # @test quad == GI.Quad(quad)
 # @test GI.getgeom(quad, 1) === (1, 2)
-# @test_throws ArgumentError GI.Quad([[(1, 2), (3, 4), (3, 2), (1, 4)]])
+# quad = GI.Quad([[(1, 2), (3, 4), (3, 2), (1, 4)]])
+# @test quad == GI.Quad(quad)
+# @test GI.getgeom(quad, 1) === (1, 2)
+# @test_throws ArgumentError GI.Quad([[(1, 2), (3, 4), (3, 2)]])
 # @test GI.testgeometry(quad)
 
-# Hex
+# # Pentagon
+# hex = GI.Pentagon([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8)])
+# @test hex == GI.Pentagon(hex)
+# @test GI.getgeom(hex, 1) === (1, 2)
+# GI.Pentagon([[(1, 2), (3, 4), (3, 2), (1, 4), (7, 8)]])
+# @test GI.testgeometry(hex)
+# @test_throws ArgumentError GI.Pentagon([[(1, 2), (3, 4), (3, 2), (1, 4)]])
+
+# # Hexagon
 # hex = GI.Hexagon([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 # @test hex == GI.Hexagon(hex)
 # @test GI.getgeom(hex, 1) === (1, 2)
-# @test_throws ArgumentError GI.Hexagon([[(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)]])
+# GI.Hexagon([[(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)]])
 # @test GI.testgeometry(hex)
+# @test_throws ArgumentError GI.Hexagon([[(1, 2), (3, 4), (3, 2), (1, 4)]])
 
-# TIN
+# # TIN
 # tin = GI.TIN([triangle])
 # @test tin == GI.TIN(tin)
 # @test GI.getgeom(tin, 1) === triangle
 # @test collect(GI.getpoint(tin)) == collect(GI.getpoint(triangle))
 # @test_throws ArgumentError GI.TIN([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 # @test GI.testgeometry(tin)
-
-# PolyhedralSurface
-# polyhedralsurface = GI.PolyhedralSurface([polygon, polygon])
-# @test polyhedralsurface == GI.PolyhedralSurface(polyhedralsurface)
-# @test GI.getgeom(polyhedralsurface, 1) === polygon
-# @test collect(GI.getgeom(polyhedralsurface)) == [polygon, polygon]
-# @test GI.getgeom(polyhedralsurface, 1) == polygon
-# @test collect(GI.getpoint(polyhedralsurface)) == vcat(collect(GI.getpoint(polygon)), collect(GI.getpoint(polygon)))
-# @test GI.testgeometry(polyhedralsurface)

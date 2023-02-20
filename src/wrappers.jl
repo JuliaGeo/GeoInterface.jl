@@ -24,9 +24,8 @@ import Extents
 
 import ..GeoInterface: AbstractGeometryTrait, PointTrait, LineTrait, LineStringTrait, LinearRingTrait,
        MultiPointTrait, PolygonTrait, MultiLineStringTrait, MultiCurveTrait, MultiPolygonTrait,
-       AbstractCurveTrait, GeometryCollectionTrait, FeatureTrait, FeatureCollectionTrait, PointTuple3
-
-# import PolyhedralSurfaceTrait, TINTrait, TriangleTrait, QuadTrait, PentagonTrait, HexagonTrait, RectangleTrait,
+       AbstractCurveTrait, GeometryCollectionTrait, FeatureTrait, FeatureCollectionTrait, PointTuple3,
+       PolyhedralSurfaceTrait, TriangleTrait, QuadTrait, PentagonTrait, HexagonTrait, RectangleTrait, TINTrait
 
 import ..GeoInterface: isgeometry, isfeature, isfeaturecollection, is3d, ismeasured,
        trait, geomtrait, convert, x, y, z, m, extent, crs,
@@ -35,9 +34,11 @@ import ..GeoInterface: isgeometry, isfeature, isfeaturecollection, is3d, ismeasu
        nfeature, getfeature, geometry, properties
 
 export Point, Line, LineString, LinearRing, Polygon, MultiPoint, MultiPolygon, MultiLineString, MultiCurve,
-    GeometryCollection, Feature, FeatureCollection
+    PolyhedralSurface, GeometryCollection, Feature, FeatureCollection
 
-# export Triangle, Pentagon, Hexagon, TIN
+# TODO
+# Triangle, Quad, Pentagon, Hexagon, TIN, Surface
+
 
 # Implement interface
 
@@ -81,8 +82,17 @@ const geomtype = geointerface_geomtype
 function getgeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}, i) where T
     isgeometry(T) ? getgeom(trait, parent(geom), i) : parent(geom)[i]
 end
+function getgeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}) where T
+    isgeometry(T) ? getgeom(trait, parent(geom)) : parent(geom)
+end
 getpoint(trait::AbstractGeometryTrait, geom::WrapperGeometry, i) = getpoint(trait, parent(geom), i)
 gethole(trait::AbstractGeometryTrait, geom::WrapperGeometry, i) = gethole(trait, parent(geom), i)
+
+extent(::AbstractGeometryTrait, geom::WrapperGeometry) =
+    isnothing(geom.extent) && isgeometry(parent(geom)) ? extent(parent(geom)) : geom.extent
+function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}) where T
+    isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
+end
 
 for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         (:Line, :LineTrait, :Point, :PointTrait, ==(2), 1),
@@ -94,22 +104,21 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         (:MultiCurve, :MultiCurveTrait, :LineString, :AbstractCurveTrait, nothing, 2),
         (:MultiPolygon, :MultiPolygonTrait, :Polygon, :PolygonTrait, nothing, 3),
         (:GeometryCollection, :GeometryCollectionTrait, :AbstractGeometry, :AbstractGeometryTrait, nothing, nothing),
-        # TODO
-        # (:Triangle, :TriangleTrait, :Point, :PointTrait, ==(3), 1),
-        # (:Quad, :QuadTrait, :Point, :PointTrait, ==(4), 1),
-        # (:Pentagon, :PentagonTrait, :Point, :PointTrait, ==(4), 1),
-        # (:Hexagon, :HexagonTrait, :Point, :PointTrait, ==(6), 1),
-        # (:Rectangle, :RectangleTrait, :Point, :PointTrait, nothing, 1),
-        # (:TIN, :TINTrait, :Triangle, :TriangleTrait, nothing, 2),
-        # (:PolyhedralSurface, :PolyhedralSurfaceTrait, :Polygon, :PolygonTrait, nothing, 3),
+        (:PolyhedralSurface, :PolyhedralSurfaceTrait, :Polygon, :PolygonTrait, nothing, 3),
+        # (:Triangle, :TriangleTrait, :LinearRingTrait, :LinearRing, ==(3), 2),
+        # (:Quad, :QuadTrait, :LinearRingTrait, :LinearRing, ==(4), 2),
+        # (:Pentagon, :PentagonTrait, :LinearRingTrait, :LinearRing, ==(5), 2),
+        # (:Hexagon, :HexagonTrait, :LinearRingTrait, :LinearRing, ==(6), 2),
+        # (:Rectangle, :RectangleTrait, :Point, :PointTrait, nothing, 1), ?
+        # (:TIN, :TINTrait, :Triangle, :TriangleTrait, nothing, 3),
     )
 
     # Prepare docstring example
     childname = lowercase(string(childtype))
     example_child_geoms = if geomtype == :Polygon
-        "[interior, hole1, hole2]"
+        "interior, hole1, hole2"
     else
-        "[$(childname)1, $(childname)2, $(childname)3))]"
+        join((string(childname, n) for n in 1:(isnothing(length_check) ? 3 : length_check.x)), ", ")
     end
     docstring = """
         $geomtype
@@ -139,7 +148,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     Or with child objects with [`$child_trait`](@ref):
 
     ```julia
-    geom = $geomtype($example_child_geoms)
+    geom = $geomtype([$example_child_geoms])
     ```
     """
     @eval begin
@@ -155,8 +164,6 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         convert(::Type{$geomtype}, ::$trait, geom) = $geomtype(geom)
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
-        extent(::$trait, geom::$geomtype) =
-            isnothing(geom.extent) && isgeometry(parent(geom)) ? extent(parent(geom)) : geom.extent
     end
     @eval function $geomtype{Z,M}(geom::T; extent::E=nothing) where {Z,M,T,E}
         Z isa Union{Bool,Nothing} || throw(ArgumentError("Z Parameter must be `true`, `false` or `nothing`"))
@@ -214,23 +221,6 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         else
             # Or complain the parent type is wrong
             _parent_type_error(geom)
-        end
-    end
-    @eval function ngeom(trait::$trait, wrapper::$geomtype)
-        p = parent(wrapper)
-        if isgeometry(p)
-            return ngeom(p)
-        elseif p isa AbstractArray
-            return length(p)
-        end
-    end
-    # Without indexing
-    @eval function getgeom(trait::$trait, wrapper::$geomtype)
-        p = parent(wrapper)
-        if isgeometry(p)
-            return getgeom(p)
-        elseif p isa AbstractArray
-            return p
         end
     end
 end
@@ -360,12 +350,20 @@ struct Feature{T,C,E<:Union{Extents.Extent,Nothing}}
     crs::C
     extent::E
 end
+function Feature(fc::FeatureCollection; crs=crs(fc), extent=extent(fc))
+    Feature(parent(fc), crs, extent)
+end
 function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
     if isfeature(geometry)
+        if !isnothing(properties) 
+            @info "properties no used when wrapping a feature"
+        end
         Feature(geometry, crs, extent)
-    else
+    elseif isnothing(geometry) || isgeometry(geometry)
         # Wrap a NamedTuple feature
         Feature((; geometry, properties...), crs, extent)
+    else
+        throw(ArgumentError("object must be a feature, geometry or `nothing`. Got $(typeof(geometry))"))
     end
 end
 
@@ -414,15 +412,20 @@ struct FeatureCollection{P,C,E}
     crs::C
     extent::E
 end
+function FeatureCollection(fc::FeatureCollection; crs=crs(fc), extent=extent(fc))
+    FeatureCollection(parent(fc), crs, extent)
+end
 function FeatureCollection(parent; crs=nothing, extent=nothing)
-    if GI.isfeaturecollection(parent)
+    if isfeaturecollection(parent)
         FeatureCollection(parent, crs, extent)
     else
-        features = !(parent isa AbstractArray) ? collect(parent) : parent
-        all(f -> isfeature(f) in features) || _child_feature_error()
+        features = (parent isa AbstractArray) ? parent : collect(parent) 
+        all(f -> isfeature(f), features) || _child_feature_error()
         FeatureCollection(parent, crs, extent)
     end
 end
+
+Base.parent(fc::FeatureCollection) = fc.parent
 
 _child_feature_error() = throw(ArgumentError("child objects must be features, but the return `GeoInterface.isfeature(obj) == false`"))
 
@@ -433,11 +436,11 @@ function nfeature(::FeatureCollectionTrait, fc::FeatureCollection)
     isfeaturecollection(parent(fc)) ? nfeature(t, parent(fc)) : length(fc.geoms)
 end
 getfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
-    isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc)) : fc.features
+    isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc)) : parent(fc)
 getfeature(t::FeatureCollectionTrait, fc::FeatureCollection, i::Integer) =
-    isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc), i) : fc.features[i]
+    isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc), i) : parent(fc)[i]
 extent(fc::FeatureCollection) =
-    isfeaturecollection(parent(fc)) && isnothing(fc.extent) ? extent(parent(fc)) : fc.extent
+    (isnothing(fc.extent) && isfeaturecollection(parent(fc))) ? extent(parent(fc)) : fc.extent
 crs(fc::FeatureCollection) =
     isfeaturecollection(parent(fc)) && isnothing(fc.crs) ? crs(parent(fc)) : fc.crs
 

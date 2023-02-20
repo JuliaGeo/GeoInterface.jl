@@ -22,9 +22,6 @@ isempty(::AbstractGeometryTrait, geom) = false
 ngeom(::AbstractPointTrait, geom) = 0
 getgeom(::AbstractPointTrait, geom) = nothing
 getgeom(::AbstractPointTrait, geom, i) = nothing
-getpoint(::AbstractPointTrait, geom, i) = geom # Helps generic `gepoint` work with mixed types
-getpoint(::AbstractPointTrait, geom) = (geom,) # getpoint without i always returns an iterable
-npoint(::AbstractPointTrait, geom, i) = 1
 
 ## LineStrings
 npoint(t::AbstractCurveTrait, geom) = ngeom(t, geom)
@@ -42,9 +39,7 @@ nhole(t::AbstractPolygonTrait, geom) = nring(t, geom) - 1
 gethole(t::AbstractPolygonTrait, geom) = (getgeom(t, geom, i) for i in 2:ngeom(t, geom))
 gethole(t::AbstractPolygonTrait, geom, i) = getring(t, geom, i + 1)
 npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
-getpoint(t::PolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
-getpoint(t::AbstractPolygonTrait, geom) = getgeom(t, geom)
-getpoint(t::AbstractPolygonTrait, geom, i) = getgeom(t, geom, i)
+getpoint(t::AbstractPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## MultiPoint
 npoint(t::AbstractMultiPointTrait, geom) = ngeom(t, geom)
@@ -73,9 +68,6 @@ getpatch(t::AbstractPolyhedralSurfaceTrait, geom) = getgeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom, i)
 getpoint(t::AbstractPolyhedralSurfaceTrait, geom) = flatten((p for p in getpoint(g)) for g in getgeom(t, geom))
 
-# Collection
-getpoint(t::AbstractGeometryCollectionTrait, collection) = flatten((p for p in getpoint(g)) for g in getgeom(collection))
-
 ## Default iterator
 getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(t, geom))
 getcoord(t::AbstractPointTrait, geom) = (getcoord(t, geom, i) for i in 1:ncoord(t, geom))
@@ -103,7 +95,7 @@ issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom)))
 issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
-crs(::AbstractGeometryTrait, geom) = nothing
+crs(::AbstractTrait, geom) = nothing
 
 # FeatureCollection
 getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))
