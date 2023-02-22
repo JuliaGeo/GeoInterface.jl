@@ -294,6 +294,8 @@ function Point(geom)
     end
 end
 
+geointerface_geomtype(::Type{PointTrait}) = Point
+
 isgeometry(::Type{<:Point}) = true
 geomtrait(geom::Point) = PointTrait()
 ncoord(trait::PointTrait, geom::Point) = ncoord(trait, parent(geom))
