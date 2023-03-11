@@ -416,8 +416,11 @@ crs(geom) = crs(geomtrait(geom), geom)
 Retrieve the extent (bounding box) for given geom or feature.
 In SF this is defined as `envelope`.
 
+`Extents.extent(obj)` will be called if `extent(trait(obj), obj)`,
+is not defined so it may be preferable to define `Extents.extent` directly.
+
 When `fallback` is true, and the obj does not have an extent,
-it is calculated from the coordinates of all geometries in `obj`.
+an extent is calculated from the coordinates of all geometries in `obj`.
 """
 function extent(obj; fallback=true)
     ex = extent(trait(obj), obj)
