@@ -37,6 +37,10 @@ GeoInterface.crs(geomtrait(geom), geom::customgeom)::GeoFormatTypes.GeoFormat
 GeoInterface.extent(geomtrait(geom), geom::customgeom)::Extents.Extent
 ```
 
+For extents, `Extents.extent(geom::customgeom)` is the fallback method for GeoInterface.extent, 
+and can be used instead here for wider interoperability. If neither is defined,
+`GeoInterface.extent` will calculate the extent from the points of the geometry.
+
 And lastly, there are many other optional functions for each specific geometry. GeoInterface provides fallback implementations based on the generic functions above, but these are not optimized. These are detailed in [Fallbacks](@ref).
 
 ### Conversion
