@@ -99,6 +99,7 @@ line = GI.Line([(1, 2), (3, 4)])
 @test GI.getgeom(line, 1) === (1, 2)
 @test GI.getgeom(line) == [(1, 2), (3, 4)]
 @test GI.testgeometry(line)
+@test_throws ArgumentError GI.Line(point)
 @test_throws ArgumentError GI.Line([(1, 2)])
 @test_throws ArgumentError GI.Line([line, line])
 
@@ -200,6 +201,8 @@ fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
 @test GI.testgeometry(multipolygon)
 @test GI.testfeaturecollection(fc)
 @test_throws ArgumentError GI.FeatureCollection([1])
+vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
+@test GI.getfeature(vecfc, 1) == (geometry=(1,2), a=1, b=2)
 
 
 # TODO

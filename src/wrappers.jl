@@ -69,9 +69,6 @@ Base.parent(geom::WrapperGeometry) = geom.geom
 function Base.:(==)(g1::WrapperGeometry, g2::WrapperGeometry)
     all(((a, b),) -> a == b, zip(getgeom(g1), getgeom(g2)))
 end
-function Base.:(!=)(g1::WrapperGeometry, g2::WrapperGeometry)
-    any(!=, zip(getgeom(g1), getgeom(g2)))
-end
 
 geointerface_geomtype(trait) = throw(ArgumentError("trait $trait not yet implemented as a GeoInterface geometry wrapper"))
 
@@ -222,7 +219,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
 end
 
 @noinline _wrong_child_error(geomtype, C, child) = throw(ArgumentError("$geomtype must have child objects with trait $C, got $(typeof(child)) with trait $(geomtrait(child))"))
-@noinline _argument_error(T, A) = throw(ArgumentError("$T is not a $A"))
+@noinline _argument_error(T, A) = throw(ArgumentError("$T is does not have $A"))
 @noinline _length_error(T, f, x) = throw(ArgumentError("Length of array must be $(f.f) $(f.x) for $T"))
 @noinline _parent_type_error(geom) = throw(ArgumentError("Object $geom is not a geometry or array of child geometries"))
 
