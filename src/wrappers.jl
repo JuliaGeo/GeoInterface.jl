@@ -73,7 +73,7 @@ function Base.:(!=)(g1::WrapperGeometry, g2::WrapperGeometry)
     any(!=, zip(getgeom(g1), getgeom(g2)))
 end
 
-geointerface_geomtype(trait) = throw(ArgumentError("trait $trait not yet handled by GeoInterface geometry wrappers"))
+geointerface_geomtype(trait) = throw(ArgumentError("trait $trait not yet implemented as a GeoInterface geometry wrapper"))
 
 # Interface methods
 # With indexing
@@ -352,16 +352,12 @@ struct Feature{T,C,E<:Union{Extents.Extent,Nothing}}
     crs::C
     extent::E
 end
-function Feature(f::Feature; crs=f.crs, extent=f.extent)
+function Feature(f::Feature; crs=f.crs, extent=f.extent, properties=nothing)
+    isnothing(properties) || @info "`properties` keyword not used when wrapping a feature"
     Feature(parent(f), crs, extent)
 end
 function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
-    if isfeature(geometry)
-        if !isnothing(properties) 
-            @info "`properties` keyword not used when wrapping a feature"
-        end
-        Feature(geometry, crs, extent)
-    elseif isnothing(geometry) || isgeometry(geometry)
+    if isnothing(geometry) || isgeometry(geometry)
         # Wrap a NamedTuple feature
         Feature((; geometry, properties...), crs, extent)
     else
@@ -429,13 +425,13 @@ end
 
 Base.parent(fc::FeatureCollection) = fc.parent
 
-_child_feature_error() = throw(ArgumentError("child objects must be features, but the return `GeoInterface.isfeature(obj) == false`"))
+_child_feature_error() = throw(ArgumentError("child objects must be features"))
 
 isfeaturecollection(fc::Type{<:FeatureCollection}) = true
 trait(fc::FeatureCollection) = FeatureCollectionTrait()
 
 function nfeature(::FeatureCollectionTrait, fc::FeatureCollection)
-    isfeaturecollection(parent(fc)) ? nfeature(t, parent(fc)) : length(fc.geoms)
+    isfeaturecollection(parent(fc)) ? nfeature(t, parent(fc)) : length(parent(fc))
 end
 getfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
     isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc)) : parent(fc)
