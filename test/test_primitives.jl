@@ -486,6 +486,6 @@ struct ExtentPolygon end
 GeoInterface.geomtrait(::ExtentPolygon) = PolygonTrait()
 Extents.extent(::ExtentPolygon) = Extent(X=(1, 2), Y=(3, 4))
 
-@testset "Extents.jl extent fallback"
+@testset "Extents.jl extent fallback" begin
     @test GeoInterface.extent(ExtentPolygon()) == Extent(X=(1, 2), Y=(3, 4))
 end
