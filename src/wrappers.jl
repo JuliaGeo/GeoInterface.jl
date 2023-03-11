@@ -73,9 +73,7 @@ function Base.:(!=)(g1::WrapperGeometry, g2::WrapperGeometry)
     any(!=, zip(getgeom(g1), getgeom(g2)))
 end
 
-geointerface_geomtype(trait) = geomtype(typeof(trait))
-geointerface_geomtype(trait::Type) = throw(ArgumentError("trait $trait not handled in wrappers"))
-const geomtype = geointerface_geomtype
+geointerface_geomtype(trait) = throw(ArgumentError("trait $trait not yet handled by GeoInterface geometry wrappers"))
 
 # Interface methods
 # With indexing
@@ -85,8 +83,6 @@ end
 function getgeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}) where T
     isgeometry(T) ? getgeom(trait, parent(geom)) : parent(geom)
 end
-getpoint(trait::AbstractGeometryTrait, geom::WrapperGeometry, i) = getpoint(trait, parent(geom), i)
-gethole(trait::AbstractGeometryTrait, geom::WrapperGeometry, i) = gethole(trait, parent(geom), i)
 
 extent(::AbstractGeometryTrait, geom::WrapperGeometry) =
     isnothing(geom.extent) && isgeometry(parent(geom)) ? extent(parent(geom)) : geom.extent
@@ -159,7 +155,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         end
         $geomtype(geom; extent=nothing) = $geomtype{nothing,nothing}(geom; extent=nothing)
         geomtrait(::$geomtype) = $trait()
-        geointerface_geomtype(::Type{$trait}) = $geomtype
+        geointerface_geomtype(::$trait) = $geomtype
         # Here converting means wrapping
         convert(::Type{$geomtype}, ::$trait, geom) = $geomtype(geom)
         # But not if geom is already a WrapperGeometry
@@ -294,7 +290,7 @@ function Point(geom)
     end
 end
 
-geointerface_geomtype(::Type{PointTrait}) = Point
+geointerface_geomtype(::PointTrait) = Point
 
 isgeometry(::Type{<:Point}) = true
 geomtrait(geom::Point) = PointTrait()
@@ -326,7 +322,7 @@ end
 Base.:(!=)(g1::Point, g2::Point) = !(g1 == g2)
 
 @noinline _coord_length_error(Z, M, l) =
-    _throw(ArgumentError("Number of coordinates must be $(2 + Z + M) when `Z` is $Z and `M` is $M. Got $l"))
+    throw(ArgumentError("Number of coordinates must be $(2 + Z + M) when `Z` is $Z and `M` is $M. Got $l"))
 @noinline _no_z_error() = throw(ArgumentError("Point has no `Z` coordinate"))
 @noinline _no_m_error() = throw(ArgumentError("Point has no `M` coordinate"))
 
@@ -362,7 +358,7 @@ end
 function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
     if isfeature(geometry)
         if !isnothing(properties) 
-            @info "properties no used when wrapping a feature"
+            @info "`properties` keyword not used when wrapping a feature"
         end
         Feature(geometry, crs, extent)
     elseif isnothing(geometry) || isgeometry(geometry)

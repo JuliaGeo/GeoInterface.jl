@@ -12,6 +12,7 @@ GI.getcoord(point, 1)
 @test_throws ArgumentError GI.m(point)
 @test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
 @test GI.testgeometry(point)
+@test GI.convert(GI, (1, 2)) isa GI.Point
 
 # 3D Point
 pointz = GI.Point(1, 2, 3)
@@ -19,6 +20,7 @@ pointz = GI.Point(1, 2, 3)
 @test GI.is3d(pointz)
 @test (GI.x(pointz), GI.y(pointz), GI.z(pointz)) == (1, 2, 3)
 @test GI.testgeometry(pointz)
+@test GI.convert(GI, pointz) === pointz
 
 # 3D measured point
 pointzm = GI.Point(1, 2, 3, 4)
@@ -28,6 +30,7 @@ pointzm = GI.Point(1, 2, 3, 4)
 @test point != GI.Point(pointzm)
 @test (GI.x(pointzm), GI.y(pointzm), GI.z(pointzm), GI.m(pointzm)) == (1, 2, 3, 4)
 @test GI.testgeometry(pointzm)
+@test GI.convert(GI, pointzm) === pointzm
 
 # Measured point
 pointm = GI.Point((X=1, Y=2, M=3))
@@ -41,11 +44,12 @@ pointm = GI.Point((X=1, Y=2, M=3))
 @test GI.testgeometry(pointm)
 
 # Foreced measured point with a tuple
-pointtm = GI.Point{false,true}((1, 2, 3))
+pointtm = GI.Point{false,true}(1, 2, 3)
+@test_throws ArgumentError GI.Point{false,true}(1, 2, 3, 4)
 @test GI.ismeasured(pointtm)
 @test !GI.is3d(pointtm)
 @test (GI.x(pointtm), GI.y(pointtm), GI.m(pointtm)) == (1, 2, 3)
-@test_throws ArgumentError GI.z(pointm)
+@test_throws ArgumentError GI.z(pointtm)
 @test GI.testgeometry(pointtm)
 
 # Point made from an array
@@ -105,6 +109,8 @@ polygon = GI.Polygon([linearring, linearring])
 @test collect(GI.getgeom(polygon)) == [linearring, linearring]
 @test collect(GI.getpoint(polygon)) == vcat(collect(GI.getpoint(linearring)), collect(GI.getpoint(linearring)))
 @test GI.testgeometry(polygon)
+@test GI.convert(GI, MyPolygon()) isa GI.Polygon
+@test GI.convert(GI, polygon) === polygon
 
 # MultiPoint
 multipoint = GI.MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
@@ -166,6 +172,7 @@ feature = GI.Feature(multipolygon;
 @test GI.crs(feature) == EPSG(4326)
 @test GI.extent(feature) == GI.extent(multipolygon) 
 @test GI.testfeature(feature)
+@test_throws ArgumentError GI.Feature(:not_a_feature; properties=(x=1, y=2, z=3))
 
 # Feature Collection
 fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
@@ -173,7 +180,7 @@ fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
 @test GI.crs(fc) == EPSG(4326)
 # TODO this should return 
 @test GI.extent(fc) == fc.extent
-@test GI.getfeature(fc, 1) === feature
+@test first(GI.getfeature(fc)) == GI.getfeature(fc, 1) === feature
 @test GI.testgeometry(multipolygon)
 
 
