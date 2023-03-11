@@ -23,7 +23,9 @@ pointz = GI.Point(1, 2, 3)
 @test GI.convert(GI, pointz) === pointz
 
 # 3D measured point
-pointzm = GI.Point(1, 2, 3, 4)
+pointzm = GI.Point(; X=1, Y=2, Z=3, M=4)
+@test pointzm == GI.Point(1, 2, 3, 4)
+@test pointzm != GI.Point(1, 2, 3)
 @test GI.ismeasured(pointzm)
 @test GI.is3d(pointzm)
 @test pointzm == GI.Point(pointzm)
@@ -31,6 +33,17 @@ pointzm = GI.Point(1, 2, 3, 4)
 @test (GI.x(pointzm), GI.y(pointzm), GI.z(pointzm), GI.m(pointzm)) == (1, 2, 3, 4)
 @test GI.testgeometry(pointzm)
 @test GI.convert(GI, pointzm) === pointzm
+
+# Measured point
+pointm = GI.Point((X=1, Y=2, M=3))
+@test_throws MethodError GI.Point(; X=1, Y=2, T=3)
+@test GI.ismeasured(pointm)
+@test !GI.is3d(pointm)
+@test pointm == GI.Point(pointm)
+@test point != GI.Point(pointm)
+@test (GI.x(pointm), GI.y(pointm), GI.m(pointm)) == (1, 2, 3)
+@test_throws ArgumentError GI.z(pointm)
+@test GI.testgeometry(pointm)
 
 # Measured point
 pointm = GI.Point((X=1, Y=2, M=3))
@@ -78,7 +91,6 @@ pointam = GI.Point{false,true}([1, 2, 3])
 @test (GI.x(pointam), GI.y(pointam), GI.m(pointam)) == (1, 2, 3)
 @test_throws ArgumentError GI.z(pointam)
 @test GI.testgeometry(pointam)
-
 @test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
 
 # Line
@@ -87,6 +99,8 @@ line = GI.Line([(1, 2), (3, 4)])
 @test GI.getgeom(line, 1) === (1, 2)
 @test GI.getgeom(line) == [(1, 2), (3, 4)]
 @test GI.testgeometry(line)
+@test_throws ArgumentError GI.Line([(1, 2)])
+@test_throws ArgumentError GI.Line([line, line])
 
 # LineString
 linestring = GI.LineString([(1, 2), (3, 4)])
@@ -94,6 +108,7 @@ linestring = GI.LineString([(1, 2), (3, 4)])
 @test GI.getgeom(linestring, 1) === (1, 2)
 @test GI.getgeom(linestring) == [(1, 2), (3, 4)]
 @test GI.testgeometry(linestring)
+@test_throws ArgumentError GI.LineString([(1, 2)])
 
 # LinearRing
 linearring = GI.LinearRing(GI.LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]))
@@ -101,6 +116,7 @@ linearring = GI.LinearRing(GI.LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]))
 @test GI.getgeom(linearring, 1) === (1, 2)
 @test GI.getgeom(linearring) == [(1, 2), (3, 4), (5, 6), (1, 2)]
 @test GI.testgeometry(linearring)
+@test_throws ArgumentError GI.LinearRing([(1, 2)])
 
 # Polygon
 polygon = GI.Polygon([linearring, linearring])
