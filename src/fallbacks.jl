@@ -101,7 +101,7 @@ getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i 
 
 # Backwards compatibility
 coordinates(t::AbstractPointTrait, geom) = collect(getcoord(t, geom))
-coordinates(t::AbstractGeometryTrait, geom) = collect(coordinates.(getgeom(t, geom)))
+coordinates(t::AbstractGeometryTrait, geom) = map(coordinates, getgeom(t, geom))
 function coordinates(t::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? [] : coordinates(geom)
