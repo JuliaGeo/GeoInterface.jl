@@ -3,6 +3,7 @@ import GeoInterface as GI
 
 # Point
 point = GI.Point(1, 2)
+@test point === GI.Point(point) 
 GI.getcoord(point, 1)
 @test !GI.ismeasured(point)
 @test !GI.is3d(point)
@@ -195,15 +196,14 @@ feature = GI.Feature(multipolygon;
 fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
 @test fc === GI.FeatureCollection(fc)
 @test GI.crs(fc) == EPSG(4326)
-# TODO this should return 
 @test GI.extent(fc) == fc.extent
 @test first(GI.getfeature(fc)) == GI.getfeature(fc, 1) === feature
-@test GI.testgeometry(multipolygon)
 @test GI.testfeaturecollection(fc)
 @test_throws ArgumentError GI.FeatureCollection([1])
 vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
 @test GI.getfeature(vecfc, 1) == (geometry=(1,2), a=1, b=2)
 
+GI.convert(HexagonTrait, nothing)
 
 # TODO
 

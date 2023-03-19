@@ -70,8 +70,6 @@ function Base.:(==)(g1::WrapperGeometry, g2::WrapperGeometry)
     all(((a, b),) -> a == b, zip(getgeom(g1), getgeom(g2)))
 end
 
-geointerface_geomtype(trait) = throw(ArgumentError("trait $trait not yet implemented as a GeoInterface geometry wrapper"))
-
 # Interface methods
 # With indexing
 function getgeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}, i) where T
@@ -83,10 +81,18 @@ end
 
 extent(::AbstractGeometryTrait, geom::WrapperGeometry) =
     isnothing(geom.extent) && isgeometry(parent(geom)) ? extent(parent(geom)) : geom.extent
+crs(::AbstractGeometryTrait, geom::WrapperGeometry) =
+    isnothing(geom.crs) && isgeometry(parent(geom)) ? crs(parent(geom)) : geom.crs
 function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}) where T
     isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
 end
 
+# We eefine all the types in a loop so we have standardised docs and behaviour
+# without too much repetition of code.
+# `child_trait` and `child_type` define the trait and type of child geometries
+# a geometry can be constructed from.
+# `length_check` limits some types to specific number of points, defined with a Fix2 or function
+# `nesting` indicates how many layers of point vectors need to be used to construct the object.
 for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         (:Line, :LineTrait, :Point, :PointTrait, ==(2), 1),
         (:LineString, :LineStringTrait, :Point, :PointTrait, >=(2), 1),
@@ -116,16 +122,20 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     docstring = """
         $geomtype
 
-        $geomtype(geom, [extent])
-        $geomtype{Z,M}(geom, [extent])
+        $geomtype(geom; [extent, crs])
+        $geomtype{Z,M}(geom; [extent, crs])
 
     ## Arguments
 
     - `geom`: any object returning $trait from `GeoInterface.trait`, or a vector
         of objects returning $child_trait.
-    - `extent`: an `Extents.Extent`, or `nothing`.
 
-    ## Parameters (optional)
+    ## Keywords
+    
+    - `extent`: an `Extents.Extent`, or `nothing`.
+    - `crs`: a `GeoFormatTypes.GeoFormat`, or `nothing`.
+
+    ## Type Parameters (optional)
 
     These are usually detected from the parent object properties.
 
@@ -146,11 +156,12 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     """
     @eval begin
         @doc $docstring
-        struct $geomtype{Z,M,T,E} <: WrapperGeometry{Z,M,T}
+        struct $geomtype{Z,M,T,E<:Union{Nothing,Extents.Extent},C} <: WrapperGeometry{Z,M,T}
             geom::T
             extent::E
+            crs::C
         end
-        $geomtype(geom; extent=nothing) = $geomtype{nothing,nothing}(geom; extent=nothing)
+        $geomtype(geom; kw...) = $geomtype{nothing,nothing}(geom; kw...)
         geomtrait(::$geomtype) = $trait()
         geointerface_geomtype(::$trait) = $geomtype
         # Here converting means wrapping
@@ -158,7 +169,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
     end
-    @eval function $geomtype{Z,M}(geom::T; extent::E=nothing) where {Z,M,T,E}
+    @eval function $geomtype{Z,M}(geom::T; extent::E=nothing, crs::C=nothing) where {Z,M,T,E,C}
         Z isa Union{Bool,Nothing} || throw(ArgumentError("Z Parameter must be `true`, `false` or `nothing`"))
         M isa Union{Bool,Nothing} || throw(ArgumentError("M Parameter must be `true`, `false` or `nothing`"))
 
@@ -167,7 +178,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             geomtrait(geom) isa $trait || _argument_error(T, $trait)
             Z1 = isnothing(Z) ? is3d(geom) : Z
             M1 = isnothing(M) ? ismeasured(geom) : M
-            return $geomtype{Z1,M1,T,E}(geom, extent)
+            return $geomtype{Z1,M1,T,E}(geom, extent, crs)
 
         # Otherwise wrap an array of child geometries
         elseif geom isa AbstractArray
@@ -181,7 +192,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 end
                 Z1 = isnothing(Z) ? is3d(first(geom)) : Z
                 M1 = isnothing(M) ? ismeasured(first(geom)) : M
-                return $geomtype{Z1,M1,T,E}(geom, extent)
+                return $geomtype{Z1,M1,T,E}(geom, extent, crs)
 
             # Where we have nested points, as in `coordinates(geom)`
             else
@@ -192,7 +203,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                         M1 = isnothing(M) ? ismeasured(first(child)) : M
                         childtype = $childtype
                         newgeom = childtype.(geom)
-                        return $geomtype{Z1,M1,typeof(newgeom),E}(newgeom, extent)
+                        return $geomtype{Z1,M1,typeof(newgeom),E}(newgeom, extent, crs)
                     elseif $nesting === 3
                         all(child) do child2
                             child2 isa AbstractArray && all(child3 -> geomtrait(child3) isa PointTrait, child2)
@@ -201,15 +212,11 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                         M1 = isnothing(M) ? ismeasured(first(first(child))) : M
                         childtype = $childtype
                         newgeom = childtype.(geom)
-                        return $geomtype{Z1,M1,typeof(newgeom),E}(newgeom, extent)
-                    else
-                        # Otherwise compain the nested child type is wrong
-                        _wrong_child_error($geomtype, $child_trait, child)
+                        return $geomtype{Z1,M1,typeof(newgeom),E}(newgeom, extent, crs)
                     end
-                else
-                    # Otherwise compain the nested child type is wrong
-                    _wrong_child_error($geomtype, $child_trait, child)
                 end
+                # Otherwise compain the nested child type is wrong
+                _wrong_child_error($geomtype, $child_trait, child)
             end
         else
             # Or complain the parent type is wrong
@@ -286,6 +293,7 @@ function Point(geom)
         return Point{false,false,typeof(geom)}(geom)
     end
 end
+Point(point::Point) = point
 
 geointerface_geomtype(::PointTrait) = Point
 
@@ -349,7 +357,7 @@ struct Feature{T,C,E<:Union{Extents.Extent,Nothing}}
     crs::C
     extent::E
 end
-function Feature(f::Feature; crs=f.crs, extent=f.extent, properties=nothing)
+function Feature(f::Feature; crs=crs(f), extent=f.extent, properties=nothing)
     isnothing(properties) || @info "`properties` keyword not used when wrapping a feature"
     Feature(parent(f), crs, extent)
 end
@@ -427,16 +435,17 @@ _child_feature_error() = throw(ArgumentError("child objects must be features"))
 isfeaturecollection(fc::Type{<:FeatureCollection}) = true
 trait(fc::FeatureCollection) = FeatureCollectionTrait()
 
-function nfeature(::FeatureCollectionTrait, fc::FeatureCollection)
-    isfeaturecollection(parent(fc)) ? nfeature(t, parent(fc)) : length(parent(fc))
-end
+nfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
+    _parent_is_fc(fc) ? nfeature(t, parent(fc)) : length(parent(fc))
 getfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
-    isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc)) : parent(fc)
+    _parent_is_fc(fc) ? getfeature(t, parent(fc)) : parent(fc)
 getfeature(t::FeatureCollectionTrait, fc::FeatureCollection, i::Integer) =
-    isfeaturecollection(parent(fc)) ? getfeature(t, parent(fc), i) : parent(fc)[i]
+    _parent_is_fc(fc) ? getfeature(t, parent(fc), i) : parent(fc)[i]
 extent(fc::FeatureCollection) =
-    (isnothing(fc.extent) && isfeaturecollection(parent(fc))) ? extent(parent(fc)) : fc.extent
+    (isnothing(fc.extent) && _parent_is_fc(fc)) ? extent(parent(fc)) : fc.extent
 crs(fc::FeatureCollection) =
-    isfeaturecollection(parent(fc)) && isnothing(fc.crs) ? crs(parent(fc)) : fc.crs
+    (isnothing(fc.crs) && _parent_is_fc(fc)) ? crs(parent(fc)) : fc.crs
+
+_parent_is_fc(x) = isfeaturecollection(parent(x))
 
 end # module
