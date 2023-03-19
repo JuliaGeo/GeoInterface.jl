@@ -203,8 +203,6 @@ fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
 vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
 @test GI.getfeature(vecfc, 1) == (geometry=(1,2), a=1, b=2)
 
-GI.convert(HexagonTrait, nothing)
-
 # TODO
 
 # # Triangle
