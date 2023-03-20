@@ -3,5 +3,5 @@ using Documenter
 using Test
 
 include("test_primitives.jl")
-include("wrappers.jl")
+include("test_wrappers.jl")
 doctest(GeoInterface)
