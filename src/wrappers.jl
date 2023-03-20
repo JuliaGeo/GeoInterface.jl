@@ -161,6 +161,8 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             extent::E
             crs::C
         end
+        $geomtype(geom::$geomtype; kw...) =
+            $geomtype(parent(geom); extent=geom.extent, crs=geom.crs, kw...)
         $geomtype(geom; kw...) = $geomtype{nothing,nothing}(geom; kw...)
         geomtrait(::$geomtype) = $trait()
         geointerface_geomtype(::$trait) = $geomtype
@@ -178,7 +180,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             geomtrait(geom) isa $trait || _argument_error(T, $trait)
             Z1 = isnothing(Z) ? is3d(geom) : Z
             M1 = isnothing(M) ? ismeasured(geom) : M
-            return $geomtype{Z1,M1,T,E}(geom, extent, crs)
+            return $geomtype{Z1,M1,T,E,C}(geom, extent, crs)
 
         # Otherwise wrap an array of child geometries
         elseif geom isa AbstractArray
@@ -192,7 +194,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 end
                 Z1 = isnothing(Z) ? is3d(first(geom)) : Z
                 M1 = isnothing(M) ? ismeasured(first(geom)) : M
-                return $geomtype{Z1,M1,T,E}(geom, extent, crs)
+                return $geomtype{Z1,M1,T,E,C}(geom, extent, crs)
 
             # Where we have nested points, as in `coordinates(geom)`
             else
@@ -203,7 +205,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                         M1 = isnothing(M) ? ismeasured(first(child)) : M
                         childtype = $childtype
                         newgeom = childtype.(geom)
-                        return $geomtype{Z1,M1,typeof(newgeom),E}(newgeom, extent, crs)
+                        return $geomtype{Z1,M1,typeof(newgeom),E,C}(newgeom, extent, crs)
                     elseif $nesting === 3
                         all(child) do child2
                             child2 isa AbstractArray && all(child3 -> geomtrait(child3) isa PointTrait, child2)
@@ -212,7 +214,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                         M1 = isnothing(M) ? ismeasured(first(first(child))) : M
                         childtype = $childtype
                         newgeom = childtype.(geom)
-                        return $geomtype{Z1,M1,typeof(newgeom),E}(newgeom, extent, crs)
+                        return $geomtype{Z1,M1,typeof(newgeom),E,C}(newgeom, extent, crs)
                     end
                 end
                 # Otherwise compain the nested child type is wrong
