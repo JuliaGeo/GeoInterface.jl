@@ -14,6 +14,9 @@ GI.getcoord(point, 1)
 @test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
 @test GI.testgeometry(point)
 @test GI.convert(GI, (1, 2)) isa GI.Point
+point_crs = GI.Point(point; crs=EPSG(4326))
+@test parent(point_crs) === parent(point)
+@test GI.crs(point_crs) === EPSG(4326)
 
 # 3D Point
 pointz = GI.Point(1, 2, 3)
@@ -34,6 +37,9 @@ pointzm = GI.Point(; X=1, Y=2, Z=3, M=4)
 @test (GI.x(pointzm), GI.y(pointzm), GI.z(pointzm), GI.m(pointzm)) == (1, 2, 3, 4)
 @test GI.testgeometry(pointzm)
 @test GI.convert(GI, pointzm) === pointzm
+pointzm_crs = GI.Point(; X=1, Y=2, Z=3, M=4, crs=EPSG(4326))
+@test parent(pointzm_crs) === parent(pointzm)
+@test GI.crs(pointzm_crs) === EPSG(4326)
 
 # Measured point
 pointm = GI.Point((X=1, Y=2, M=3))
@@ -45,17 +51,9 @@ pointm = GI.Point((X=1, Y=2, M=3))
 @test (GI.x(pointm), GI.y(pointm), GI.m(pointm)) == (1, 2, 3)
 @test_throws ArgumentError GI.z(pointm)
 @test GI.testgeometry(pointm)
-
-# Measured point
-pointm = GI.Point((X=1, Y=2, M=3))
-@test_throws MethodError GI.Point(; X=1, Y=2, T=3)
-@test GI.ismeasured(pointm)
-@test !GI.is3d(pointm)
-@test pointm == GI.Point(pointm)
-@test point != GI.Point(pointm)
-@test (GI.x(pointm), GI.y(pointm), GI.m(pointm)) == (1, 2, 3)
-@test_throws ArgumentError GI.z(pointm)
-@test GI.testgeometry(pointm)
+pointm_crs = GI.Point((X=1, Y=2, M=3); crs=EPSG(4326))
+@test parent(pointm_crs) === parent(pointm)
+@test GI.crs(pointm_crs) === EPSG(4326)
 
 # Foreced measured point with a tuple
 pointtm = GI.Point{false,true}(1, 2, 3)
@@ -65,6 +63,9 @@ pointtm = GI.Point{false,true}(1, 2, 3)
 @test (GI.x(pointtm), GI.y(pointtm), GI.m(pointtm)) == (1, 2, 3)
 @test_throws ArgumentError GI.z(pointtm)
 @test GI.testgeometry(pointtm)
+pointtm_crs = GI.Point{false,true}(1, 2, 3; crs=EPSG(4326))
+@test parent(pointtm_crs) === parent(pointtm)
+@test GI.crs(pointtm_crs) === EPSG(4326)
 
 # Point made from an array
 pointa = GI.Point([1, 2])

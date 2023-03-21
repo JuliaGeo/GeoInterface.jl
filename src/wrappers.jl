@@ -58,7 +58,7 @@ usually detected from the wrapped object, but can be added manually
 e.g. for `Tuple` or `Vector` points to have the third value used as
 measures.
 """
-abstract type WrapperGeometry{Z,M,T} end
+abstract type WrapperGeometry{Z,M,T,C} end
 
 isgeometry(::Type{<:WrapperGeometry}) = true
 is3d(::WrapperGeometry{Z}) where Z = Z
@@ -156,7 +156,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     """
     @eval begin
         @doc $docstring
-        struct $geomtype{Z,M,T,E<:Union{Nothing,Extents.Extent},C} <: WrapperGeometry{Z,M,T}
+        struct $geomtype{Z,M,T,E<:Union{Nothing,Extents.Extent},C} <: WrapperGeometry{Z,M,T,C}
             geom::T
             extent::E
             crs::C
@@ -263,17 +263,18 @@ GeoInterface.m(point)
 3
 ```
 """
-struct Point{Z,M,T} <: WrapperGeometry{Z,M,T}
+struct Point{Z,M,T,C} <: WrapperGeometry{Z,M,T,C}
     geom::T
+    crs::C
 end
-function Point{Z,M}(geom::T) where {Z,M,T}
+function Point{Z,M}(geom::T; crs::C=nothing) where {Z,M,T,C}
     expected_coords = 2 + Z + M
     ncoord(geom) == expected_coords || _coord_length_error(Z, M, ncoord(geom))
-    Point{Z,M,T}(geom)
+    Point{Z,M,T,C}(geom, crs)
 end
-Point(x::Real, y::Real, args::Real...) = Point((x, y, args...))
-Point{Z,M}(x::Real, y::Real, args::Real...) where {Z,M} = Point{Z,M}((x, y, args...))
-function Point(; X::Real, Y::Real, Z::Union{Real,Nothing}=nothing, M::Union{Real,Nothing}=nothing)
+Point(x::Real, y::Real, args::Real...; crs=nothing) = Point((x, y, args...); crs)
+Point{Z,M}(x::Real, y::Real, args::Real...; crs=nothing) where {Z,M} = Point{Z,M}((x, y, args...); crs)
+function Point(; X::Real, Y::Real, Z::Union{Real,Nothing}=nothing, M::Union{Real,Nothing}=nothing, crs=nothing)
     p = (; X, Y)
     if !isnothing(Z)
         p = merge(p, (; Z))
@@ -281,21 +282,22 @@ function Point(; X::Real, Y::Real, Z::Union{Real,Nothing}=nothing, M::Union{Real
     if !isnothing(M)
         p = merge(p, (; M))
     end
-    return Point(p)
+    return Point(p; crs)
 end
-function Point(geom)
+function Point(geom::T; crs::C=nothing) where {T,C}
     geomtrait(geom) isa PointTrait || _parent_type_error(geom)
     if is3d(geom) && ismeasured(geom)
-        return Point{true,true,typeof(geom)}(geom)
+        return Point{true,true,T,C}(geom, crs)
     elseif is3d(geom)
-        return Point{true,false,typeof(geom)}(geom)
+        return Point{true,false,T,C}(geom, crs)
     elseif ismeasured(geom)
-        return Point{false,true,typeof(geom)}(geom)
+        return Point{false,true,T,C}(geom, crs)
     else
-        return Point{false,false,typeof(geom)}(geom)
+        return Point{false,false,T,C}(geom, crs)
     end
 end
-Point(point::Point) = point
+Point(point::Point{Z,M,T}; crs::C=crs(point)) where {Z,M,T,C} = 
+    Point{Z,M,T,C}(parent(point), crs)
 
 geointerface_geomtype(::PointTrait) = Point
 
