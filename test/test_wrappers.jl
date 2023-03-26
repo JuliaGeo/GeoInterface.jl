@@ -202,6 +202,13 @@ multipolygon_coords = [[[[1, 2], [3, 4], [3, 2], [1, 4]]]]
 multipolygon = GI.MultiPolygon(multipolygon_coords)
 @test GI.coordinates(multipolygon) == multipolygon_coords
 
+# Wrong parent type
+@test_throws ArgumentError GI.Point(nothing)
+@test_throws ArgumentError GI.Point(linestring)
+@test_throws ArgumentError GI.LineString(1)
+@test_throws ArgumentError GI.MultiPolygon(1)
+@test_throws ArgumentError GI.MultiPolygon((1, 2))
+
 # Feature
 feature = GI.Feature(multipolygon; properties=(x=1, y=2, z=3))
 @test feature === GI.Feature(feature) === GI.Feature(feature; properties=(a=1, b=2))

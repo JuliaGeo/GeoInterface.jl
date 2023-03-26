@@ -200,7 +200,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             else
                 if child isa AbstractArray
                     if $nesting === 2
-                        all(child2 -> geomtrait(child2) isa PointTrait, child) || _parent_type_error(geom)
+                        all(child2 -> geomtrait(child2) isa PointTrait, child) || _parent_type_error($geomtype, $child_trait, geom)
                         Z1 = isnothing(Z) ? is3d(first(child)) : Z
                         M1 = isnothing(M) ? ismeasured(first(child)) : M
                         childtype = $childtype
@@ -209,7 +209,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                     elseif $nesting === 3
                         all(child) do child2
                             child2 isa AbstractArray && all(child3 -> geomtrait(child3) isa PointTrait, child2)
-                        end || _parent_type_error(geom)
+                        end || _parent_type_error($geomtype, $child_trait, geom)
                         Z1 = isnothing(Z) ? is3d(first(first(child))) : Z
                         M1 = isnothing(M) ? ismeasured(first(first(child))) : M
                         childtype = $childtype
@@ -218,19 +218,20 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                     end
                 end
                 # Otherwise compain the nested child type is wrong
-                _wrong_child_error($geomtype, $child_trait, child)
+                _wrong_child_error($trait, $child_trait, child)
             end
         else
             # Or complain the parent type is wrong
-            _parent_type_error(geom)
+            _parent_type_error($geomtype, $child_trait, geom)
         end
     end
 end
 
 @noinline _wrong_child_error(geomtype, C, child) = throw(ArgumentError("$geomtype must have child objects with trait $C, got $(typeof(child)) with trait $(geomtrait(child))"))
-@noinline _argument_error(T, A) = throw(ArgumentError("$T is does not have $A"))
+@noinline _argument_error(T, A) = throw(ArgumentError("$T does not have $A"))
 @noinline _length_error(T, f, x) = throw(ArgumentError("Length of array must be $(f.f) $(f.x) for $T"))
-@noinline _parent_type_error(geom) = throw(ArgumentError("Object $geom is not a geometry or array of child geometries"))
+@noinline _parent_type_error(trait, child_trait, geom) = throw(ArgumentError("Object $geom is not a $trait geometry or array of $child_trait child geometries"))
+@noinline _not_a_point_error(geom) = throw(ArgumentError("Object $geom is not a PointTrait geometry"))
 
 """
     Point
@@ -285,7 +286,7 @@ function Point(; X::Real, Y::Real, Z::Union{Real,Nothing}=nothing, M::Union{Real
     return Point(p; crs)
 end
 function Point(geom::T; crs::C=nothing) where {T,C}
-    geomtrait(geom) isa PointTrait || _parent_type_error(geom)
+    geomtrait(geom) isa PointTrait || _not_a_point_error(geom)
     if is3d(geom) && ismeasured(geom)
         return Point{true,true,T,C}(geom, crs)
     elseif is3d(geom)
