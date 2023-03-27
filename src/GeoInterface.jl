@@ -52,5 +52,9 @@ include("interface.jl")
 include("fallbacks.jl")
 include("utils.jl")
 include("base.jl")
+include("wrappers.jl")
+
+using .Wrappers
+using .Wrappers: geointerface_geomtype
 
 end # module

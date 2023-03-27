@@ -408,7 +408,7 @@ getpolygon(geom) = getpolygon(geomtrait(geom), geom)
 Retrieve Coordinate Reference System for given geom.
 In SF this is defined as `SRID`.
 """
-crs(geom) = crs(geomtrait(geom), geom)
+crs(geom) = crs(trait(geom), geom)
 
 """
     extent(obj; fallback=true) -> T <: Extents.Extent

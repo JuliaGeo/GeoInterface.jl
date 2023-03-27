@@ -36,6 +36,7 @@ GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
 GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
 GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
 
+GeoInterface.ncoord(t::PolygonTrait, geom::MyPolygon) = 2
 GeoInterface.isgeometry(::MyPolygon) = true
 GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
 GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2

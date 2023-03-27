@@ -66,6 +66,7 @@ getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) 
 npatch(t::AbstractPolyhedralSurfaceTrait, geom)::Integer = ngeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom) = getgeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom, i)
+getpoint(t::AbstractPolyhedralSurfaceTrait, geom) = flatten((p for p in getpoint(g)) for g in getgeom(t, geom))
 
 ## Default iterator
 getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(t, geom))
@@ -94,7 +95,7 @@ issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom)))
 issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
-crs(::AbstractGeometryTrait, geom) = nothing
+crs(::AbstractTrait, geom) = nothing
 
 # FeatureCollection
 getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))
