@@ -86,6 +86,8 @@ crs(::AbstractGeometryTrait, geom::WrapperGeometry) =
 function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T}) where T
     isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
 end
+ncoord(p::WrapperGeometry) = 2 + is3d(p) + ismeasured(p)
+coordnames(p::WrapperGeometry) = coordnames(parent(p))
 
 # We eefine all the types in a loop so we have standardised docs and behaviour
 # without too much repetition of code.
@@ -308,6 +310,10 @@ ncoord(trait::PointTrait, geom::Point) = ncoord(trait, parent(geom))
 getcoord(trait::PointTrait, geom::Point, i::Integer) = getcoord(trait, parent(geom), i)
 convert(::Type{Point}, ::PointTrait, geom) = Point(geom)
 convert(::Type{Point}, ::PointTrait, geom::Point) = geom
+ncoord(p::Point) = 2 + is3d(p) + ismeasured(p)
+coordnames(p::Point) = coordnames(parent(p))
+coordnames(p::Point{<:PointTuple3}) = (:X, :Y, (is3d(p) ? :Z : :M ))
+coordnames(p::Point{<:Vector{<:Real}}) = (:X, :Y, (is3d(p) ? :Z : :M ))
 
 x(trait::PointTrait, geom::Point) = x(trait, parent(geom))
 y(trait::PointTrait, geom::Point) = y(trait, parent(geom))

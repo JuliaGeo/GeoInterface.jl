@@ -80,14 +80,26 @@ function expr_enable(Geom)
         function $MC.plottype(geom::$Geom)
             $_plottype(geom)
         end
+        function $MC.plottype(geoms::AbstractVector{<:$Geom})
+            $_plottype(first(skipmissing(geoms)))
+        end
         function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom)
-            $_convert_arguments(p,geom)
+            $_convert_arguments(p, geom)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractVector{$Geom})
+            $_convert_arguments.(p, geoms)
         end
         function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom)
-            $_convert_arguments(p,geom)
+            $_convert_arguments(p, geom)
+        end
+        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractVector{$Geom})
+            $_convert_arguments.(p, geoms)
         end
         function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom)
-            $_convert_arguments(p,geom)
+            $_convert_arguments(p, geom)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::AbstractVector{<:$Geom})
+            $_convert_arguments.(p, geom)
         end
     end
 end

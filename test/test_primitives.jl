@@ -117,6 +117,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.npoint(geom) == 2  # defaults to ngeom
+        @test GeoInterface.ncoord(geom) == 2
         @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
         points = GeoInterface.getpoint(geom)
         point = GeoInterface.getpoint(geom, 1)
@@ -139,6 +140,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
 
         @test GeoInterface.nring(geom) == 2
         @test GeoInterface.nhole(geom) == 1
+        @test GeoInterface.ncoord(geom) == 2
         @test GeoInterface.coordinates(geom) == [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]
         lines = GeoInterface.getring(geom)
         line = GeoInterface.getring(geom, 1)
@@ -162,6 +164,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.npoint(geom) == 2
+        @test GeoInterface.ncoord(geom) == 2
         points = GeoInterface.getpoint(geom)
         point = GeoInterface.getpoint(geom, 1)
         @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
@@ -174,6 +177,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         geom = MyMultiCurve()
         @test testgeometry(geom)
 
+        @test GeoInterface.ncoord(geom) == 2
         @test GeoInterface.nlinestring(geom) == 2
         lines = GeoInterface.getlinestring(geom)
         line = GeoInterface.getlinestring(geom, 1)
@@ -186,6 +190,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.npolygon(geom) == 2
+        @test GeoInterface.ncoord(geom) == 2
         polygons = GeoInterface.getpolygon(geom)
         polygon = GeoInterface.getpolygon(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[[1, 2], [1, 2]], [[1, 2], [1, 2]]], [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]]
@@ -209,6 +214,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.ngeom(geom) == 2
+        @test GeoInterface.ncoord(geom) == 2
         geoms = GeoInterface.getgeom(geom)
         thing = GeoInterface.getgeom(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]

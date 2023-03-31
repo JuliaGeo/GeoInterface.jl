@@ -57,6 +57,34 @@ GeoInterface.z(::PointTrait, geom::Union{PointTuple3,PointTuple4}) = geom[3]
 GeoInterface.m(::PointTrait, geom::PointTuple4) = geom[4]
 GeoInterface.m(::PointTrait, geom::Union{PointTuple2,PointTuple3}) = _m_error(Base.length(geom))
 
+function GeoInterface.convert(::Type{Tuple}, ::PointTrait, geom) 
+    if is3d(geom)
+        if ismeasured(geom)
+            x(geom), y(geom), z(geom), m(geom)
+        else
+            x(geom), y(geom), z(geom)
+        end
+    elseif ismeasured(geom)
+        x(geom), y(geom), m(geom)
+    else
+        x(geom), y(geom)
+    end
+end
+
+function GeoInterface.convert(::Type{NamedTuple}, ::PointTrait, geom) 
+    if is3d(geom)
+        if ismeasured(geom)
+            (X=x(geom), Y=y(geom), Z=z(geom), M=m(geom))
+        else
+            (X=x(geom), Y=y(geom), Z=z(geom))
+        end
+    elseif ismeasured(geom)
+        (X=x(geom), Y=y(geom), M=m(geom))
+    else
+        (X=x(geom), Y=y(geom))
+    end
+end
+
 
 # NamedTuple 
 # with X/Y/Z/M names in any order
