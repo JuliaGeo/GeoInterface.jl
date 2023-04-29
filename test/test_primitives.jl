@@ -35,42 +35,49 @@ GeoInterface.isgeometry(::MyCurve) = true
 GeoInterface.geomtrait(::MyCurve) = LineStringTrait()
 GeoInterface.ngeom(::LineStringTrait, geom::MyCurve) = 2
 GeoInterface.getgeom(::LineStringTrait, geom::MyCurve, i) = MyPoint()
+GeoInterface.ncoord(t::LineStringTrait, geom::MyCurve) = 2
 
-GeoInterface.ncoord(t::PolygonTrait, geom::MyPolygon) = 2
 GeoInterface.isgeometry(::MyPolygon) = true
 GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
 GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2
 GeoInterface.getgeom(::PolygonTrait, geom::MyPolygon, i) = MyCurve()
+GeoInterface.ncoord(t::PolygonTrait, geom::MyPolygon) = 2
 
 GeoInterface.isgeometry(::MyTriangle) = true
 GeoInterface.geomtrait(::MyTriangle) = TriangleTrait()
 GeoInterface.ngeom(::TriangleTrait, geom::MyTriangle) = 3
 GeoInterface.getgeom(::TriangleTrait, geom::MyTriangle, i) = MyCurve()
+GeoInterface.ncoord(t::TriangleTrait, geom::MyTriangle) = 2
 
 GeoInterface.isgeometry(::MyMultiPoint) = true
 GeoInterface.geomtrait(::MyMultiPoint) = MultiPointTrait()
 GeoInterface.ngeom(::MultiPointTrait, geom::MyMultiPoint) = 2
 GeoInterface.getgeom(::MultiPointTrait, geom::MyMultiPoint, i) = MyPoint()
+GeoInterface.ncoord(t::MultiPointTrait, geom::MyMultiPoint) = 2
 
 GeoInterface.isgeometry(::MyMultiCurve) = true
 GeoInterface.geomtrait(::MyMultiCurve) = MultiCurveTrait()
 GeoInterface.ngeom(::MultiCurveTrait, geom::MyMultiCurve) = 2
 GeoInterface.getgeom(::MultiCurveTrait, geom::MyMultiCurve, i) = MyCurve()
+GeoInterface.ncoord(t::MultiCurveTrait, geom::MyMultiCurve) = 2
 
 GeoInterface.isgeometry(::MyMultiPolygon) = true
 GeoInterface.geomtrait(::MyMultiPolygon) = MultiPolygonTrait()
 GeoInterface.ngeom(::MultiPolygonTrait, geom::MyMultiPolygon) = 2
 GeoInterface.getgeom(::MultiPolygonTrait, geom::MyMultiPolygon, i) = MyPolygon()
+GeoInterface.ncoord(t::MultiPolygonTrait, geom::MyMultiPolygon) = 2
 
 GeoInterface.isgeometry(::MyTIN) = true
 GeoInterface.geomtrait(::MyTIN) = PolyhedralSurfaceTrait()
 GeoInterface.ngeom(::PolyhedralSurfaceTrait, geom::MyTIN) = 2
 GeoInterface.getgeom(::PolyhedralSurfaceTrait, geom::MyTIN, i) = MyTriangle()
+GeoInterface.ncoord(t::PolyhedralSurfaceTrait, geom::MyTIN) = 2
 
 GeoInterface.isgeometry(::MyCollection) = true
 GeoInterface.geomtrait(::MyCollection) = GeometryCollectionTrait()
 GeoInterface.ngeom(::GeometryCollectionTrait, geom::MyCollection) = 2
 GeoInterface.getgeom(::GeometryCollectionTrait, geom::MyCollection, i) = MyCurve()
+GeoInterface.ncoord(t::GeometryCollectionTrait, geom::MyCollection) = 2
 
 GeoInterface.isfeature(::Type{<:MyFeature}) = true
 GeoInterface.trait(feature::MyFeature) = FeatureTrait()
@@ -117,6 +124,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.npoint(geom) == 2  # defaults to ngeom
+        @test GeoInterface.ncoord(geom) == 2
         @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
         points = GeoInterface.getpoint(geom)
         point = GeoInterface.getpoint(geom, 1)
@@ -139,6 +147,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
 
         @test GeoInterface.nring(geom) == 2
         @test GeoInterface.nhole(geom) == 1
+        @test GeoInterface.ncoord(geom) == 2
         @test GeoInterface.coordinates(geom) == [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]
         lines = GeoInterface.getring(geom)
         line = GeoInterface.getring(geom, 1)
@@ -162,6 +171,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.npoint(geom) == 2
+        @test GeoInterface.ncoord(geom) == 2
         points = GeoInterface.getpoint(geom)
         point = GeoInterface.getpoint(geom, 1)
         @test GeoInterface.coordinates(geom) == [[1, 2], [1, 2]]
@@ -174,6 +184,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         geom = MyMultiCurve()
         @test testgeometry(geom)
 
+        @test GeoInterface.ncoord(geom) == 2
         @test GeoInterface.nlinestring(geom) == 2
         lines = GeoInterface.getlinestring(geom)
         line = GeoInterface.getlinestring(geom, 1)
@@ -186,6 +197,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.npolygon(geom) == 2
+        @test GeoInterface.ncoord(geom) == 2
         polygons = GeoInterface.getpolygon(geom)
         polygon = GeoInterface.getpolygon(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[[1, 2], [1, 2]], [[1, 2], [1, 2]]], [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]]
@@ -209,6 +221,7 @@ GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::In
         @test testgeometry(geom)
 
         @test GeoInterface.ngeom(geom) == 2
+        @test GeoInterface.ncoord(geom) == 2
         geoms = GeoInterface.getgeom(geom)
         thing = GeoInterface.getgeom(geom, 1)
         @test GeoInterface.coordinates(geom) == [[[1, 2], [1, 2]], [[1, 2], [1, 2]]]
