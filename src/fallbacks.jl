@@ -111,10 +111,10 @@ coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in ge
 
 extent(::AbstractTrait, x) = Extents.extent(x)
 function calc_extent(t::AbstractPointTrait, geom)
-    x = x(t, geom)
-    y = y(t, geom)
+    x = GeoInterface.x(t, geom)
+    y = GeoInterface.y(t, geom)
     if is3d(geom)
-        z = z(t, geom)
+        z = GeoInterface.z(t, geom)
         return Extent(; X=(x, x), Y=(y, y), Z=(z, z))
     else
         return Extent(; X=(x, x), Y=(y, y))
