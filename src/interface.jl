@@ -423,6 +423,7 @@ When `fallback` is true, and the obj does not have an extent,
 an extent is calculated from the coordinates of all geometries in `obj`.
 """
 function extent(obj; fallback=true)
+    isnothing(trait(obj)) && return Extents.extent(obj)
     ex = extent(trait(obj), obj)
     isnothing(ex) && fallback && return calc_extent(trait(obj), obj)
     return ex

@@ -107,9 +107,9 @@ function coordinates(t::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? [] : coordinates(geom)
 end
-coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(t, fc)]
+coordinates(t::AbstractFeatureCollectionTrait, fc) = map(f -> coordinates(f), getfeature(t, fc))
 
-extent(::AbstractTrait, x) = Extents.extent(x)
+extent(::Any, x) = Extents.extent(x)
 function calc_extent(t::AbstractPointTrait, geom)
     coords = collect(getcoord(t, geom))
     names = coordnames(geom)
