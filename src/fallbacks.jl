@@ -115,7 +115,18 @@ function calc_extent(t::AbstractPointTrait, geom)
     names = coordnames(geom)
     return Extent(NamedTuple{names}(zip(coords, coords)))
 end
-calc_extent(t::AbstractGeometryTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
+function calc_extent(t::AbstractGeometryTrait, geom)
+    points = getpoint(t, geom)
+    X = extrema(p -> x(p), points)
+    Y = extrema(p -> y(p), points)
+    if is3d(geom)
+        Z = extrema(p -> z(p), points)
+        Extent(; X, Y, Z)
+    else
+        Extent(; X, Y)
+    end
+end
+calc_extent(t::GeometryCollectionTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
 function calc_extent(::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? nothing : extent(geom)
