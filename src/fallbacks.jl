@@ -111,9 +111,14 @@ coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in ge
 
 extent(::AbstractTrait, x) = Extents.extent(x)
 function calc_extent(t::AbstractPointTrait, geom)
-    coords = collect(getcoord(t, geom))
-    names = coordnames(geom)
-    return Extent(NamedTuple{names}(zip(coords, coords)))
+    x = x(t, geom)
+    y = y(t, geom)
+    if is3d(geom)
+        z = z(t, geom)
+        return Extent(; X=(x, x), Y=(y, y), Z=(z, z))
+    else
+        return Extent(; X=(x, x), Y=(y, y))
+    end
 end
 function calc_extent(t::AbstractGeometryTrait, geom)
     points = getpoint(t, geom)
