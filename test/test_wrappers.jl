@@ -142,6 +142,10 @@ polygon = GI.Polygon([linearring, linearring])
 polygon_crs = GI.Polygon(polygon; crs=EPSG(4326))
 @test parent(polygon_crs) === parent(polygon)
 @test GI.crs(polygon_crs) === EPSG(4326)
+# Make sure `linestring` is also ok in polygons
+polygon = GI.Polygon([linestring, linestring])
+@test GI.getgeom(polygon, 1) === linestring
+@test collect(GI.getgeom(polygon)) == [linestring, linestring]
 
 # MultiPoint
 multipoint = GI.MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
