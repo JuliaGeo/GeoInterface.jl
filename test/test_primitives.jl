@@ -489,6 +489,6 @@ Extents.extent(::ExtentPolygon) = Extent(X=(1, 2), Y=(3, 4))
 
 @testset "Extents.jl extent fallback" begin
     @test GeoInterface.extent(ExtentPolygon()) == Extent(X=(1, 2), Y=(3, 4))
-    @test GeoInterface.extent(1) == nothing
-    @test GeoInterface.extent(nothing, 1) == nothing
+    @test isnothing(GeoInterface.extent(1))
+    @test isnothing(GeoInterface.extent(nothing, 1))
 end
