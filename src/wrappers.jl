@@ -98,7 +98,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         (:LineString, :LineStringTrait, :Point, :PointTrait, >=(2), 1),
         (:LinearRing, :LinearRingTrait, :Point, :PointTrait, >=(3), 1),
         (:MultiPoint, :MultiPointTrait, :Point, :PointTrait, nothing, 1),
-        (:Polygon, :PolygonTrait, :LinearRing, :LinearRingTrait, nothing, 2),
+        (:Polygon, :PolygonTrait, :LinearRing, :AbstractCurveTrait, nothing, 2),
         (:MultiLineString, :MultiLineStringTrait, :LineString, :LineStringTrait, nothing, 2),
         (:MultiCurve, :MultiCurveTrait, :LineString, :AbstractCurveTrait, nothing, 2),
         (:MultiPolygon, :MultiPolygonTrait, :Polygon, :PolygonTrait, nothing, 3),
