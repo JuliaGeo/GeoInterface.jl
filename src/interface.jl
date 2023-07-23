@@ -639,13 +639,13 @@ convert(::Type{T}, x::T) where {T} = x  # no-op
 """
     astext(geom) -> WKT
 
-Convert `geom` into Well Known Text (WKT) representation, such as `POINT (30 10)`.
+Convert `geom` into Well Known Text (WKT) representation, such as `POINT (30 10)`, wrapped in a `GeoFormatTypes.WellKnownText`.
 """
 astext(geom) = astext(geomtrait(geom), geom)
 
 """
     asbinary(geom) -> WKB
 
-Convert `geom` into Well Known Binary (WKB) representation, such as `000000000140000000000000004010000000000000`.
+Convert `geom` into Well Known Binary (WKB) representation, such as `000000000140000000000000004010000000000000`, wrapped in a `GeoFormatTypes.WellKnownBinary`.
 """
 asbinary(geom) = asbinary(geomtrait(geom), geom)

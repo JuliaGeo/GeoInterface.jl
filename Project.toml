@@ -6,14 +6,22 @@ version = "1.3.1"
 [deps]
 Extents = "411431e0-e8b7-467b-b5e0-f676ba4f2910"
 
+[weakdeps]
+WellKnownGeometry = "0f680547-7be7-4555-8820-bb198eeb646b"
+
+[extensions]
+WellKnownGeometryExt = "WellKnownGeometry"
+
 [compat]
 Extents = "0.1.1"
+WellKnownGeometry = "0.2"
 julia = "1"
 
 [extras]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 GeoFormatTypes = "68eda718-8dee-11e9-39e7-89f7f65f511f"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+WellKnownGeometry = "0f680547-7be7-4555-8820-bb198eeb646b"
 
 [targets]
-test = ["Test", "Documenter", "GeoFormatTypes"]
+test = ["Test", "Documenter", "GeoFormatTypes", "WellKnownGeometry"]
