@@ -331,6 +331,7 @@ end
         @test GeoInterface.y(geom) == 2
         @test_throws ArgumentError GeoInterface.z(geom)
         @test_throws ArgumentError GeoInterface.m(geom)
+        @test GeoInterface.extent(geom) == Extents.Extent(X=(1, 1), Y=(2, 2))
         geom = [1, 2, 3]
         @test testgeometry(geom)
         @test collect(GeoInterface.getcoord(geom)) == geom

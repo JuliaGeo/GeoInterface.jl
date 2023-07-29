@@ -143,6 +143,11 @@ polygon_crs = GI.Polygon(polygon; crs=EPSG(4326))
 @test parent(polygon_crs) === parent(polygon)
 @test GI.crs(polygon_crs) === EPSG(4326)
 
+linearring3d = GI.LinearRing([(1, 2, 3), (3, 4, 5), (5, 6, 7), (1, 2, 3)])
+polygon3d = GI.Polygon([linearring3d, linearring3d])
+@test GI.is3d(polygon3d)
+@test GI.extent(polygon3d) == Extents.Extent(X=(1, 5), Y=(2, 6), Z=(3, 7))
+
 # MultiPoint
 multipoint = GI.MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 @test multipoint == GI.MultiPoint(multipoint)

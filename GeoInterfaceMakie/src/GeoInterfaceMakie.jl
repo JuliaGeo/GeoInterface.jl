@@ -118,4 +118,6 @@ end
 # Features and Feature collections
 # https://github.com/JuliaGeo/GeoInterface.jl/pull/72#issue-1406325596
 
+@enable GeoInterface.Wrappers.WrapperGeometry
+
 end

@@ -139,7 +139,6 @@ function _coordvecs(::GI.MultiPolygonTrait, geom)
     end
 end
 
-
 _coordvec(n) = Array{Float64}(undef, n)
 
 function _geom2coordvecs!(xs, ys, geom)
@@ -157,5 +156,7 @@ function _geom2coordvecs!(xs, ys, zs, geom)
     end
     return xs, ys, zs
 end
+
+@enable_geo_plots GeoInterface.Wrappers.WrapperGeometry
 
 end
