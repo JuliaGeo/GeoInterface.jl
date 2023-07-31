@@ -197,10 +197,11 @@ multicurve_crs = GI.MultiCurve(multicurve; crs=EPSG(4326))
 
 
 # MultiPolygon
-multipolygon = GI.MultiPolygon([polygon])
+multipolygon = GI.MultiPolygon(GI.Polygon([linearring, linearring]))
 @test multipolygon == GI.MultiPolygon(multipolygon)
 @test GI.getgeom(multipolygon, 1) === polygon
 @test !GI.is3d(multipolygon)
+@show polygon
 @show polygon
 @show GI.getgeom(polygon, 1)
 # MultiPolygon extent does not infer, maybe due to nesting
