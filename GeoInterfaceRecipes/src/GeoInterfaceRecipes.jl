@@ -6,34 +6,6 @@ const GI = GeoInterface
 
 export @enable_geo_plots
 
-"""
-     GeoInterfaceRecipes.@enable_geo_plots(typ)
-
-Macro to add plot recipes to a geometry type.
-"""
-macro enable_geo_plots(typ)
-    quote
-        # We recreate the apply_recipe functions manually here
-        # as nesting the @recipe macro doesn't work.
-        function RecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::$(esc(typ)))
-              @nospecialize
-              series_list = RecipesBase.RecipeData[]
-              RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
-              Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.trait(geom), geom)))
-              return series_list
-        end
-        function RecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::Base.AbstractVector{<:Base.Union{Base.Missing,<:($(esc(typ)))}})
-              @nospecialize
-              series_list = RecipesBase.RecipeData[]
-              RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
-              for g in Base.skipmissing(geom)
-                  Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.trait(g), g)))
-              end
-              return series_list
-        end
-    end
-end
-
 RecipesBase.@recipe function f(t::Union{GI.PointTrait,GI.MultiPointTrait}, geom)
     seriestype --> :scatter
     _coordvecs(t, geom)
@@ -157,5 +129,58 @@ function _geom2coordvecs!(xs, ys, zs, geom)
     end
     return xs, ys, zs
 end
+
+function expr_enable(typ)
+    quote
+        # We recreate the apply_recipe functions manually here
+        # as nesting the @recipe macro doesn't work.
+        function RecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::$(esc(typ)))
+              @nospecialize
+              series_list = RecipesBase.RecipeData[]
+              RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
+              Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.trait(geom), geom)))
+              return series_list
+        end
+        function RecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::Base.AbstractVector{<:Base.Union{Base.Missing,<:($(esc(typ)))}})
+              @nospecialize
+              series_list = RecipesBase.RecipeData[]
+              RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
+              for g in Base.skipmissing(geom)
+                  Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (GeoInterface.trait(g), g)))
+              end
+              return series_list
+        end
+    end
+end
+
+"""
+     GeoInterfaceRecipes.@enable(GeometryType)
+
+Macro to add plot recipes to a geometry type.
+
+# Usage
+
+```julia
+struct MyGeometry 
+...
+end
+# overload GeoInterface for MyGeometry
+...
+
+# Enable Plots.jl plotting
+GeoInterfaceRecipes.@enable_geo_plots MyGeometry
+```
+"""
+macro enable(typ)
+    expr_enable(typ)
+end
+
+# Compat
+macro enable_geo_plots(typ)
+    expr_enable(typ)
+end
+
+# Enable Plots.jl for GeoInterface wrappers
+@enable GeoInterface.Wrappers.WrapperGeometry
 
 end

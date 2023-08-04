@@ -94,7 +94,7 @@ end
 
 """
 
-    @enable(Geom)
+    GeoInterfaceMakie.@enable(GeometryType)
 
 Enable Makie based plotting for a type `Geom` that implements the geometry interface 
 defined in `GeoInterface`.
@@ -107,12 +107,16 @@ end
 # overload GeoInterface for MyGeometry
 ...
 
-@enable MyGeometry
+# Enable Makie.jl plotting
+GeoInterfaceMakie.@enable MyGeometry
 ```
 """
 macro enable(Geom)
     esc(expr_enable(Geom))
 end
+
+# Enable Makie.jl for GeoInterface wrappers
+@enable GeoInterface.Wrappers.WrapperGeometry
 
 # TODO 
 # Features and Feature collections
