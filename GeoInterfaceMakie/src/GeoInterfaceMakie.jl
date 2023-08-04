@@ -18,13 +18,6 @@ end
 function plottype_from_geomtrait(::Union{GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
     MC.Poly
 end
-function pttype(geom)
-    if GI.is3d(geom)
-        GB.Point3{Float64}
-    else
-        GB.Point2{Float64}
-    end
-end
 
 function _convert_arguments(t, geom)::Tuple
     geob = GI.convert(GB, geom)
