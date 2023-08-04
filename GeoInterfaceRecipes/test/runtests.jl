@@ -18,8 +18,9 @@ struct MyCollection{N} <: MyAbstractGeom{N} end
 struct MyFeature end
 struct MyFeatureCollection end
 
-GeoInterfaceRecipes.@enable_geo_plots MyAbstractGeom
-GeoInterfaceRecipes.@enable_geo_plots MyFeature
+GeoInterfaceRecipes.@enable MyAbstractGeom
+GeoInterfaceRecipes.@enable MyFeature
+# Test legacy interface
 GeoInterfaceRecipes.@enable_geo_plots MyFeatureCollection
 
 GeoInterface.isgeometry(::MyAbstractGeom) = true
