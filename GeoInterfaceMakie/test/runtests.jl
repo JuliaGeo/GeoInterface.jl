@@ -45,8 +45,8 @@ end
         readgeom("MULTIPOINT(1 2, 2 3, 3 4)"),
     ]
     for (i, geom) in enumerate(geoms)
-        Makie.plot!(Axis(fig[i,1], title="$(GI.geomtrait(geom))"), geom)
-        Makie.plot!(Axis(fig[i,1], title="$(GI.geomtrait(geom))"), [geom])
+        Makie.plot!(Axis(fig[i, 1], title="$(GI.geomtrait(geom))"), geom)
+        Makie.plot!(Axis(fig[i, 2], title="Vector of $(GI.geomtrait(geom))"), [geom])
     end
     fig
 end
