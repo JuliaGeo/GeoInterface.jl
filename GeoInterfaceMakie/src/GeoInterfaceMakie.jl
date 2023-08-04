@@ -40,7 +40,7 @@ end
     push!(out, _convert(eltype(out), pt))
     out
 end
-function _convert(::Type{GB.Point2{Float64}, pt)
+function _convert(::Type{GB.Point2{Float64}}, pt)
     x,y = GI.getcoord(pt)
     GB.Point2{Float64}(x,y)
 end
