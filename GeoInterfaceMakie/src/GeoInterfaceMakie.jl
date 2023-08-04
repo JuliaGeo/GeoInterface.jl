@@ -94,7 +94,7 @@ end
 
 """
 
-    GeoInterfaceRecipes.@enable(Geom)
+    GeoInterfaceMakie.@enable(GeometryType)
 
 Enable Makie based plotting for a type `Geom` that implements the geometry interface 
 defined in `GeoInterface`.

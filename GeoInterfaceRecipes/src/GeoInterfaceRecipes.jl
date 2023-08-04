@@ -154,7 +154,7 @@ function expr_enable(typ)
 end
 
 """
-     GeoInterfaceRecipes.@enable(typ)
+     GeoInterfaceRecipes.@enable(GeometryType)
 
 Macro to add plot recipes to a geometry type.
 
