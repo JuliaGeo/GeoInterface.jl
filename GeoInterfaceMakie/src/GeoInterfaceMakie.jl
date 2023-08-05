@@ -18,61 +18,14 @@ end
 function plottype_from_geomtrait(::Union{GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
     MC.Poly
 end
-function pttype(geom)
-    if GI.is3d(geom)
-        GB.Point3f
-    else
-        GB.Point2f
-    end
-end
-function points(geom)::Union{Vector{GB.Point2f}, Vector{GB.Point3f}}
-    Pt = pttype(geom)
-    out = Pt[]
-    points!(out, GI.geomtrait(geom), geom)
-end
-@noinline function points!(out, ::GI.AbstractTrait, geom)
-    for pt in GI.getpoint(geom)
-        push!(out, _convert(eltype(out), pt))
-    end
-    out
-end
-@noinline function points!(out, ::GI.PointTrait, pt)
-    push!(out, _convert(eltype(out), pt))
-    out
-end
-function _convert(::Type{GB.Point2f}, pt)
-    x,y = GI.getcoord(pt)
-    GB.Point2f(x,y)
-end
-function _convert(::Type{GB.Point3f}, pt)
-    x,y,z = GI.getcoord(pt)
-    GB.Point3f(x,y,z)
-end
 
-function basicsgeom(geom)
-    t = GI.geomtrait(geom)
-    T = basicsgeomtype(t)
-    GI.convert(T, t, geom)
-end
-
-basicsgeomtype(::GI.PointTrait)           = GB.Point
-basicsgeomtype(::GI.MultiPointTrait)      = GB.MultiPoint
-basicsgeomtype(::GI.PolygonTrait)         = GB.Polygon
-basicsgeomtype(::GI.MultiPolygonTrait)    = GB.MultiPolygon
-basicsgeomtype(::GI.LineStringTrait)      = GB.LineString
-basicsgeomtype(::GI.MultiLineStringTrait) = GB.MultiLineString
-
-function _convert_arguments(t::Type{<:MC.Poly}, geom)::Tuple
-    geob = basicsgeom(geom)::Union{GB.Polygon, GB.MultiPolygon}
-    MC.convert_arguments(t,geob)
-end
-function _convert_arguments(t::Type{<:MC.Lines}, geom)::Tuple
-    geob = basicsgeom(geom)
+function _convert_arguments(t, geom)::Tuple
+    geob = GI.convert(GB, geom)
     MC.convert_arguments(t, geob)
 end
-function _convert_arguments(::MC.PointBased, geom)::Tuple
-    pts = points(geom)
-    (pts,)
+function _convert_array_arguments(t, geoms)::Tuple
+    geob = map(geom -> GI.convert(GB, geom), geoms)
+    MC.convert_arguments(t, geob)
 end
 
 function expr_enable(Geom)
@@ -80,14 +33,27 @@ function expr_enable(Geom)
         function $MC.plottype(geom::$Geom)
             $_plottype(geom)
         end
+        # TODO: this method doesn't seem to do anything
+        function $MC.plottype(geom::AbstractArray{<:$Geom})
+            $_plottype(first(geom))
+        end
         function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom)
-            $_convert_arguments(p,geom)
+            $_convert_arguments(p, geom)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:$Geom})
+            $_convert_array_arguments(p, geoms)
         end
         function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom)
-            $_convert_arguments(p,geom)
+            $_convert_arguments(p, geom)
+        end
+        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:$Geom})
+            $_convert_array_arguments(p, geoms)
         end
         function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom)
-            $_convert_arguments(p,geom)
+            $_convert_arguments(p, geom)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:$Geom})
+            $_convert_array_arguments(p, geoms)
         end
     end
 end
