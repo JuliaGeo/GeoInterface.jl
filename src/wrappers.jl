@@ -308,6 +308,7 @@ ncoord(trait::PointTrait, geom::Point) = ncoord(trait, parent(geom))
 getcoord(trait::PointTrait, geom::Point, i::Integer) = getcoord(trait, parent(geom), i)
 convert(::Type{Point}, ::PointTrait, geom) = Point(geom)
 convert(::Type{Point}, ::PointTrait, geom::Point) = geom
+extent(trait::PointTrait, geom::Point) = extent(trait, parent(geom)) 
 
 x(trait::PointTrait, geom::Point) = x(trait, parent(geom))
 y(trait::PointTrait, geom::Point) = y(trait, parent(geom))

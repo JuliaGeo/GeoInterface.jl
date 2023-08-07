@@ -7,6 +7,7 @@ point = GI.Point(1, 2)
 GI.getcoord(point, 1)
 @test !GI.ismeasured(point)
 @test !GI.is3d(point)
+@test GI.extent(point) == Extent(X=(1, 1), Y=(2, 2))
 @test point == GI.Point(point)
 @test (GI.x(point), GI.y(point)) == (1, 2)
 @test_throws ArgumentError GI.z(point)
@@ -25,6 +26,7 @@ pointz = GI.Point(1, 2, 3)
 @test (GI.x(pointz), GI.y(pointz), GI.z(pointz)) == (1, 2, 3)
 @test GI.testgeometry(pointz)
 @test GI.convert(GI, pointz) === pointz
+@test GI.extent(pointz) == Extents.Extent(X=(1, 1), Y=(2, 2), Z=(3, 3))
 
 # 3D measured point
 pointzm = GI.Point(; X=1, Y=2, Z=3, M=4)
@@ -101,6 +103,8 @@ line = GI.Line([(1, 2), (3, 4)])
 @test GI.getgeom(line, 1) === (1, 2)
 @test GI.getgeom(line) == [(1, 2), (3, 4)]
 @test GI.testgeometry(line)
+@test !GI.is3d(line)
+@test GI.extent(line) == Extent(X=(1, 3), Y=(2, 4))
 @test_throws ArgumentError GI.Line(point)
 @test_throws ArgumentError GI.Line([(1, 2)])
 @test_throws ArgumentError GI.Line([line, line])
@@ -114,6 +118,8 @@ linestring = GI.LineString([(1, 2), (3, 4)])
 @test GI.getgeom(linestring, 1) === (1, 2)
 @test GI.getgeom(linestring) == [(1, 2), (3, 4)]
 @test GI.testgeometry(linestring)
+@test !GI.is3d(linestring)
+@test @inferred(GI.extent(linestring)) == Extent(X=(1, 3), Y=(2, 4))
 @test_throws ArgumentError GI.LineString([(1, 2)])
 linestring_crs = GI.LineString(linestring; crs=EPSG(4326))
 @test parent(linestring_crs) === parent(linestring)
@@ -125,6 +131,8 @@ linearring = GI.LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])
 @test GI.getgeom(linearring, 1) === (1, 2)
 @test GI.getgeom(linearring) == [(1, 2), (3, 4), (5, 6), (1, 2)]
 @test GI.testgeometry(linearring)
+@test !GI.is3d(linearring)
+@test @inferred(GI.extent(linearring)) == Extent(X=(1, 5), Y=(2, 6))
 @test_throws ArgumentError GI.LinearRing([(1, 2)])
 linearring_crs = GI.LinearRing(linearring; crs=EPSG(4326))
 @test parent(linearring_crs) === parent(linearring)
@@ -137,6 +145,8 @@ polygon = GI.Polygon([linearring, linearring])
 @test collect(GI.getgeom(polygon)) == [linearring, linearring]
 @test collect(GI.getpoint(polygon)) == vcat(collect(GI.getpoint(linearring)), collect(GI.getpoint(linearring)))
 @test GI.testgeometry(polygon)
+@test !GI.is3d(polygon)
+@test @inferred(GI.extent(polygon)) == Extent(X=(1, 5), Y=(2, 6))
 @test GI.convert(GI, MyPolygon()) isa GI.Polygon
 @test GI.convert(GI, polygon) === polygon
 polygon_crs = GI.Polygon(polygon; crs=EPSG(4326))
@@ -147,10 +157,17 @@ polygon = GI.Polygon([linestring, linestring])
 @test GI.getgeom(polygon, 1) === linestring
 @test collect(GI.getgeom(polygon)) == [linestring, linestring]
 
+linearring3d = GI.LinearRing([(1, 2, 3), (3, 4, 5), (5, 6, 7), (1, 2, 3)])
+polygon3d = GI.Polygon([linearring3d, linearring3d])
+@test GI.is3d(polygon3d)
+@test GI.extent(polygon3d) == Extents.Extent(X=(1, 5), Y=(2, 6), Z=(3, 7))
+
 # MultiPoint
 multipoint = GI.MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 @test multipoint == GI.MultiPoint(multipoint)
 @test GI.getgeom(multipoint, 1) === (1, 2)
+@test !GI.is3d(multipoint)
+@test @inferred(GI.extent(multipoint)) == Extent(X=(1, 9), Y=(2, 10))
 @test_throws ArgumentError GI.MultiPoint([[(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)]])
 @test GI.testgeometry(multipoint)
 multipoint_crs = GI.MultiPoint(multipoint; crs=EPSG(4326))
@@ -163,6 +180,8 @@ collection = GI.GeometryCollection(geoms)
 @test collection == GI.GeometryCollection(collection)
 @test GI.getgeom(collection) == geoms
 @test GI.testgeometry(collection)
+@test !GI.is3d(collection)
+@test GI.extent(collection) == reduce(Extents.union, map(GI.extent, geoms))
 collection_crs = GI.GeometryCollection(collection; crs=EPSG(4326))
 @test parent(collection_crs) == parent(collection)
 @test GI.crs(collection_crs) === EPSG(4326)
@@ -172,16 +191,25 @@ multicurve = GI.MultiCurve([linestring, linearring])
 @test collect(GI.getpoint(multicurve)) == vcat(collect(GI.getpoint(linestring)), collect(GI.getpoint(linearring)))
 @test multicurve == GI.MultiCurve(multicurve)
 @test GI.getgeom(multicurve, 1) === linestring
+@test !GI.is3d(multicurve)
+@test GI.extent(multicurve) == Extent(X=(1, 5), Y=(2, 6))
 @test_throws ArgumentError GI.MultiCurve([pointz, polygon])
 @test GI.testgeometry(multicurve)
 multicurve_crs = GI.MultiCurve(multicurve; crs=EPSG(4326))
 @test parent(multicurve_crs) == parent(multicurve)
 @test GI.crs(multicurve_crs) === EPSG(4326)
 
+
 # MultiPolygon
+polygon = GI.Polygon([linearring, linearring])
 multipolygon = GI.MultiPolygon([polygon])
 @test multipolygon == GI.MultiPolygon(multipolygon)
 @test GI.getgeom(multipolygon, 1) === polygon
+@test !GI.is3d(multipolygon)
+@show polygon
+@show GI.getgeom(polygon, 1)
+# MultiPolygon extent does not infer, maybe due to nesting
+@test GI.extent(multipolygon) == Extent(X=(1, 5), Y=(2, 6))
 @test collect(GI.getpoint(multipolygon)) == collect(GI.getpoint(polygon))
 @test_throws ArgumentError GI.MultiPolygon([[[[(1, 2), (3, 4), (3, 2), (1, 4)]]]])
 @test GI.testgeometry(multipolygon)
@@ -192,6 +220,8 @@ multipolygon_crs = GI.MultiPolygon(multipolygon; crs=EPSG(4326))
 # PolyhedralSurface
 polyhedralsurface = GI.PolyhedralSurface([polygon, polygon])
 @test polyhedralsurface == GI.PolyhedralSurface(polyhedralsurface)
+@test !GI.is3d(polyhedralsurface)
+@test @inferred(GI.extent(polyhedralsurface)) == Extent(X=(1, 5), Y=(2, 6))
 @test GI.getgeom(polyhedralsurface, 1) === polygon
 @test collect(GI.getgeom(polyhedralsurface)) == [polygon, polygon]
 @test GI.getgeom(polyhedralsurface, 1) == polygon
