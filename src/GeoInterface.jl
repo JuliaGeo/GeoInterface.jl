@@ -1,6 +1,6 @@
 module GeoInterface
 
-using Extents
+using Extents: Extents, Extent
 using Base.Iterators: flatten
 
 export testgeometry, isgeometry, trait, geomtrait, ncoord, getcoord, ngeom, getgeom
