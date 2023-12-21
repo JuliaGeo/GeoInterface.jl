@@ -95,6 +95,7 @@ issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom)))
 issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
+crs(::Nothing, geom) = nothing
 crs(::AbstractTrait, geom) = nothing
 
 # FeatureCollection

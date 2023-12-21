@@ -478,6 +478,11 @@ end
 
 end
 
+@testset "extent and crs fallback to nothing on unknown objects" begin
+    @test isnothing(GeoInterface.crs(nothing))
+    @test isnothing(GeoInterface.extent(nothing))
+end
+
 module ConvertTestModule
 using GeoInterface
 struct TestPolygon end
