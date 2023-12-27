@@ -29,34 +29,55 @@ function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
     else
         geob = map(geom -> GI.convert(GB, geom), geoms)
     end
-    MC.convert_arguments(t, geob)
+    return MC.convert_arguments(t, geob)
 end
 
 function expr_enable(Geom)
     quote
+        # plottype
         function $MC.plottype(geom::$Geom)
             $_plottype(geom)
         end
-        # TODO: this method doesn't seem to do anything
-        function $MC.plottype(geom::AbstractArray{<:Union{Missing,<:$Geom}})
+        function $MC.plottype(geom::AbstractArray{<:$Geom})
             $_plottype(first(geom))
         end
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom)
+        function $MC.plottype(geom::AbstractArray{<:Union{Missing,<:$Geom}})
+            $_plottype(first(skipmissing(geom)))
+        end
+        # we need `AbstractVector` specifically for dispatch
+        function $MC.plottype(geom::AbstractVector{<:$Geom})
+            $_plottype(first(geom))
+        end
+        function $MC.plottype(geom::AbstractVector{<:Union{Missing,<:$Geom}})
+            $_plottype(first(skipmissing(geom)))
+        end
+
+        # convert_arguments
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom; kw...)
             $_convert_arguments(p, geom)
         end
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:Union{Missing,<:$Geom}})
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:$Geom}; kw...)
             $_convert_array_arguments(p, geoms)
         end
-        function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom)
-            $_convert_arguments(p, geom)
-        end
-        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:Union{Missing,<:$Geom}})
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
             $_convert_array_arguments(p, geoms)
         end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom)
+        function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom; kw...)
             $_convert_arguments(p, geom)
         end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:Union{Missing,<:$Geom}})
+        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:$Geom}; kw...)
+            $_convert_array_arguments(p, geoms)
+        end
+        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
+            $_convert_array_arguments(p, geoms)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom; kw...)
+            $_convert_arguments(p, geom)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:$Geom}; kw...)
+            $_convert_array_arguments(p, geoms)
+        end
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
             $_convert_array_arguments(p, geoms)
         end
     end
