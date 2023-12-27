@@ -23,8 +23,12 @@ function _convert_arguments(t, geom)::Tuple
     geob = GI.convert(GB, geom)
     MC.convert_arguments(t, geob)
 end
-function _convert_array_arguments(t, geoms)::Tuple
-    geob = map(geom -> GI.convert(GB, geom), geoms)
+function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
+    if Missing <: T
+        geob = map(geom -> GI.convert(GB, geom), skipmissing(geoms))
+    else
+        geob = map(geom -> GI.convert(GB, geom), geoms)
+    end
     MC.convert_arguments(t, geob)
 end
 
@@ -34,25 +38,25 @@ function expr_enable(Geom)
             $_plottype(geom)
         end
         # TODO: this method doesn't seem to do anything
-        function $MC.plottype(geom::AbstractArray{<:$Geom})
+        function $MC.plottype(geom::AbstractArray{<:Union{Missing,<:$Geom}})
             $_plottype(first(geom))
         end
         function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom)
             $_convert_arguments(p, geom)
         end
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:$Geom})
+        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:Union{Missing,<:$Geom}})
             $_convert_array_arguments(p, geoms)
         end
         function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom)
             $_convert_arguments(p, geom)
         end
-        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:$Geom})
+        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:Union{Missing,<:$Geom}})
             $_convert_array_arguments(p, geoms)
         end
         function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom)
             $_convert_arguments(p, geom)
         end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:$Geom})
+        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:Union{Missing,<:$Geom}})
             $_convert_array_arguments(p, geoms)
         end
     end

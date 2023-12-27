@@ -47,3 +47,8 @@ end
     end
     fig
 end
+
+@testset "handle missing values" begin
+    geoms = [GI.Point(1, 2), GI.Point(3, 4), missing]
+    Makie.plot(geoms)
+end
