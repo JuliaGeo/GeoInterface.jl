@@ -47,3 +47,10 @@ end
     end
     fig
 end
+
+@testset "handle missing values" begin
+    points = [GI.Point(1, 2), GI.Point(3, 4), missing]
+    Makie.plot(points)
+    lines = [GI.LineString([(1, 2), (3, 4)]), GI.LineString([(5, 4), (5, 6)]), missing]
+    Makie.plot(lines)
+end
