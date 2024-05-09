@@ -1,7 +1,7 @@
 name = "GeoInterfaceMakie"
 uuid = "0edc0954-3250-4c18-859d-ec71c1660c08"
 authors = ["JuliaGeo and contributors"]
-version = "0.1.5"
+version = "0.1.6"
 
 [deps]
 GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
