@@ -634,9 +634,14 @@ Create a `CustomGeom` from any `geom` that implements the GeoInterface.
 
 Can also convert to a `Module`, which finds the corresponding
 geom type for the trait using the modules `geointerface_traittype` method.
+
+`convert(T::Type)` or `convert(m::Module)` return curried versions of that function, 
+just like `==`.
 """
 convert(T, geom) = convert(T, geomtrait(geom), geom)
 convert(::Type{T}, x::T) where {T} = x  # no-op
+convert(T::Type) = Base.Fix1(convert, T)
+convert(M::Module) = Base.Fix1(convert, M)
 
 """
     astext(geom) -> WKT

@@ -257,6 +257,9 @@ end
     geom = MyCurve()
     @test GeoInterface.convert(MyCurve, geom) === geom
     @test_throws Exception GeoInterface.convert(MyPolygon, geom)
+    @test GeoInterface.convert(MyCurve)(geom) == geom
+    @test_throws Exception GeoInterface.convert(MyPolygon)(geom)
+    
 end
 
 @testset "Operations" begin
@@ -499,7 +502,9 @@ module BadModule
 end
 
 @test GeoInterface.convert(ConvertTestModule, MyPolygon()) == ConvertTestModule.TestPolygon()
+@test GeoInterface.convert(ConvertTestModule)(MyPolygon()) == ConvertTestModule.TestPolygon()
 @test_throws ArgumentError GeoInterface.convert(BadModule, MyPolygon()) == ConvertTestModule.TestPolygon()
+@test_throws ArgumentError GeoInterface.convert(BadModule)(MyPolygon()) == ConvertTestModule.TestPolygon()
 
 
 struct ExtentPolygon end
