@@ -8,8 +8,7 @@ GeoInterface.geomtrait(::AbstractVector{<:Real}) = PointTrait()
 GeoInterface.ncoord(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom) # TODO should this error for length > 4 ?
 GeoInterface.getcoord(::PointTrait, geom::AbstractVector{<:Real}, i) = getindex(geom, i)
 GeoInterface.is3d(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom) in (3, 4)
-GeoInterface.ismeasured(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom) == 4 # Measured must have Z
-
+GeoInterface.ismeasured(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom) == 4 # for vectors, we assume the 3rd element is always Z, so a vector can only have M if it is length 4.
 # x/y/z/m methods were 100x slower without these custom definitions
 # Also allow @inbounds to make them slightly faster when you know the sizes
 Base.@propagate_inbounds function GeoInterface.x(::PointTrait, geom::AbstractVector{<:Real})
