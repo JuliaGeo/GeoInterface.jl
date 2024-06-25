@@ -26,7 +26,7 @@ end
     geoms = [
         unitsquare,
         GI.difference(bigsquare, smallsquare),
-        boundary(unitsquare),
+        LibGEOS.boundary(unitsquare),
         multipolygon, 
         point, 
         multipoint,
