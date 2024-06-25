@@ -44,10 +44,6 @@ function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
             if last_trait isa GI.LineStringTrait || last_trait isa GI.MultiLineStringTrait
                 geob = to_multilinestring(geob)
             end
-        elseif first_trait isa GI.PointTrait || first_trait isa GI.MultiPointTrait
-            if last_trait isa GI.PointTrait || last_trait isa GI.MultiPointTrait
-                geob = to_multipoint(geob)
-            end
         end
     end
     return MC.convert_arguments(t, geob)
