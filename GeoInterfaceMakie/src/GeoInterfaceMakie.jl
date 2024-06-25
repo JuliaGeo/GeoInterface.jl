@@ -35,18 +35,16 @@ function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
             geob = geob
         end
         first_trait = GI.geomtrait(first(geob))
-        last_trait = GI.geomtrait(last(geob))
-        if first_trait == last_trait
-            # This should never happen, if the traits are the same, unless the dimensions are wrong.
-            # error("GeoInterfaceMakie: Geometry traits are the same, this should never happen.")
-        elseif first_trait isa GI.PolygonTrait || first_trait isa GI.MultiPolygonTrait
-            if last_trait isa GI.PolygonTrait || last_trait isa GI.MultiPolygonTrait
-                geob = to_multipoly(geob)
-            end
-        elseif first_trait isa GI.LineStringTrait || first_trait isa GI.MultiLineStringTrait
-            if last_trait isa GI.LineStringTrait || last_trait isa GI.MultiLineStringTrait
-                geob = to_multilinestring(geob)
-            end
+        different_trait_idx = findfirst(x -> GI.geomtrait(x) != first_trait, geob)
+        if isnothing(different_trait_idx)
+            # All traits are the same, and all things are GB, so how did this happen?
+            # It's possible that the point lengths are different, we still need to handle that.
+            return MC.convert_arguments(t, geob)
+        end
+        if all(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait}, geob) # an array of polygon like structs
+            geob = to_multipoly(geob)
+        elseif all(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait}, geob) # an array of linestring like structs
+            geob = to_multilinestring(geob)
         end
     end
     return MC.convert_arguments(t, geob)
