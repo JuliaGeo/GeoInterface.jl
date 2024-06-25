@@ -41,9 +41,9 @@ function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
             # It's possible that the point lengths are different, we still need to handle that.
             return MC.convert_arguments(t, geob)
         end
-        if all(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait}, geob) # an array of polygon like structs
+        if all(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait, GI.GeometryCollectionTrait}, geob) # an array of polygon like structs
             geob = to_multipoly(geob)
-        elseif all(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait}, geob) # an array of linestring like structs
+        elseif all(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait, GI.GeometryCollectionTrait}, geob) # an array of linestring like structs
             geob = to_multilinestring(geob)
         end
     end
