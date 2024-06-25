@@ -54,3 +54,9 @@ end
     lines = [GI.LineString([(1, 2), (3, 4)]), GI.LineString([(5, 4), (5, 6)]), missing]
     Makie.plot(lines)
 end
+
+@testset "Mixed geometry types work" begin
+    poly = GI.Polygon([GI.LinearRing([(0, 0), (1, 0), (1, 1), (0, 0)])])
+    multipoly = GI.MultiPolygon([poly, poly])
+    @test_nowarn Makie.plot([poly, multipoly])
+end

@@ -23,11 +23,32 @@ function _convert_arguments(t, geom)::Tuple
     geob = GI.convert(GB, geom)
     MC.convert_arguments(t, geob)
 end
+
 function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
     if Missing <: T
         geob = map(geom -> GI.convert(GB, geom), skipmissing(geoms))
     else
         geob = map(geom -> GI.convert(GB, geom), geoms)
+    end
+    if !(eltype(geob) <: GB.AbstractGeometry) || eltype(geob) isa Union # Unions are bad
+        if isempty(geob)
+            geob = geob
+        end
+        first_trait = GI.geomtrait(first(geob))
+        last_trait = GI.geomtrait(last(geob))
+        if first_trait isa GI.PolygonTrait || first_trait isa GI.MultiPolygonTrait
+            if last_trait isa GI.PolygonTrait || last_trait isa GI.MultiPolygonTrait
+                geob = to_multipoly(geob)
+            end
+        elseif first_trait isa GI.LineStringTrait || first_trait isa GI.MultiLineStringTrait
+            if last_trait isa GI.LineStringTrait || last_trait isa GI.MultiLineStringTrait
+                geob = to_multilinestring(geob)
+            end
+        elseif first_trait isa GI.PointTrait || first_trait isa GI.MultiPointTrait
+            if last_trait isa GI.PointTrait || last_trait isa GI.MultiPointTrait
+                geob = to_multipoint(geob)
+            end
+        end
     end
     return MC.convert_arguments(t, geob)
 end
@@ -108,6 +129,39 @@ end
 
 # Enable Makie.jl for GeoInterface wrappers
 @enable GeoInterface.Wrappers.WrapperGeometry
+
+
+# Munging utilities for mixed geometry arrays
+# Taken from GeoMakie.jl
+
+# TODO: this takes double the amount of time in convert args
+# than it does using the functions straight, so something is wrong here.
+# Maybe its actually a good idea, to call these functions directly, or move
+# the detection code before the actual conversion...
+
+to_multipoly(poly::GB.Polygon) = GB.MultiPolygon([poly])
+to_multipoly(poly::Vector{GB.Polygon}) = GB.MultiPolygon(poly)
+to_multipoly(mp::GB.MultiPolygon) = mp
+to_multipoly(geom) = to_multipoly(GeoInterface.trait(geom), geom)
+to_multipoly(::Nothing, geom::AbstractVector) = to_multipoly.(GeoInterface.trait.(geom), geom)
+to_multipoly(::GeoInterface.PolygonTrait, geom) = GB.MultiPolygon([GeoInterface.convert(GB, geom)])
+to_multipoly(::GeoInterface.MultiPolygonTrait, geom) = GeoInterface.convert(GB, geom)
+
+to_multilinestring(poly::GB.LineString) = GB.MultiLineString([poly])
+to_multilinestring(poly::Vector{GB.Polygon}) = GB.MultiLineString(poly)
+to_multilinestring(mp::GB.MultiLineString) = mp
+to_multilinestring(geom) = to_multilinestring(GeoInterface.trait(geom), geom)
+to_multilinestring(geom::AbstractVector) = to_multilinestring.(GeoInterface.trait.(geom), geom)
+to_multilinestring(::GeoInterface.LineStringTrait, geom) = GB.MultiLineString([GeoInterface.convert(GB, geom)])
+to_multilinestring(::GeoInterface.MultiLineStringTrait, geom) = GeoInterface.convert(GB, geom)
+
+to_multipoint(poly::GB.Point) = GB.MultiPoint([poly])
+to_multipoint(poly::Vector{GB.Point}) = GB.MultiPoint(poly)
+to_multipoint(mp::GB.MultiPoint) = mp
+to_multipoint(geom) = to_multipoint(GeoInterface.trait(geom), geom)
+to_multipoint(geom::AbstractVector) = to_multipoint.(GeoInterface.trait.(geom), geom)
+to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.convert(GB, geom)])
+to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
 
 # TODO 
 # Features and Feature collections
