@@ -31,8 +31,8 @@ function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
         geob = map(geom -> GI.convert(GB, geom), geoms)
     end
     if !(eltype(geob) <: GB.AbstractGeometry) || eltype(geob) isa Union # Unions are bad
-        if isempty(geob)
-            geob = geob
+        if isempty(geob) # this means that an empty vector with some eltype was passed in...
+            return geob
         end
         first_trait = GI.geomtrait(first(geob))
         different_trait_idx = findfirst(x -> GI.geomtrait(x) != first_trait, geob)
@@ -42,9 +42,9 @@ function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
             return MC.convert_arguments(t, geob)
         end
         if all(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait, GI.GeometryCollectionTrait}, geob) # an array of polygon like structs
-            geob = to_multipoly(geob)
+            return MC.convert_arguments(t, to_multipoly(geob))
         elseif all(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait, GI.GeometryCollectionTrait}, geob) # an array of linestring like structs
-            geob = to_multilinestring(geob)
+            return MC.convert_arguments(t, to_multilinestring(geob))
         end
     end
     return MC.convert_arguments(t, geob)
