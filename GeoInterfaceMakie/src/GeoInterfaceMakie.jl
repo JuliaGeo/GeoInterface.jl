@@ -36,7 +36,10 @@ function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
         end
         first_trait = GI.geomtrait(first(geob))
         last_trait = GI.geomtrait(last(geob))
-        if first_trait isa GI.PolygonTrait || first_trait isa GI.MultiPolygonTrait
+        if first_trait == last_trait
+            # This should never happen, if the traits are the same, unless the dimensions are wrong.
+            # error("GeoInterfaceMakie: Geometry traits are the same, this should never happen.")
+        elseif first_trait isa GI.PolygonTrait || first_trait isa GI.MultiPolygonTrait
             if last_trait isa GI.PolygonTrait || last_trait isa GI.MultiPolygonTrait
                 geob = to_multipoly(geob)
             end
