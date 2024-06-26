@@ -9,7 +9,7 @@ import GeoInterface as GI
 function _plottype(geom)
     plottype_from_geomtrait(GI.geomtrait(geom))
 end
-function plottype_from_geomtrait(::Union{GI.LineStringTrait, GI.MultiLineStringTrait})
+function plottype_from_geomtrait(::Union{GI.LineStringTrait, GI.MultiLineStringTrait, GI.GeometryCollectionTrait})
     MC.Lines
 end
 function plottype_from_geomtrait(::Union{GI.PointTrait, GI.MultiPointTrait})
