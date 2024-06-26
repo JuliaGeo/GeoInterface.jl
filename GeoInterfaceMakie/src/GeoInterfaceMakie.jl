@@ -144,6 +144,12 @@ to_multipoly(::Nothing, geom::AbstractVector) = to_multipoly.(GeoInterface.trait
 to_multipoly(::GeoInterface.PolygonTrait, geom) = GB.MultiPolygon([GeoInterface.convert(GB, geom)])
 to_multipoly(::GeoInterface.MultiPolygonTrait, geom) = GeoInterface.convert(GB, geom)
 
+function to_multipoly(::GeoInterface.GeometryCollectionTrait, geom)
+    ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait}, GI.getgeom(geom))
+    multipolys = to_multipoly(ls_or_mls)
+    return GeometryBasics.MultiPolygon(vcat(getproperty.(multipolys, :polys)...))
+end
+
 to_multilinestring(poly::GB.LineString) = GB.MultiLineString([poly])
 to_multilinestring(poly::Vector{GB.Polygon}) = GB.MultiLineString(poly)
 to_multilinestring(mp::GB.MultiLineString) = mp
@@ -151,6 +157,12 @@ to_multilinestring(geom) = to_multilinestring(GeoInterface.trait(geom), geom)
 to_multilinestring(geom::AbstractVector) = to_multilinestring.(GeoInterface.trait.(geom), geom)
 to_multilinestring(::GeoInterface.LineStringTrait, geom) = GB.MultiLineString([GeoInterface.convert(GB, geom)])
 to_multilinestring(::GeoInterface.MultiLineStringTrait, geom) = GeoInterface.convert(GB, geom)
+
+function to_multilinestring(::GeoInterface.GeometryCollectionTrait, geom)
+    ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait}, GI.getgeom(geom))
+    multilinestrings = to_multilinestring(ls_or_mls)
+    return GeometryBasics.MultiLineString(vcat(getproperty.(multilinestrings, :linestrings)...))
+end
 
 to_multipoint(poly::GB.Point) = GB.MultiPoint([poly])
 to_multipoint(poly::Vector{GB.Point}) = GB.MultiPoint(poly)
