@@ -59,4 +59,5 @@ end
     poly = GI.Polygon([GI.LinearRing([(0, 0), (1, 0), (1, 1), (0, 0)])])
     multipoly = GI.MultiPolygon([poly, poly])
     @test_nowarn Makie.plot([poly, multipoly])
+    @test_nowarn Makie.plot([GI.GeometryCollection([poly, multipoly]), multipoly])
 end
