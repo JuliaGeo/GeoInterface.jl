@@ -15,21 +15,37 @@ end
 function plottype_from_geomtrait(::Union{GI.PointTrait, GI.MultiPointTrait})
     MC.Scatter
 end
-function plottype_from_geomtrait(::Union{GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
+function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait, GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
     MC.Poly
 end
 
 function _convert_arguments(t, geom)::Tuple
     geob = GI.convert(GB, geom)
-    MC.convert_arguments(t, geob)
-end
-function _convert_array_arguments(t, geoms::AbstractArray{T})::Tuple where T
-    if Missing <: T
-        geob = map(geom -> GI.convert(GB, geom), skipmissing(geoms))
-    else
-        geob = map(geom -> GI.convert(GB, geom), geoms)
-    end
     return MC.convert_arguments(t, geob)
+end
+
+function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
+    # skip all missing elements if necessary.
+    # TODO: insert empty geometries in the same place, so we don't have 
+    # issues with mismatched lengths!
+    geoms_to_convert = Missing <: T ? skipmissing(geoms) : geoms
+    # assess whether multification is needed!
+    # Multification is the conversion of a vector of mixed single and multi-geometry types,
+    # like [::PolygonTrait, ::MultiPolygonTrait, ::PolygonTrait, ...], to the higher multi-
+    # type, in this case `MultiPolygon`.
+    needs_multification, trait = _needs_multification_trait(geoms_to_convert)
+
+    if needs_multification 
+        if trait isa GI.MultiLineStringTrait
+            return MC.convert_arguments(plottrait, to_multilinestring(geoms_to_convert))
+        elseif trait isa GI.MultiPolygonTrait
+            return MC.convert_arguments(plottrait, to_multipoly(geoms_to_convert))
+        else # don't support multipoints yet...
+            error("GeoInterfaceMakie: We don't support mixed single-and-multi geometries for this multi trait yet: $(trait)")
+        end
+    else # no multification needed, so we can just convert the array as is.
+        return MC.convert_arguments(plottrait, map(x -> GI.convert(GB, x), geoms_to_convert))
+    end
 end
 
 function expr_enable(Geom)
@@ -108,6 +124,94 @@ end
 
 # Enable Makie.jl for GeoInterface wrappers
 @enable GeoInterface.Wrappers.WrapperGeometry
+
+
+# Munging utilities for mixed geometry arrays
+# Taken from GeoMakie.jl
+
+
+_multi_trait(::Union{GI.PolygonTrait, GI.MultiPolygonTrait}) = GI.MultiPolygonTrait()
+_multi_trait(::Union{GI.LineStringTrait, GI.MultiLineStringTrait}) = GI.MultiLineStringTrait()
+_multi_trait(::Union{GI.PointTrait, GI.MultiPointTrait}) = GI.MultiPointTrait()
+
+"""
+    _needs_multification_trait(geoms)::(needs_mulification::Bool, trait::GI.AbstractTrait)
+
+`geoms` must be some iterable of geometries.
+"""
+function _needs_multification_trait(geoms)
+    first_trait = GI.geomtrait(first(geoms))
+    # GeometryCollections are a special case, since they can contain
+    # multiple geometries, which all need to be handled differently.
+    if first_trait isa GI.GeometryCollectionTrait # if this happens, look at the second trait if it exists
+        if length(geoms) ≤ 1 # there is only one geometrycollection
+            # analyze the contents
+            traits = unique(map(GI.geomtrait, GI.getgeom(first(geoms))))
+            if GI.MultiPolygonTrait() ∈ traits || GI.PolygonTrait() ∈ traits
+                return true, GI.MultiPolygonTrait()
+            elseif GI.MultiLineStringTrait() ∈ traits || GI.LineStringTrait() ∈ traits
+                return true, GI.MultiLineStringTrait()
+            elseif GI.MultiPointTrait() ∈ traits || GI.PointTrait() ∈ traits
+                return true, GI.MultiPointTrait()
+            end
+        else 
+            # A robust solution is to:
+            # - Traverse the array to find the first non-geometrycollection element
+            # If that fails, then introspect the first element as was done earlier, to
+            # get the multification trait.
+            first_nongc_idx = findfirst(x -> GI.geomtrait(x) != GI.GeometryCollectionTrait, geoms)
+            if isnothing(first_nongc_idx) # only geometry collections in the whole array
+                return _needs_multification_trait((GI.getgeom(first(geoms)),)) # introspect the first element
+            else
+                # introspect the first non-geometrycollection element
+                return _needs_multification_trait((first(Iterators.drop(geoms, first_nongc_idx-1)),))
+            end
+        end
+    end
+    # Now, we continue with the regular code.
+    different_trait_idx = findfirst(x -> GI.geomtrait(x) != first_trait, geoms)
+    if isnothing(different_trait_idx)
+        return false, first_trait # all traits are the same, so we don't need to multify
+    else
+        return true, _multi_trait(first_trait) # traits are different, so we need to multify
+    end
+end
+
+to_multipoly(poly::GB.Polygon) = GB.MultiPolygon([poly])
+to_multipoly(poly::Vector{GB.Polygon}) = GB.MultiPolygon(poly)
+to_multipoly(mp::GB.MultiPolygon) = mp
+to_multipoly(geom) = to_multipoly(GeoInterface.trait(geom), geom)
+to_multipoly(::Nothing, geom::AbstractVector) = to_multipoly.(GeoInterface.trait.(geom), geom)
+to_multipoly(::GeoInterface.PolygonTrait, geom) = GB.MultiPolygon([GeoInterface.convert(GB, geom)])
+to_multipoly(::GeoInterface.MultiPolygonTrait, geom) = GeoInterface.convert(GB, geom)
+
+function to_multipoly(::GeoInterface.GeometryCollectionTrait, geom)
+    ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait}, GI.getgeom(geom))
+    multipolys = to_multipoly(ls_or_mls)
+    return GB.MultiPolygon(vcat(getproperty.(multipolys, :polygons)...))
+end
+
+to_multilinestring(poly::GB.LineString) = GB.MultiLineString([poly])
+to_multilinestring(poly::Vector{GB.Polygon}) = GB.MultiLineString(poly)
+to_multilinestring(mp::GB.MultiLineString) = mp
+to_multilinestring(geom) = to_multilinestring(GeoInterface.trait(geom), geom)
+to_multilinestring(geom::AbstractVector) = to_multilinestring.(GeoInterface.trait.(geom), geom)
+to_multilinestring(::GeoInterface.LineStringTrait, geom) = GB.MultiLineString([GeoInterface.convert(GB, geom)])
+to_multilinestring(::GeoInterface.MultiLineStringTrait, geom) = GeoInterface.convert(GB, geom)
+
+function to_multilinestring(::GeoInterface.GeometryCollectionTrait, geom)
+    ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait}, GI.getgeom(geom))
+    multilinestrings = to_multilinestring(ls_or_mls)
+    return GeometryBasics.MultiLineString(vcat(getproperty.(multilinestrings, :linestrings)...))
+end
+
+to_multipoint(poly::GB.Point) = GB.MultiPoint([poly])
+to_multipoint(poly::Vector{GB.Point}) = GB.MultiPoint(poly)
+to_multipoint(mp::GB.MultiPoint) = mp
+to_multipoint(geom) = to_multipoint(GeoInterface.trait(geom), geom)
+to_multipoint(geom::AbstractVector) = to_multipoint.(GeoInterface.trait.(geom), geom)
+to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.convert(GB, geom)])
+to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
 
 # TODO 
 # Features and Feature collections
