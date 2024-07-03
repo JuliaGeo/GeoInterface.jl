@@ -75,9 +75,9 @@ end
 
 @testset "handle missing values" begin
     # First test that missing values get the right dispatches
-    points = [GI.Point(1, 2), GI.Point(3, 4), missing]
+    points = [GI.Point(1., 2.), GI.Point(3., 4.), missing]
     @test_nowarn Makie.plot(points)
-    lines = [GI.LineString([(1, 2), (3, 4)]), GI.LineString([(5, 4), (5, 6)]), missing]
+    lines = [GI.LineString(Point2d[(1, 2), (3, 4)]), GI.LineString(Point2d[(5, 4), (5, 6)]), missing]
     @test_nowarn Makie.plot(lines)
     polys = [GI.Polygon([GI.LinearRing(Point2d[(1, 2), (3, 4), (5, 5), (1, 2)])]), GI.Polygon([GI.LinearRing(Point2d[(7, 8), (9, 10), (11, 11), (7, 8)])]), missing]
     @test_nowarn Makie.plot(polys)
