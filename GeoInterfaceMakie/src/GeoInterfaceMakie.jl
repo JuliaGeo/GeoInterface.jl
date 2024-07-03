@@ -24,27 +24,45 @@ function _convert_arguments(t, geom)::Tuple
     return MC.convert_arguments(t, geob)
 end
 
+function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims, numtype = Float64)
+    nan_geom = _nan_geom(trait, ndims, numtype)
+    return x -> ismissing(x) ? nan_geom : func(x)
+end
+
 function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
-    # skip all missing elements if necessary.
-    # TODO: insert empty geometries in the same place, so we don't have 
-    # issues with mismatched lengths!
-    geoms_to_convert = Missing <: T ? skipmissing(geoms) : geoms
+    geoms_without_missings = Missing <: T ? skipmissing(geoms) : geoms
     # assess whether multification is needed!
     # Multification is the conversion of a vector of mixed single and multi-geometry types,
     # like [::PolygonTrait, ::MultiPolygonTrait, ::PolygonTrait, ...], to the higher multi-
     # type, in this case `MultiPolygon`.
-    needs_multification, trait = _needs_multification_trait(geoms_to_convert)
+    needs_multification, trait = _needs_multification_trait(geoms_without_missings)
 
-    if needs_multification 
+    func_to_apply = if needs_multification
         if trait isa GI.MultiLineStringTrait
-            return MC.convert_arguments(plottrait, to_multilinestring(geoms_to_convert))
+            to_multilinestring
         elseif trait isa GI.MultiPolygonTrait
-            return MC.convert_arguments(plottrait, to_multipoly(geoms_to_convert))
-        else # don't support multipoints yet...
+            to_multipoly
+        else
             error("GeoInterfaceMakie: We don't support mixed single-and-multi geometries for this multi trait yet: $(trait)")
         end
-    else # no multification needed, so we can just convert the array as is.
-        return MC.convert_arguments(plottrait, map(x -> GI.convert(GB, x), geoms_to_convert))
+    else
+        # base case
+        Base.Fix1(GI.convert, GB)
+    end
+    if Missing <: T
+        return MC.convert_arguments(
+            plottrait, 
+            map(
+                operator_nangeom_if_missing_or_func(
+                    func_to_apply, 
+                    trait, 
+                    GI.ncoord(first(geoms_without_missings))
+                ), 
+                geoms
+            )
+        )
+    else # no missings, do this the regular way
+        return MC.convert_arguments(plottrait, map(func_to_apply, geoms))
     end
 end
 
@@ -126,6 +144,24 @@ end
 @enable GeoInterface.Wrappers.WrapperGeometry
 
 
+# Creating empty geometries from traits
+function _geomtrait_for_array(arr)
+    idx = findfirst(!ismissing, arr)
+    geom = if isnothing(idx)
+        error("We can't plot only missings!!")
+    else
+        arr[idx]
+    end
+end
+
+# NaN geometry creators from traits
+_nan_geom(::GI.PointTrait, ndims = 2, T = Float64) = GB.Point{ndims, T}(NaN)
+_nan_geom(::GI.MultiPointTrait, ndims = 2, T = Float64) = GB.MultiPoint(_nan_geom(GI.PointTrait(), ndims, T))
+_nan_geom(::GI.LineStringTrait, ndims = 2, T = Float64) = GB.LineString([_nan_geom(GI.PointTrait(), ndims, T)])
+_nan_geom(::GI.MultiLineStringTrait, ndims = 2, T = Float64) = GB.MultiLineString([_nan_geom(GI.LineStringTrait(), ndims, T)])
+_nan_geom(::GI.PolygonTrait, ndims = 2, T = Float64) = GB.Polygon([_nan_geom(GI.PointTrait(), ndims, T)])
+_nan_geom(::GI.MultiPolygonTrait, ndims = 2, T = Float64) = GB.MultiPolygon([_nan_geom(GI.PolygonTrait(), ndims, T)])
+
 # Munging utilities for mixed geometry arrays
 # Taken from GeoMakie.jl
 
@@ -140,7 +176,7 @@ _multi_trait(::Union{GI.PointTrait, GI.MultiPointTrait}) = GI.MultiPointTrait()
 `geoms` must be some iterable of geometries.
 """
 function _needs_multification_trait(geoms)
-    first_trait = GI.geomtrait(first(geoms))
+    first_trait = GI.geomtrait(first(skipmissing(geoms)))
     # GeometryCollections are a special case, since they can contain
     # multiple geometries, which all need to be handled differently.
     if first_trait isa GI.GeometryCollectionTrait # if this happens, look at the second trait if it exists
@@ -161,7 +197,7 @@ function _needs_multification_trait(geoms)
             # get the multification trait.
             first_nongc_idx = findfirst(x -> GI.geomtrait(x) != GI.GeometryCollectionTrait, geoms)
             if isnothing(first_nongc_idx) # only geometry collections in the whole array
-                return _needs_multification_trait((GI.getgeom(first(geoms)),)) # introspect the first element
+                return _needs_multification_trait((GI.getgeom(first(skipmissing(geoms))),)) # introspect the first element
             else
                 # introspect the first non-geometrycollection element
                 return _needs_multification_trait((first(Iterators.drop(geoms, first_nongc_idx-1)),))
@@ -212,6 +248,7 @@ to_multipoint(geom) = to_multipoint(GeoInterface.trait(geom), geom)
 to_multipoint(geom::AbstractVector) = to_multipoint.(GeoInterface.trait.(geom), geom)
 to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.convert(GB, geom)])
 to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
+
 
 # TODO 
 # Features and Feature collections
