@@ -425,46 +425,26 @@ Retrieve Coordinate Reference System for given geom.
 In SF this is defined as `SRID`.
 """
 crs(geom) = crs(trait(geom), geom)
-crs(trait, geom) = nothing
 
 """
-    affine(raster) -> (<:AbstractMatrix{T}, <:AbstractVector{T}) where T<:Real
+    extent(obj; fallback=true) -> T <: Extents.Extent
 
-Retrieve the affine transformation for a raster.
-An affine transform consists of a linear transformation and a translation.
-Defaults to nothing, as this is not defined for all raster types.
-If the raster is not affine, `index` and `coords` should be defined instead.
-"""
-affine(raster) = affine(trait(raster), raster)
-affine(trait, raster) = nothing
-
-
-"""
-    index(raster, x, y) -> Tuple{<:Integer, <:Integer}
-
-Retrieve the logical indices i, j for a given coordinate x, y.
-Coordinates are allowed to be outside the raster extent, it's up to the caller to check
-the validity.
-"""
-index(raster, x, y) = index(trait(raster), raster, x, y)
-index(trait, raster, x, y) = nothing
-
-"""
-    coords(raster, i, j) -> Tuple{<:Real, <:Real}
-
-Retrieve the coordinates x, y for a given logical indices i, j.
-"""
-coords(raster, i, j) = coords(trait(raster), raster, i, j)
-coords(trait, raster, i, j) = nothing
-
-"""
-    extent(geom) -> T <: Extents.Extent
-
-Retrieve the extent (bounding box) for given geom.
+Retrieve the extent (bounding box) for given geom or feature.
 In SF this is defined as `envelope`.
+
+`Extents.extent(obj)` will be called if `extent(trait(obj), obj)`,
+is not defined so it may be preferable to define `Extents.extent` directly.
+
+When `fallback` is true, and the obj does not have an extent,
+an extent is calculated from the coordinates of all geometries in `obj`.
 """
-extent(geom) = extent(trait(geom), geom)
-extent(trait, geom) = nothing
+function extent(obj; fallback=true)
+    t = trait(obj)
+    isnothing(t) && return Extents.extent(obj)
+    ex = extent(t, obj)
+    isnothing(ex) && fallback && return calc_extent(t, obj)
+    return ex
+end
 
 """
     bbox(geom) -> T <: Extents.Extent
@@ -602,6 +582,8 @@ convexhull(geom) = convexhull(geomtrait(geom), geom)
 
 Return the :X coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For `Tuple` and `Vector` points, the first value is returned.
 """
 x(geom) = x(geomtrait(geom), geom)
 
@@ -610,6 +592,8 @@ x(geom) = x(geomtrait(geom), geom)
 
 Return the :Y coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For `Tuple` and `Vector` points, the second value is returned.
 """
 y(geom) = y(geomtrait(geom), geom)
 
@@ -618,14 +602,22 @@ y(geom) = y(geomtrait(geom), geom)
 
 Return the :Z coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For length 3 `Tuple` and `Vector` points, the third value is returned.
 """
 z(geom) = z(geomtrait(geom), geom)
 
 """
     m(geom) -> Number
 
-Return the :M coordinate of the given `geom`.
+Return the :M (measured) coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
+
+For length 4 `Tuple` and `Vector` points, the fouth value
+is returned. 
+
+Length 3 `Tuple` and `Vector` points can *not* represent measured points,
+and will throw an `ArgumentError`.
 """
 m(geom) = m(geomtrait(geom), geom)
 
@@ -652,11 +644,20 @@ coordinates(obj) = coordinates(trait(obj), obj)
 
 """
     convert(type::CustomGeom, geom)
+    convert(module::Module, geom)
 
 Create a `CustomGeom` from any `geom` that implements the GeoInterface.
+
+Can also convert to a `Module`, which finds the corresponding
+geom type for the trait using the modules `geointerface_traittype` method.
+
+`convert(T::Type)` or `convert(m::Module)` return curried versions of that function, 
+just like `==`.
 """
 convert(T, geom) = convert(T, geomtrait(geom), geom)
 convert(::Type{T}, x::T) where {T} = x  # no-op
+convert(T::Type) = Base.Fix1(convert, T)
+convert(M::Module) = Base.Fix1(convert, M)
 
 """
     astext(geom) -> WKT

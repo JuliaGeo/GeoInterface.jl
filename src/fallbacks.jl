@@ -66,6 +66,7 @@ getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) 
 npatch(t::AbstractPolyhedralSurfaceTrait, geom)::Integer = ngeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom) = getgeom(t, geom)
 getpatch(t::AbstractPolyhedralSurfaceTrait, geom, i::Integer) = getgeom(t, geom, i)
+getpoint(t::AbstractPolyhedralSurfaceTrait, geom) = flatten((p for p in getpoint(g)) for g in getgeom(t, geom))
 
 ## Default iterator
 getgeom(t::AbstractGeometryTrait, geom) = (getgeom(t, geom, i) for i in 1:ngeom(t, geom))
@@ -94,20 +95,59 @@ issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom)))
 issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
-crs(::AbstractGeometryTrait, geom) = nothing
-extent(::AbstractGeometryTrait, geom) = nothing
+crs(::Nothing, geom) = nothing
+crs(::AbstractTrait, geom) = nothing
 
 # FeatureCollection
 getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))
 
 # Backwards compatibility
 coordinates(t::AbstractPointTrait, geom) = collect(getcoord(t, geom))
-coordinates(t::AbstractGeometryTrait, geom) = collect(coordinates.(getgeom(t, geom)))
+coordinates(t::AbstractGeometryTrait, geom) = map(coordinates, getgeom(t, geom))
 function coordinates(t::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? [] : coordinates(geom)
 end
-coordinates(t::AbstractFeatureCollectionTrait, fc) = [coordinates(f) for f in getfeature(fc)]
+coordinates(t::AbstractFeatureCollectionTrait, fc) = map(f -> coordinates(f), getfeature(t, fc))
+
+extent(::Any, x) = Extents.extent(x)
+function calc_extent(t::AbstractPointTrait, geom)
+    x = GeoInterface.x(t, geom)
+    y = GeoInterface.y(t, geom)
+    if is3d(geom)
+        z = GeoInterface.z(t, geom)
+        return Extent(; X=(x, x), Y=(y, y), Z=(z, z))
+    else
+        return Extent(; X=(x, x), Y=(y, y))
+    end
+end
+function calc_extent(t::AbstractGeometryTrait, geom)
+    points = getpoint(t, geom)
+    X = extrema(p -> x(p), points)
+    Y = extrema(p -> y(p), points)
+    if is3d(geom)
+        Z = extrema(p -> z(p), points)
+        Extent(; X, Y, Z)
+    else
+        Extent(; X, Y)
+    end
+end
+calc_extent(t::GeometryCollectionTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
+function calc_extent(::AbstractFeatureTrait, feature)
+    geom = geometry(feature)
+    isnothing(geom) ? nothing : extent(geom)
+end
+calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
+
+# Package level `GeoInterface.convert` method
+# Packages must implement their own `traittype` method
+# that accepts a GeoInterface.jl trait and returns the
+# corresponding geometry type
+function convert(package::Module, geom)
+    t = trait(geom)
+    isdefined(package, :geointerface_geomtype) || throw(ArgumentError("$package does not implement `geointerface_geomtype`. Please request this be implemented in a github issue."))
+    convert(package.geointerface_geomtype(t), t, geom)
+end
 
 # Subtraits
 

@@ -1,47 +1,88 @@
 # Implementation of GeoInterface for Base Types
 
 
+# AbstractVector{<:Real} length 2 - 4 (where length checking is possible and efficient)
+
+GeoInterface.isgeometry(::Type{<:AbstractVector{<:Real}}) = true
+GeoInterface.geomtrait(::AbstractVector{<:Real}) = PointTrait()
+GeoInterface.ncoord(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom) # TODO should this error for length > 4 ?
+GeoInterface.getcoord(::PointTrait, geom::AbstractVector{<:Real}, i) = getindex(geom, i)
+GeoInterface.is3d(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom) in (3, 4)
+GeoInterface.ismeasured(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom) == 4 # for vectors, we assume the 3rd element is always Z, so a vector can only have M if it is length 4.
+# x/y/z/m methods were 100x slower without these custom definitions
+# Also allow @inbounds to make them slightly faster when you know the sizes
+Base.@propagate_inbounds function GeoInterface.x(::PointTrait, geom::AbstractVector{<:Real})
+    @boundscheck Base.length(geom) in (2, 3, 4) || _xy_error(Base.length(geom))
+    @inbounds geom[begin]
+end
+Base.@propagate_inbounds function GeoInterface.y(::PointTrait, geom::AbstractVector{<:Real})
+    @boundscheck Base.length(geom) in (2, 3, 4) || _xy_error(Base.length(geom))
+    @inbounds geom[begin + 1]
+end
+Base.@propagate_inbounds function GeoInterface.z(::PointTrait, geom::AbstractVector{<:Real})
+    @boundscheck Base.length(geom) in (3, 4) || _z_error(Base.length(geom))
+    @inbounds geom[begin + 2]
+end
+Base.@propagate_inbounds function GeoInterface.m(::PointTrait, geom::AbstractVector{<:Real})
+    @boundscheck Base.length(geom) == 4 || _m_error(Base.length(geom))
+    @inbounds geom[end]
+end
+
+@noinline _xy_error(l) = throw(ArgumentError("Length of point must be 2, 3 or 4 to use `GeoInterface.x(point)` or `GeoInterface.y(point)`, got $l"))
+@noinline _z_error(l) = throw(ArgumentError("Length of point must be 3 or 4 to use `GeoInterface.z(point)`, got $l"))
+@noinline _m_error(l) = throw(ArgumentError("Length of point must be 4 to use `GeoInterface.m(point)`, got $l"))
+
+
+# Tuple length 2 - 4
+
 const PointTuple2 = Tuple{<:Real,<:Real}
 const PointTuple3 = Tuple{<:Real,<:Real,<:Real}
 const PointTuple4 = Tuple{<:Real,<:Real,<:Real,<:Real}
 const PointTuple = Union{PointTuple2,PointTuple3,PointTuple4}
 
-GeoInterface.isgeometry(::Type{<:AbstractVector{<:Real}}) = true
-GeoInterface.geomtrait(::AbstractVector{<:Real}) = PointTrait()
-GeoInterface.ncoord(::PointTrait, geom::AbstractVector{<:Real}) = Base.length(geom)
-GeoInterface.getcoord(::PointTrait, geom::AbstractVector{<:Real}, i) = getindex(geom, i)
-
 GeoInterface.isgeometry(::Type{<:PointTuple}) = true
 GeoInterface.geomtrait(::PointTuple) = PointTrait()
 GeoInterface.ncoord(::PointTrait, geom::PointTuple) = Base.length(geom)
 GeoInterface.getcoord(::PointTrait, geom::PointTuple, i) = getindex(geom, i)
+GeoInterface.is3d(::PointTrait, geom::PointTuple2) = false
+GeoInterface.is3d(::PointTrait, geom::Union{PointTuple3,PointTuple4}) = true
+GeoInterface.ismeasured(::PointTrait, geom::Union{PointTuple2,PointTuple3}) = false
+GeoInterface.ismeasured(::PointTrait, geom::PointTuple4) = true
 
-for (i, pointtype) in enumerate((PointTuple2, PointTuple3, PointTuple4))
-    keys = default_coord_names[1:i+1]
-    sig = NamedTuple{keys,<:pointtype}
-    @eval GeoInterface.isgeometry(::Type{<:$sig}) = true
-    @eval GeoInterface.geomtrait(::$sig) = PointTrait()
-    @eval GeoInterface.ncoord(::PointTrait, geom::$sig) = $i + 1
-    @eval GeoInterface.getcoord(::PointTrait, geom::$sig, i) = getindex(geom, i)
-end
+GeoInterface.x(::PointTrait, geom::PointTuple) = geom[1]
+GeoInterface.y(::PointTrait, geom::PointTuple) = geom[2]
+GeoInterface.z(::PointTrait, geom::PointTuple2) = _z_error(Base.length(geom))
+GeoInterface.z(::PointTrait, geom::Union{PointTuple3,PointTuple4}) = geom[3]
+GeoInterface.m(::PointTrait, geom::PointTuple4) = geom[4]
+GeoInterface.m(::PointTrait, geom::Union{PointTuple2,PointTuple3}) = _m_error(Base.length(geom))
 
+
+# NamedTuple 
+# with X/Y/Z/M names in any order
 
 # Define all possible NamedTuple points
-const NamedTuplePoint = Union{
+const NamedTuplePointXY = Union{
     NamedTuple{(:X, :Y),<:PointTuple2},
     NamedTuple{(:Y, :X),<:PointTuple2},
+}
+
+const NamedTuplePointZ = Union{
     NamedTuple{(:X, :Y, :Z),<:PointTuple3},
     NamedTuple{(:X, :Z, :Y),<:PointTuple3},
     NamedTuple{(:Z, :Y, :X),<:PointTuple3},
     NamedTuple{(:Z, :X, :Y),<:PointTuple3},
     NamedTuple{(:Y, :X, :Z),<:PointTuple3},
     NamedTuple{(:Y, :Z, :X),<:PointTuple3},
+}
+const NamedTuplePointM = Union{
     NamedTuple{(:X, :Y, :M),<:PointTuple3},
     NamedTuple{(:X, :M, :Y),<:PointTuple3},
     NamedTuple{(:M, :Y, :X),<:PointTuple3},
     NamedTuple{(:M, :X, :Y),<:PointTuple3},
     NamedTuple{(:Y, :X, :Z),<:PointTuple3},
     NamedTuple{(:Y, :Z, :X),<:PointTuple3},
+}
+const NamedTuplePointZM = Union{
     NamedTuple{(:X, :Y, :Z, :M),<:PointTuple4},
     NamedTuple{(:X, :Y, :M, :Z),<:PointTuple4},
     NamedTuple{(:X, :Z, :Y, :M),<:PointTuple4},
@@ -68,16 +109,19 @@ const NamedTuplePoint = Union{
     NamedTuple{(:M, :X, :Y, :Z),<:PointTuple4},
 }
 
+const NamedTuplePoint = Union{NamedTuplePointXY,NamedTuplePointZ,NamedTuplePointM,NamedTuplePointZM}
+
 _keys(::Type{<:NamedTuple{K}}) where K = K
-GeoInterface.isgeometry(::Type{T}) where {T<:NamedTuplePoint} = all(in(default_coord_names), _keys(T))
+GeoInterface.isgeometry(::Type{T}) where {T<:NamedTuplePoint} = true
 GeoInterface.geomtrait(::NamedTuplePoint) = PointTrait()
 GeoInterface.ncoord(::PointTrait, geom::NamedTuplePoint) = Base.length(geom)
 GeoInterface.getcoord(::PointTrait, geom::NamedTuplePoint, i) = getindex(geom, i)
 GeoInterface.coordnames(::PointTrait, geom::NamedTuplePoint) = _keys(typeof(geom))
 GeoInterface.x(::PointTrait, geom::NamedTuplePoint) = geom.X
 GeoInterface.y(::PointTrait, geom::NamedTuplePoint) = geom.Y
-GeoInterface.z(::PointTrait, geom::NamedTuplePoint) = geom.Z
-GeoInterface.m(::PointTrait, geom::NamedTuplePoint) = geom.M
+GeoInterface.z(::PointTrait, geom::Union{NamedTuplePointZ,NamedTuplePointZM}) = geom.Z
+GeoInterface.z(::PointTrait, geom::NamedTuplePointXY) = throw(ArgumentError("NamedTuple point has no Z field"))
+GeoInterface.m(::PointTrait, geom::Union{NamedTuplePointXY,NamedTuplePointZ}) = throw(ArgumentError("NamedTuple point has no M field"))
 
 
 # Default features using NamedTuple and AbstractArray
