@@ -201,16 +201,19 @@ isring(geom) = isclosed(geom) && issimple(geom)
 Return the length of `geom` in its 2d coordinate system.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
-length(geom) = length(geomtrait(geom), geom)
+length(geom) = length(crstrait(geom), geomtrait(geom), geom)
+length(::UnknownTrait, trait, geom) = length(trait, geom)  # fallback
 
 # Surface
+
 """
     area(geom) -> Number
 
 Return the area of `geom` in its 2d coordinate system.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-area(geom) = area(geomtrait(geom), geom)
+area(geom) = area(crstrait(geom), geomtrait(geom), geom)
+area(::UnknownTrait, trait, geom) = area(trait, geom)  # fallback
 
 """
     centroid(geom) -> Point
@@ -219,7 +222,8 @@ The mathematical centroid for this Surface as a Point.
 The result is not guaranteed to be on this Surface.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-centroid(geom) = centroid(geomtrait(geom), geom)
+centroid(geom) = centroid(crstrait(geom), geomtrait(geom), geom)
+centroid(::UnknownTrait, trait, geom) = centroid(trait, geom)  # fallback
 
 """
     pointonsurface(geom) -> Point
@@ -227,7 +231,8 @@ centroid(geom) = centroid(geomtrait(geom), geom)
 A Point guaranteed to be on this geometry (as opposed to [`centroid`](@ref)).
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-pointonsurface(geom) = pointonsurface(geomtrait(geom), geom)
+pointonsurface(geom) = pointonsurface(crstrait(geom), geomtrait(geom), geom)
+pointonsurface(::UnknownTrait, trait, geom) = pointonsurface(trait, geom)  # fallback
 
 """
     boundary(geom) -> Curve
@@ -235,9 +240,11 @@ pointonsurface(geom) = pointonsurface(geomtrait(geom), geom)
 Return the boundary of `geom`.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-boundary(geom) = boundary(geomtrait(geom), geom)
+boundary(geom) = boundary(crstrait(geom), geomtrait(geom), geom)
+boundary(::UnknownTrait, trait, geom) = boundary(trait, geom)  # fallback
 
 # Polygon/Triangle
+
 """
     nring(geom) -> Integer
 
@@ -424,11 +431,12 @@ an extent is calculated from the coordinates of all geometries in `obj`.
 """
 function extent(obj; fallback=true)
     t = trait(obj)
-    isnothing(t) && return Extents.extent(obj)
-    ex = extent(t, obj)
-    isnothing(ex) && fallback && return calc_extent(t, obj)
-    return ex
+    ct = crstrait(obj)
+    ex = extent(ct, t, obj)
+    isnothing(ex) && !isnothing(t) && fallback ? calc_extent(ct, t, obj) : ex
 end
+extent(::UnknownTrait, trait, geom) = extent(trait, geom)  # fallback
+extent(::UnknownTrait, ::Nothing, geom) = Extents.extent(geom)
 
 """
     bbox(geom) -> T <: Extents.Extent
@@ -656,3 +664,12 @@ astext(geom) = astext(geomtrait(geom), geom)
 Convert `geom` into Well Known Binary (WKB) representation, such as `000000000140000000000000004010000000000000`.
 """
 asbinary(geom) = asbinary(geomtrait(geom), geom)
+
+"""
+    crstrait(geom) -> AbstractCRSTrait
+
+Retrieves the type of the Coordinate Reference System for the given `geom`.
+Defaults to retrieving from `crs(geom)` and to `UnknownTrait` if not implemented.
+
+"""
+crstrait(geom) = UnknownTrait()

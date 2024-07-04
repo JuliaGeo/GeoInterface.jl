@@ -92,3 +92,21 @@ struct FeatureTrait <: AbstractFeatureTrait end
 abstract type AbstractFeatureCollectionTrait <: AbstractTrait end
 "A FeatureCollectionTrait holds objects of `FeatureTrait` and an `extent`"
 struct FeatureCollectionTrait <: AbstractFeatureCollectionTrait end
+
+"An AbstractCRSTrait for all coordinate reference systems"
+abstract type AbstractCRSTrait end
+"An AbstractProjectedTrait for all projected coordinate reference systems"
+abstract type AbstractProjectedTrait <: AbstractCRSTrait end
+"An AbstractGeographicTrait for all geographic coordinate reference systems"
+abstract type AbstractGeographicTrait <: AbstractCRSTrait end
+"An ProjectedTrait for all projected coordinate reference systems"
+struct ProjectedTrait <: AbstractProjectedTrait end
+"An UnknownTrait for all unknown (assumed projected) coordinate reference systems"
+struct UnknownTrait <: AbstractProjectedTrait
+    function UnknownTrait()
+        Base.depwarn("It is unknown whether your geometry is projected or geographic. Please implement `crstrait` for your geometry.", :UnknownTrait)
+        new()
+    end
+end
+"An GeographicTrait for all geographic coordinate reference systems"
+struct GeographicTrait <: AbstractGeographicTrait end
