@@ -83,19 +83,7 @@ function testraster(raster)
     @assert israster(typeof(raster)) "$raster doesn't implement `israster`."
     @assert trait(raster) isa AbstractRasterTrait "$raster does not return an `AbstractRasterTrait` for `trait`."
 
-    am = affine(raster)
-    if !isnothing(am)
-        @assert Base.length(am) == 2 "Raster $raster doesn't return a Tuple of length 2 for `affine`"
-        l, t = am
-        @assert l isa AbstractMatrix{<:Real} "Raster $raster doesn't return an `AbstractMatrix{<:Real}` for `affine`"
-        @assert t isa AbstractVector{<:Real} "Raster $raster doesn't return an `AbstractVector{<:Real}` for `affine`"
-        @assert size(l)[1] == size(l)[2] "Raster $raster doesn't return a square matrix for `affine`"
-        @assert size(l)[1] == Base.length(t) "Raster $raster doesn't return the same dimensions for the linear and translation part of `affine`"
-    end
-
-    @assert index(raster, 1.0, 1.0) isa NTuple{2,<:Integer} "Raster $raster doesn't return a `NTuple{2,<:Real}` for `index`."
-    @assert coords(raster, 1, 1) isa NTuple{2,<:Real} "Raster $raster doesn't return a `NTuple{2,<:Integer}` for `coords`."
-
+    # Symbol because we don't directly depend on GeoFormatTypes
     @assert :CoordinateReferenceSystemFormat in Symbol.(supertypes(typeof(crs(raster)))) "Raster $raster doesn't return a CoordinateReferenceSystemFormat for `crs`."
     @assert extent(raster) isa Extent "Raster $raster doesn't return an `Extent` for `extent`"
     return true

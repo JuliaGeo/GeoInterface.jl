@@ -98,9 +98,7 @@ trait(geom) = geomtrait(geom)
     GeoInterface.israster(x) => Bool
 
 Check if an object `x` is a raster and thus implicitly supports some
-GeoInterface methods. A raster requires the crs, extent and affine methods to be defined.
-
-If the raster is not affine, the `index`` and `coords` methods needs to be implemented.
+GeoInterface methods. A raster requires the crs and extent methods to be defined.
 
 It is recommended that for users implementing `MyType`, they define only
 `israster(::Type{MyType})`. `israster(::MyType)` will then

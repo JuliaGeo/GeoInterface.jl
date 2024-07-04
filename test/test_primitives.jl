@@ -1,4 +1,5 @@
 using GeoInterface
+using GeoFormatTypes
 using Extents
 using Test
 
@@ -20,6 +21,8 @@ end
 struct MyFeatureCollection{G}
     geoms::G
 end
+
+struct Raster end
 
 GeoInterface.isgeometry(::MyPoint) = true
 GeoInterface.geomtrait(::MyPoint) = PointTrait()
@@ -91,15 +94,13 @@ GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = lengt
 GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
 GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]
 
-@testset "Developer" begin
+GeoInterface.israster(::Type{<:Raster}) = true
+GeoInterface.trait(::Raster) = RasterTrait()
+GeoInterface.extent(::RasterTrait, ::Raster) = Extents.Extent()
+GeoInterface.crs(::RasterTrait, ::Raster) = GeoFormatTypes.EPSG(4326)
 
-    GeoInterface.israster(::Type{<:Raster}) = true
-    GeoInterface.trait(::Raster) = RasterTrait()
-    GeoInterface.extent(::RasterTrait, ::Raster) = Extents.Extent()
-    GeoInterface.crs(::RasterTrait, ::Raster) = GeoFormatTypes.EPSG(4326)
-    GeoInterface.index(::RasterTrait, ::Raster, x, y) = (1, 2)
-    GeoInterface.coords(::RasterTrait, ::Raster, i, j) = (1.0, 2.0)
-    GeoInterface.affine(::RasterTrait, ::Raster) = [1 0; 0 1], [0, 0]
+
+@testset "Developer" begin
 
     @testset "Point" begin
         geom = MyPoint()

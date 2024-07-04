@@ -63,9 +63,6 @@ GeoInterface.israster(raster::customraster)::Bool = true
 GeoInterface.trait(::customraster) = RasterTrait()
 GeoInterface.extent(::RasterTrait, raster::customraster)::Extents.Extent
 GeoInterface.crs(::RasterTrait, raster::customraster)::GeoFormatTypes.CoordinateReferenceSystem
-GeoInterface.affine(::RasterTrait, raster::customraster) = [1 0; 0 1], [0, 0]
-GeoInterface.index(::RasterTrait, raster::customraster, x::Real, y::Real) -> i::Int, j::Int
-GeoInterface.coords(::RasterTrait, raster::customraster, i::Int, j::Int) -> x::Real, y::Real
 ```
 
 ## Required for Feature(Collection)s
