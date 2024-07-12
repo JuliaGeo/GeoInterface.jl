@@ -5,7 +5,7 @@ DocMeta.setdocmeta!(GeoInterface, :DocTestSetup, :(using GeoInterface); recursiv
 cp(joinpath(@__DIR__, "../INTEGRATIONS.md"), joinpath(@__DIR__, "src/reference/integrations.md"); force=true)
 
 makedocs(;
-    modules=[GeoInterface],
+    modules=[GeoInterface, GeoInterface.Wrappers],
     authors="JuliaGeo and contributors",
     repo="https://github.com/JuliaGeo/GeoInterface.jl/blob/{commit}{path}#{line}",
     sitename="GeoInterface.jl",
