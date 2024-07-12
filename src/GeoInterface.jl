@@ -44,7 +44,9 @@ export AbstractGeometryTrait,
     AbstractFeatureTrait,
     FeatureTrait,
     AbstractFeatureCollectionTrait,
-    FeatureCollectionTrait
+    FeatureCollectionTrait,
+    @enable,
+    @enable_geo_plots
 
 
 include("types.jl")
@@ -53,6 +55,7 @@ include("fallbacks.jl")
 include("utils.jl")
 include("base.jl")
 include("wrappers.jl")
+include("plots.jl")
 
 using .Wrappers
 using .Wrappers: geointerface_geomtype
