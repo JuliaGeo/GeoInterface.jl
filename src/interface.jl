@@ -201,8 +201,8 @@ isring(geom) = isclosed(geom) && issimple(geom)
 Return the length of `geom` in its 2d coordinate system.
 Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
-length(geom) = length(crstrait(geom), geomtrait(geom), geom)
-length(::UnknownTrait, trait, geom) = length(trait, geom)  # fallback
+length(geom) = length(geomtrait(geom), geom)
+
 
 # Surface
 
@@ -212,8 +212,8 @@ length(::UnknownTrait, trait, geom) = length(trait, geom)  # fallback
 Return the area of `geom` in its 2d coordinate system.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-area(geom) = area(crstrait(geom), geomtrait(geom), geom)
-area(::UnknownTrait, trait, geom) = area(trait, geom)  # fallback
+area(geom) = area(geomtrait(geom), geom)
+
 
 """
     centroid(geom) -> Point
@@ -222,8 +222,8 @@ The mathematical centroid for this Surface as a Point.
 The result is not guaranteed to be on this Surface.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-centroid(geom) = centroid(crstrait(geom), geomtrait(geom), geom)
-centroid(::UnknownTrait, trait, geom) = centroid(trait, geom)  # fallback
+centroid(geom) = centroid(geomtrait(geom), geom)
+
 
 """
     pointonsurface(geom) -> Point
@@ -231,8 +231,8 @@ centroid(::UnknownTrait, trait, geom) = centroid(trait, geom)  # fallback
 A Point guaranteed to be on this geometry (as opposed to [`centroid`](@ref)).
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-pointonsurface(geom) = pointonsurface(crstrait(geom), geomtrait(geom), geom)
-pointonsurface(::UnknownTrait, trait, geom) = pointonsurface(trait, geom)  # fallback
+pointonsurface(geom) = pointonsurface(geomtrait(geom), geom)
+
 
 """
     boundary(geom) -> Curve
@@ -240,8 +240,8 @@ pointonsurface(::UnknownTrait, trait, geom) = pointonsurface(trait, geom)  # fal
 Return the boundary of `geom`.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
-boundary(geom) = boundary(crstrait(geom), geomtrait(geom), geom)
-boundary(::UnknownTrait, trait, geom) = boundary(trait, geom)  # fallback
+boundary(geom) = boundary(geomtrait(geom), geom)
+
 
 # Polygon/Triangle
 
