@@ -93,14 +93,18 @@ abstract type AbstractFeatureCollectionTrait <: AbstractTrait end
 "A FeatureCollectionTrait holds objects of `FeatureTrait` and an `extent`"
 struct FeatureCollectionTrait <: AbstractFeatureCollectionTrait end
 
-"An AbstractCRSTrait for all coordinate reference systems"
+"Supertype for all coordinate reference system traits"
 abstract type AbstractCRSTrait end
+
 "An AbstractProjectedTrait for all projected coordinate reference systems"
 abstract type AbstractProjectedTrait <: AbstractCRSTrait end
 "An AbstractGeographicTrait for all geographic coordinate reference systems"
 abstract type AbstractGeographicTrait <: AbstractCRSTrait end
+
 "An ProjectedTrait for all projected coordinate reference systems"
 struct ProjectedTrait <: AbstractProjectedTrait end
+"An GeographicTrait for all geographic coordinate reference systems"
+struct GeographicTrait <: AbstractGeographicTrait end
 "An UnknownTrait for all unknown (assumed projected) coordinate reference systems"
 struct UnknownTrait <: AbstractProjectedTrait
     function UnknownTrait()
@@ -108,5 +112,3 @@ struct UnknownTrait <: AbstractProjectedTrait
         new()
     end
 end
-"An GeographicTrait for all geographic coordinate reference systems"
-struct GeographicTrait <: AbstractGeographicTrait end
