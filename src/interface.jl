@@ -217,7 +217,9 @@ Note that this is only valid for [`AbstractCurveTrait`](@ref)s.
 """
 length(geom) = length(geomtrait(geom), geom)
 
+
 # Surface
+
 """
     area(geom) -> Number
 
@@ -225,6 +227,7 @@ Return the area of `geom` in its 2d coordinate system.
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 area(geom) = area(geomtrait(geom), geom)
+
 
 """
     centroid(geom) -> Point
@@ -235,6 +238,7 @@ Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 centroid(geom) = centroid(geomtrait(geom), geom)
 
+
 """
     pointonsurface(geom) -> Point
 
@@ -242,6 +246,7 @@ A Point guaranteed to be on this geometry (as opposed to [`centroid`](@ref)).
 Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 pointonsurface(geom) = pointonsurface(geomtrait(geom), geom)
+
 
 """
     boundary(geom) -> Curve
@@ -251,7 +256,9 @@ Note that this is only valid for [`AbstractSurfaceTrait`](@ref)s.
 """
 boundary(geom) = boundary(geomtrait(geom), geom)
 
+
 # Polygon/Triangle
+
 """
     nring(geom) -> Integer
 
@@ -670,3 +677,12 @@ astext(geom) = astext(geomtrait(geom), geom)
 Convert `geom` into Well Known Binary (WKB) representation, such as `000000000140000000000000004010000000000000`.
 """
 asbinary(geom) = asbinary(geomtrait(geom), geom)
+
+"""
+    crstrait(geom) -> AbstractCRSTrait
+
+Retrieves the type of the Coordinate Reference System for the given `geom`.
+Defaults to retrieving from `crs(geom)` and to `UnknownTrait` if not implemented.
+
+"""
+crstrait(geom) = UnknownTrait()
