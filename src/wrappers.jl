@@ -174,9 +174,10 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         
         function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
             compact = get(io, :compact, false)
+            spacing = compact ? "" : " "
             print(io, $geomtype)
             if show_mz
-                print(io, "{$Z, $M}")
+                print(io, "{$Z,$(spacing)$M}")
             end
             print(io, "(")
             this_geom = getgeom(trait(geom), geom)
@@ -185,7 +186,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 for (i, g) ∈ enumerate(this_geom)
                     _nice_print_geom(io, g, false)
                     if i != length(this_geom)
-                        print(io, ",$(compact ? "" : " ")")
+                        print(io, ",$(spacing)")
                     end
                 end
                 print(io, "]")
@@ -196,10 +197,12 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 print(io, ")")
             else
                 if !isnothing(geom.extent)
-                    print(", extent = $(geom.extent)")
+                    print(",$(spacing)extent$(spacing)=$(spacing)")
+                    show(io, MIME("text/plain"), geom.extent)
                 end
                 if !isnothing(geom.crs)
-                    print(", crs = $(geom.crs)")
+                    print(",$(spacing)crs$(spacing)=$(spacing)")
+                    show(io, MIME("text/plain"), geom.crs)
                 end
                 print(")")
             end
@@ -391,8 +394,9 @@ function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz
     end
     print(io, ")")
 
-    if !isnothing(this_crs)
-        print(io, ",$(spacing)crs$(spacing)=$(spacing)$(this_crs)")
+    if !compact && !isnothing(this_crs)
+        print(io, ",$(spacing)crs$(spacing)=$(spacing)")
+        show(io, MIME("text/plain"), this_crs)
     end
     print(io, ")")
 
@@ -450,7 +454,7 @@ function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
     Base.show(io, MIME("text/plain"), f.parent.geometry; show_mz = show_mz)
     non_geom_props = filter(!=(:geometry), propertynames(f.parent))
     if !isempty(non_geom_props)
-        print(io, ", properties$(spacing)=$(spacing)(")
+        print(io, ",$(spacing)properties$(spacing)=$(spacing)(")
         for (i, property) ∈ enumerate(non_geom_props)
             print(io, "$(property)$(spacing)=$(spacing)")
             Base.show(io, getproperty(f.parent, property))
@@ -460,11 +464,15 @@ function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
         end
         print(io, ")")
     end
-    if !isnothing(f.extent)
-        print(io, ", extent$(spacing)=$(spacing)$(f.extent)")
-    end
-    if !isnothing(f.crs)
-        print(io, ", crs$(spacing)=$(spacing)$(f.crs)")
+    if !compact
+        if !isnothing(f.extent)
+            print(io, ", extent$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), f.extent)
+        end
+        if !isnothing(f.crs)
+            print(io, ", crs$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), f.crs)
+        end
     end
     print(io, ")")
 end
@@ -534,17 +542,21 @@ function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
     features = _parent_is_fc(fc) ? getfeature(trait(fc), parent(fc)) : parent(fc)
     print(io, "[")
     for (i, f) ∈ enumerate(features)
-        show(io, MIME("text/plain"), f; show_mz = compact)
+        show(io, MIME("text/plain"), f; show_mz = !compact)
         if i != length(features)
             print(io, ",$(spacing)")
         end
     end
     print(io, "]")
-    if !isnothing(fc.crs)
-        print(io, ",$(spacing)crs=$(fc.crs)")
-    end
-    if !isnothing(fc.extent)
-        print(io, ",$(spacing)extent=$(fc.extent)")
+    if !compact
+        if !isnothing(fc.crs)
+            print(io, ",$(spacing)crs$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), fc.crs)
+        end
+        if !isnothing(fc.extent)
+            print(io, ",$(spacing)extent$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), fc.extent)
+        end
     end
     print(io, ")")
     return nothing
