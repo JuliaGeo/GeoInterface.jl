@@ -111,7 +111,7 @@ end
 coordinates(t::AbstractFeatureCollectionTrait, fc) = map(f -> coordinates(f), getfeature(t, fc))
 
 extent(::Any, x) = Extents.extent(x)
-function calc_extent(::AbstractProjectedTrait, t::AbstractPointTrait, geom)
+function calc_extent(t::AbstractPointTrait, geom)
     x = GeoInterface.x(t, geom)
     y = GeoInterface.y(t, geom)
     if is3d(geom)
@@ -121,7 +121,7 @@ function calc_extent(::AbstractProjectedTrait, t::AbstractPointTrait, geom)
         return Extent(; X=(x, x), Y=(y, y))
     end
 end
-function calc_extent(::AbstractProjectedTrait, t::AbstractGeometryTrait, geom)
+function calc_extent(t::AbstractGeometryTrait, geom)
     points = getpoint(t, geom)
     X = extrema(p -> x(p), points)
     Y = extrema(p -> y(p), points)
@@ -132,12 +132,12 @@ function calc_extent(::AbstractProjectedTrait, t::AbstractGeometryTrait, geom)
         Extent(; X, Y)
     end
 end
-calc_extent(::AbstractProjectedTrait, t::GeometryCollectionTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
-function calc_extent(::AbstractProjectedTrait, ::AbstractFeatureTrait, feature)
+calc_extent(t::GeometryCollectionTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
+function calc_extent(::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? nothing : extent(geom)
 end
-calc_extent(::AbstractProjectedTrait, t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
+calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
 
 # Package level `GeoInterface.convert` method
 # Packages must implement their own `traittype` method

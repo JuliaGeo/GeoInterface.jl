@@ -431,12 +431,11 @@ an extent is calculated from the coordinates of all geometries in `obj`.
 """
 function extent(obj; fallback=true)
     t = trait(obj)
-    ct = crstrait(obj)
-    ex = extent(ct, t, obj)
-    isnothing(ex) && !isnothing(t) && fallback ? calc_extent(ct, t, obj) : ex
+    isnothing(t) && return Extents.extent(obj)
+    ex = extent(t, obj)
+    isnothing(ex) && fallback && return calc_extent(t, obj)
+    return ex
 end
-extent(::UnknownTrait, trait, geom) = extent(trait, geom)  # fallback
-extent(::UnknownTrait, ::Nothing, geom) = Extents.extent(geom)
 
 """
     bbox(geom) -> T <: Extents.Extent
