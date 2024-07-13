@@ -386,6 +386,9 @@ function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz
     if Z
         print(io, ",$(spacing)$(z(trait, point))")
     end
+    if M
+        print(io, ",$(spacing)$(m(trait, point))")
+    end
     print(io, ")")
 
     if !isnothing(this_crs)
@@ -440,11 +443,11 @@ function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothi
     end
 end
 
-function Base.show(io::IO, ::MIME"text/plain", f::Feature)
+function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
     compact = get(io, :compact, false)
     spacing = compact ? "" : " "
     print(io, "Feature(")
-    show(io, MIME("text/plain"), f.parent.geometry)
+    Base.show(io, MIME("text/plain"), f.parent.geometry; show_mz = show_mz)
     non_geom_props = filter(!=(:geometry), propertynames(f.parent))
     if !isempty(non_geom_props)
         print(io, ", properties$(spacing)=$(spacing)(")
@@ -531,7 +534,7 @@ function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
     features = _parent_is_fc(fc) ? getfeature(trait(fc), parent(fc)) : parent(fc)
     print(io, "[")
     for (i, f) ∈ enumerate(features)
-        show(io, MIME("text/plain"), f)
+        show(io, MIME("text/plain"), f; show_mz = compact)
         if i != length(features)
             print(io, ",$(spacing)")
         end
