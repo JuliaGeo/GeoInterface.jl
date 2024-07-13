@@ -94,6 +94,20 @@ e.g. [`PointTrait`](@ref).
 """
 trait(geom) = geomtrait(geom)
 
+"""
+    GeoInterface.israster(x) => Bool
+
+Check if an object `x` is a raster and thus implicitly supports some
+GeoInterface methods. A raster requires the crs and extent methods to be defined.
+
+It is recommended that for users implementing `MyType`, they define only
+`israster(::Type{MyType})`. `israster(::MyType)` will then
+automatically delegate to this method.
+"""
+israster(x::T) where {T} = israster(T)
+israster(::Type{T}) where {T} = false
+
+
 # All types
 """
     ncoord(geom) -> Integer
