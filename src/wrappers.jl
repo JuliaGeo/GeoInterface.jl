@@ -440,6 +440,30 @@ function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothi
     end
 end
 
+function Base.show(io::IO, ::MIME"text/plain", f::Feature)
+    print(io, "Feature(")
+    show(io, MIME("text/plain"), f.parent.geometry)
+    non_geom_props = filter(!=(:geometry), propertynames(f.parent))
+    if !isempty(non_geom_props)
+        print(io, ", properties = (")
+        for (i, property) ∈ enumerate(non_geom_props)
+            print(io, "$(property) = ")
+            Base.show(io, getproperty(f.parent, property))
+            if i != length(non_geom_props)
+                print(io, ", ")
+            end
+        end
+        print(io, ")")
+    end
+    if !isnothing(f.extent)
+        print(io, ", extent = $(f.extent)")
+    end
+    if !isnothing(f.crs)
+        print(io, ", crs = $(f.crs)")
+    end
+    print(io, ")")
+end
+
 Base.parent(f::Feature) = f.parent
 
 isfeature(::Type{<:Feature}) = true
