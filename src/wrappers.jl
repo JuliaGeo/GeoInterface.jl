@@ -370,30 +370,30 @@ function Base.:(==)(g1::Point, g2::Point)
 end
 Base.:(!=)(g1::Point, g2::Point) = !(g1 == g2)
 
-function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}) where {Z,M,T,C}
-    if get(io, :compact, false)
-        print(io, "Point(")
-        _print_coords(io, point)
-    else
-        print(io, "Point((")
-        _print_coords(io, point)
-        print(io, ", Z:$(Z), M:$(M)")
-        this_crs = crs(point)
-        if !isnothing(this_crs)
-            print(io, ", CRS: $(crs(point))")
-        end
-        print(io, ")")
-    end
-    return nothing
-end
+function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz::Bool = true) where {Z,M,T,C}
+    print(io, "Point")
+    this_crs = crs(point)
 
-function _print_coords(io::IO, point::Point{Z}) where Z
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
+
+    if !compact && show_mz
+        print(io, "{$Z, $M}")
+    end
+    print(io, "(")
     trait = geomtrait(point)
-    print(io, "$(x(trait, point)), $(y(trait, point))")
+    print(io, "($(x(trait, point)),$(spacing)$(y(trait, point))")
     if Z
-        print(io, "$(z(trait, point))")
+        print(io, ",$(spacing)$(z(trait, point))")
     end
     print(io, ")")
+
+    if !isnothing(this_crs)
+        print(io, ",$(spacing)crs$(spacing)=$(spacing)$(this_crs)")
+    end
+    print(io, ")")
+
+    return nothing
 end
 
 @noinline _coord_length_error(Z, M, l) =
@@ -441,25 +441,27 @@ function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothi
 end
 
 function Base.show(io::IO, ::MIME"text/plain", f::Feature)
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
     print(io, "Feature(")
     show(io, MIME("text/plain"), f.parent.geometry)
     non_geom_props = filter(!=(:geometry), propertynames(f.parent))
     if !isempty(non_geom_props)
-        print(io, ", properties = (")
+        print(io, ", properties$(spacing)=$(spacing)(")
         for (i, property) ∈ enumerate(non_geom_props)
-            print(io, "$(property) = ")
+            print(io, "$(property)$(spacing)=$(spacing)")
             Base.show(io, getproperty(f.parent, property))
             if i != length(non_geom_props)
-                print(io, ", ")
+                print(io, ",$(spacing)")
             end
         end
         print(io, ")")
     end
     if !isnothing(f.extent)
-        print(io, ", extent = $(f.extent)")
+        print(io, ", extent$(spacing)=$(spacing)$(f.extent)")
     end
     if !isnothing(f.crs)
-        print(io, ", crs = $(f.crs)")
+        print(io, ", crs$(spacing)=$(spacing)$(f.crs)")
     end
     print(io, ")")
 end
@@ -520,6 +522,29 @@ function FeatureCollection(parent; crs=nothing, extent=nothing)
         all(f -> isfeature(f), features) || _child_feature_error()
         FeatureCollection(parent, crs, extent)
     end
+end
+
+function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
+    print(io, "FeatureCollection(")
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
+    features = _parent_is_fc(fc) ? getfeature(trait(fc), parent(fc)) : parent(fc)
+    print(io, "[")
+    for (i, f) ∈ enumerate(features)
+        show(io, MIME("text/plain"), f)
+        if i != length(features)
+            print(io, ",$(spacing)")
+        end
+    end
+    print(io, "]")
+    if !isnothing(fc.crs)
+        print(io, ",$(spacing)crs=$(fc.crs)")
+    end
+    if !isnothing(fc.extent)
+        print(io, ",$(spacing)extent=$(fc.extent)")
+    end
+    print(io, ")")
+    return nothing
 end
 
 Base.parent(fc::FeatureCollection) = fc.parent
