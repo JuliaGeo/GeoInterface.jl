@@ -88,7 +88,7 @@ function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T
     isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
 end
 
-# We eefine all the types in a loop so we have standardised docs and behaviour
+# We define all the types in a loop so we have standardised docs and behaviour
 # without too much repetition of code.
 # `child_trait` and `child_type` define the trait and type of child geometries
 # a geometry can be constructed from.
@@ -171,6 +171,40 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         convert(::Type{$geomtype}, ::$trait, geom) = $geomtype(geom)
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
+        
+        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
+            compact = get(io, :compact, false)
+            print(io, $geomtype)
+            if show_mz
+                print(io, "{$Z, $M}")
+            end
+            print(io, "(")
+            this_geom = getgeom(trait(geom), geom)
+            if this_geom isa AbstractVector
+                print(io, "[")
+                for (i, g) ∈ enumerate(this_geom)
+                    _nice_print_geom(io, g, false)
+                    if i != length(this_geom)
+                        print(io, ",$(compact ? "" : " ")")
+                    end
+                end
+                print(io, "]")
+            else
+                show(io, g; show_mz = false)
+            end
+            if compact
+                print(io, ")")
+            else
+                if !isnothing(geom.extent)
+                    print(", extent = $(geom.extent)")
+                end
+                if !isnothing(geom.crs)
+                    print(", crs = $(geom.crs)")
+                end
+                print(")")
+            end
+            return nothing
+        end
     end
     @eval function $geomtype{Z,M}(geom::T; extent::E=nothing, crs::C=nothing) where {Z,M,T,E,C}
         Z isa Union{Bool,Nothing} || throw(ArgumentError("Z Parameter must be `true`, `false` or `nothing`"))
@@ -227,6 +261,9 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         end
     end
 end
+
+_nice_print_geom(io::IO, geom, ::Bool) = show(io, MIME("text/plain"), geom)
+_nice_print_geom(io::IO, geom::WrapperGeometry, show_mz::Bool) = Base.show(io, MIME("text/plain"), geom; show_mz = show_mz)
 
 @noinline _wrong_child_error(geomtype, C, child) = throw(ArgumentError("$geomtype must have child objects with trait $C, got $(typeof(child)) with trait $(geomtrait(child))"))
 @noinline _argument_error(T, A) = throw(ArgumentError("$T does not have $A"))
@@ -332,6 +369,32 @@ function Base.:(==)(g1::Point, g2::Point)
     return true
 end
 Base.:(!=)(g1::Point, g2::Point) = !(g1 == g2)
+
+function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}) where {Z,M,T,C}
+    if get(io, :compact, false)
+        print(io, "Point(")
+        _print_coords(io, point)
+    else
+        print(io, "Point((")
+        _print_coords(io, point)
+        print(io, ", Z:$(Z), M:$(M)")
+        this_crs = crs(point)
+        if !isnothing(this_crs)
+            print(io, ", CRS: $(crs(point))")
+        end
+        print(io, ")")
+    end
+    return nothing
+end
+
+function _print_coords(io::IO, point::Point{Z}) where Z
+    trait = geomtrait(point)
+    print(io, "$(x(trait, point)), $(y(trait, point))")
+    if Z
+        print(io, "$(z(trait, point))")
+    end
+    print(io, ")")
+end
 
 @noinline _coord_length_error(Z, M, l) =
     throw(ArgumentError("Number of coordinates must be $(2 + Z + M) when `Z` is $Z and `M` is $M. Got $l"))
