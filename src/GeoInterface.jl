@@ -1,8 +1,8 @@
 module GeoInterface
 
 using Extents: Extents, Extent
+using GeoFormatTypes: CoordinateReferenceSystemFormat
 using Base.Iterators: flatten
-using InteractiveUtils: supertypes
 
 export testgeometry, isgeometry, trait, geomtrait, ncoord, getcoord, ngeom, getgeom
 

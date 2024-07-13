@@ -84,7 +84,7 @@ function testraster(raster)
     @assert trait(raster) isa AbstractRasterTrait "$raster does not return an `AbstractRasterTrait` for `trait`."
 
     # Symbol because we don't directly depend on GeoFormatTypes
-    @assert :CoordinateReferenceSystemFormat in Symbol.(supertypes(typeof(crs(raster)))) "Raster $raster doesn't return a CoordinateReferenceSystemFormat for `crs`."
+    @assert crs(raster) isa CoordinateReferenceSystemFormat "Raster $raster doesn't return a CoordinateReferenceSystemFormat for `crs`."
     @assert extent(raster) isa Extent "Raster $raster doesn't return an `Extent` for `extent`"
     return true
 end
