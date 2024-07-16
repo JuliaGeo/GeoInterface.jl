@@ -38,5 +38,6 @@ makedocs(;
 
 deploydocs(;
     repo="github.com/JuliaGeo/GeoInterface.jl",
-    devbranch="main"
+    devbranch="main",
+    push_preview = true,
 )
