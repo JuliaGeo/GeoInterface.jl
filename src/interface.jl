@@ -618,7 +618,7 @@ z(geom) = z(geomtrait(geom), geom)
 Return the :M (measured) coordinate of the given `geom`.
 Note that this is only valid for [`AbstractPointTrait`](@ref)s.
 
-For length 4 `Tuple` and `Vector` points, the fouth value
+For length 4 `Tuple` and `Vector` points, the fourth value
 is returned. 
 
 Length 3 `Tuple` and `Vector` points can *not* represent measured points,

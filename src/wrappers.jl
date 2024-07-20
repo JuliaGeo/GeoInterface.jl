@@ -88,7 +88,7 @@ function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T
     isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
 end
 
-# We eefine all the types in a loop so we have standardised docs and behaviour
+# We define all the types in a loop so we have standardised docs and behaviour
 # without too much repetition of code.
 # `child_trait` and `child_type` define the trait and type of child geometries
 # a geometry can be constructed from.
