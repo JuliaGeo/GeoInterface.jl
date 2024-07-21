@@ -61,7 +61,7 @@ pointm_crs = GI.Point((X=1, Y=2, M=3); crs=EPSG(4326))
 @test parent(pointm_crs) === parent(pointm)
 @test GI.crs(pointm_crs) === EPSG(4326)
 
-# Foreced measured point with a tuple
+# Forced measured point with a tuple
 pointtm = GI.Point{false,true}(1, 2, 3)
 @test_throws ArgumentError GI.Point{false,true}(1, 2, 3, 4)
 @test GI.ismeasured(pointtm)
