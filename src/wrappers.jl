@@ -175,6 +175,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
             compact = get(io, :compact, false)
             spacing = compact ? "" : " "
+            show_mz &= !compact
             print(io, $geomtype)
             if show_mz
                 print(io, "{$Z,$(spacing)$M}")
@@ -193,19 +194,17 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             else
                 show(io, g; show_mz = false)
             end
-            if compact
-                print(io, ")")
-            else
+            if !compact
                 if !isnothing(geom.extent)
-                    print(",$(spacing)extent$(spacing)=$(spacing)")
+                    print(io, ",$(spacing)extent$(spacing)=$(spacing)")
                     show(io, MIME("text/plain"), geom.extent)
                 end
                 if !isnothing(geom.crs)
-                    print(",$(spacing)crs$(spacing)=$(spacing)")
+                    print(io, ",$(spacing)crs$(spacing)=$(spacing)")
                     show(io, MIME("text/plain"), geom.crs)
                 end
-                print(")")
             end
+            print(io, ")")
             return nothing
         end
     end
@@ -267,6 +266,29 @@ end
 
 _nice_print_geom(io::IO, geom, ::Bool) = show(io, MIME("text/plain"), geom)
 _nice_print_geom(io::IO, geom::WrapperGeometry, show_mz::Bool) = Base.show(io, MIME("text/plain"), geom; show_mz = show_mz)
+# handle tuples/vectors explicitly
+function _nice_print_geom(io::IO, geom::AbstractVector, ::Bool)
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
+    print(io, "[")
+    _print_elements_with_spacing(io, geom, spacing)
+    print(io, "]")
+end
+
+function _nice_print_geom(io::IO, geom::Tuple, ::Bool)
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
+    print(io, "(")
+    _print_elements_with_spacing(io, geom, spacing)
+    print(io, ")")
+end
+
+function _print_elements_with_spacing(io::IO, itr, spacing::String = "")
+    for x ∈ itr[1:end - 1]
+        print(io, "$(x),$(spacing)")
+    end
+    print(io, itr[end])
+end
 
 @noinline _wrong_child_error(geomtype, C, child) = throw(ArgumentError("$geomtype must have child objects with trait $C, got $(typeof(child)) with trait $(geomtrait(child))"))
 @noinline _argument_error(T, A) = throw(ArgumentError("$T does not have $A"))
