@@ -176,35 +176,61 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             compact = get(io, :compact, false)
             spacing = compact ? "" : " "
             show_mz &= !compact
-            print(io, $geomtype)
-            if show_mz
-                print(io, "{$Z,$(spacing)$M}")
-            end
-            print(io, "(")
-            this_geom = getgeom(trait(geom), geom)
-            if this_geom isa AbstractVector
-                print(io, "[")
-                for (i, g) ∈ enumerate(this_geom)
-                    _nice_print_geom(io, g, false)
-                    if i != length(this_geom)
-                        print(io, ",$(spacing)")
-                    end
-                end
-                print(io, "]")
-            else
-                show(io, g; show_mz = false)
-            end
+            screen_nrows, screen_ncols = displaysize(io)
+
+            extent_str = ""
+            crs_str = ""
             if !compact
                 if !isnothing(geom.extent)
-                    print(io, ",$(spacing)extent$(spacing)=$(spacing)")
-                    show(io, MIME("text/plain"), geom.extent)
+                    extent_str = ",$(spacing)extent$(spacing)=$(spacing)$(repr(MIME("text/plain"), geom.extent))"
                 end
                 if !isnothing(geom.crs)
-                    print(io, ",$(spacing)crs$(spacing)=$(spacing)")
-                    show(io, MIME("text/plain"), geom.crs)
+                    crs_str = ",$(spacing)crs$(spacing)=$(spacing)$(repr(MIME("text/plain"), geom.crs))"
                 end
             end
-            print(io, ")")
+
+            str = "$($geomtype)"
+            if show_mz
+                str *= "{$Z,$(spacing)$M}"
+            end
+            str *= "("
+            this_geom = getgeom(trait(geom), geom)
+            if this_geom isa AbstractVector
+                # check here if we have enough room to display the whole object or if we need to condense the string
+                str *= "["
+                currently_used_space = textwidth(str) + textwidth(extent_str) + textwidth(crs_str) + 2 # +2 for brackets
+                length_of_one_object_in_chars = textwidth(_nice_geom_str(this_geom[1], false, compact))
+                num_objects_to_show = min(length(this_geom), floor(Int, (screen_ncols - currently_used_space - 1 #=triple dot character =#) / length_of_one_object_in_chars))
+                
+                num_shown_each_side = ceil(Int, num_objects_to_show/2)
+                num_missing = length(this_geom) - num_objects_to_show
+                
+                for i ∈ 1:num_shown_each_side
+                    str *= "$(_nice_geom_str(this_geom[i], false, compact)),$(spacing)"
+                end
+                
+                if num_missing > 0
+                    # report how many geometries aren't shown here
+                    str *= " … ($(num_missing)) … "
+                end
+
+                for i ∈ 1:num_shown_each_side
+                    str *= _nice_geom_str(this_geom[end - num_shown_each_side + i], false, compact)
+                    if i != num_shown_each_side
+                        str *= ",$(spacing)"
+                    end
+                end
+                
+                str *= "]"
+            else
+                str *= _nice_geom_str(g, false, compact)
+            end
+
+            str *= extent_str
+            str *= crs_str
+            
+            str *= ")"
+            print(io, str)
             return nothing
         end
     end
@@ -264,30 +290,42 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     end
 end
 
-_nice_print_geom(io::IO, geom, ::Bool) = show(io, MIME("text/plain"), geom)
-_nice_print_geom(io::IO, geom::WrapperGeometry, show_mz::Bool) = Base.show(io, MIME("text/plain"), geom; show_mz = show_mz)
+function _nice_geom_str(geom, ::Bool, ::Bool) 
+    io = IOBuffer()
+    show(io, MIME("text/plain"), geom)
+    return String(take!(io))
+end
+
+# need a work around to pass the show_mz variable through - put string to a temp IOBuffer then read it
+function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, ::Bool) 
+    io = IOBuffer()
+    show(io, MIME("text/plain"), geom; show_mz = show_mz)
+    return String(take!(io))
+end
+
 # handle tuples/vectors explicitly
-function _nice_print_geom(io::IO, geom::AbstractVector, ::Bool)
-    compact = get(io, :compact, false)
+function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool)
     spacing = compact ? "" : " "
-    print(io, "[")
-    _print_elements_with_spacing(io, geom, spacing)
-    print(io, "]")
+    str = "["
+    str *= _add_elements_with_spacing(geom, spacing)
+    str *= "]"
+    return str
 end
 
-function _nice_print_geom(io::IO, geom::Tuple, ::Bool)
-    compact = get(io, :compact, false)
+function _nice_geom_str(geom::Tuple, ::Bool, compact::Bool)
     spacing = compact ? "" : " "
-    print(io, "(")
-    _print_elements_with_spacing(io, geom, spacing)
-    print(io, ")")
+    str = "("
+    str *= _add_elements_with_spacing(geom, spacing)
+    str *= ")"
+    return str
 end
 
-function _print_elements_with_spacing(io::IO, itr, spacing::String = "")
+function _add_elements_with_spacing(itr, spacing::String = "")
+    str = ""
     for x ∈ itr[1:end - 1]
-        print(io, "$(x),$(spacing)")
+        str *= "$(x),$(spacing)"
     end
-    print(io, itr[end])
+    str *= "$(itr[end])"
 end
 
 @noinline _wrong_child_error(geomtype, C, child) = throw(ArgumentError("$geomtype must have child objects with trait $C, got $(typeof(child)) with trait $(geomtrait(child))"))
