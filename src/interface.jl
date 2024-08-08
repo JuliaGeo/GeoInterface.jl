@@ -52,7 +52,9 @@ geometrycolumns(featurecollection) = (:geometry,)
 Retrieve the geometry of `feat`. It is expected that `isgeometry(geom) === true`.
 Ensures backwards compatibility with GeoInterface version 0.
 """
-geometry(feat) = nothing
+geometry(feat) = geometry(trait(feat), feat)
+geometry(::Union{AbstractTrait, Nothing), feat) = nothing
+geometry(::FeatureCollectionTrait, fc) = Iterators.map(geometry, getfeature(fc))
 
 """
     GeoInterface.properties(feat) => properties
