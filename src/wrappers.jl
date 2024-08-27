@@ -186,10 +186,10 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # Otherwise wrap an array of child geometries
         elseif geom isa AbstractArray
             child = first(geom)
-            chilren_match = all(child -> geomtrait(child) isa $child_trait, geom)
+            children_match = findfirst(child -> !(geomtrait(child) isa $child_trait), geom)
 
             # Where the next level down is the child geometry
-            if chilren_match
+            if isnothing(children_match)
                 if $(!isnothing(length_check))
                     $length_check(Base.length(geom)) || _length_error($geomtype, $length_check, geom)
                 end
@@ -219,7 +219,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                     end
                 end
                 # Otherwise compain the nested child type is wrong
-                _wrong_child_error($trait, $child_trait, child)
+                _wrong_child_error($trait, $child_trait, geom[children_match])
             end
         else
             # Or complain the parent type is wrong
