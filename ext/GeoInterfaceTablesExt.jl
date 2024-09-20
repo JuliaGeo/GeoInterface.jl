@@ -14,7 +14,7 @@ Tables.isrowtable(::Type{<: Wrappers.FeatureCollection}) = true
 Tables.rowaccess(::Type{<: Wrappers.FeatureCollection}) = true
 Tables.rows(fc::Wrappers.FeatureCollection{P, C, E}) where {P <: Union{AbstractArray{<: Wrappers.Feature}, Tuple{Vararg{<: Wrappers.Feature}}}, C, E} = GeoInterface.getfeature(fc)
 Tables.rows(fc::Wrappers.FeatureCollection) = Iterators.map(Wrappers.Feature, GeoInterface.getfeature(fc))
-Tables.schema(fc::Wrappers.FeatureCollection) = nothing
+Tables.schema(fc::Wrappers.FeatureCollection) = property_schema(GeoInterface.getfeature(fc))
 
 # Define the row access interface for feature wrappers
 function Tables.getcolumn(row::Wrappers.Feature, i::Int)
@@ -34,12 +34,15 @@ Tables.columnnames(row::Wrappers.Feature) = (:geometry, propertynames(GeoInterfa
 # of the properties field, rather than the main object
 # TODO: Is `missT` required?
 # TODO: The `getfield` is probably required once
+missT(::Type{Nothing}) = Missing
+missT(::Type{T}) where {T} = T
+
 function property_schema(features)
     # Otherwise find the shared names
     names = Set{Symbol}()
     types = Dict{Symbol,Type}()
     for feature in features
-        props = properties(feature)
+        props = GeoInterface.properties(feature)
         isnothing(props) && continue
         if isempty(names)
             for k in keys(props)
@@ -48,7 +51,7 @@ function property_schema(features)
                 types[k] = missT(typeof(props[k]))
             end
             push!(names, :geometry)
-            types[:geometry] = missT(typeof(geometry(feature)))
+            types[:geometry] = missT(typeof(GeoInterface.geometry(feature)))
         else
             for nm in names
                 T = types[nm]
