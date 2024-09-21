@@ -172,16 +172,23 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
     end
+
     @eval function $geomtype{Z,M}(geom::T; extent::E=nothing, crs::C=nothing) where {Z,M,T,E,C}
         Z isa Union{Bool,Nothing} || throw(ArgumentError("Z Parameter must be `true`, `false` or `nothing`"))
         M isa Union{Bool,Nothing} || throw(ArgumentError("M Parameter must be `true`, `false` or `nothing`"))
 
-        # Wrap some geometry at the same level
+        # Is geom a single geometry ?
         if isgeometry(geom)
-            geomtrait(geom) isa $trait || _argument_error(T, $trait)
-            Z1 = isnothing(Z) ? is3d(geom) : Z
-            M1 = isnothing(M) ? ismeasured(geom) : M
-            return $geomtype{Z1,M1,T,E,C}(geom, extent, crs)
+            if geomtrait(geom) isa $child_trait
+                # If geom is a child_trait, then make geom a vector and call again
+                return $geomtype([geom]; extent, crs)
+            else
+                # Wrap some geometry at the same level
+                geomtrait(geom) isa $trait || _argument_error(T, $trait)
+                Z1 = isnothing(Z) ? is3d(geom) : Z
+                M1 = isnothing(M) ? ismeasured(geom) : M
+                return $geomtype{Z1,M1,T,E,C}(geom, extent, crs)
+            end
 
         # Otherwise wrap an array of child geometries
         elseif geom isa AbstractArray
