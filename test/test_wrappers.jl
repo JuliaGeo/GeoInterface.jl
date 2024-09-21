@@ -152,6 +152,7 @@ linearring_crs = GI.LinearRing(linearring; crs=EPSG(4326))
 
 # Polygon
 polygon = GI.Polygon([linearring, linearring])
+@test GI.Polygon([linearring]) == GI.Polygon(linearring)
 @test polygon == GI.Polygon(polygon)
 @test GI.getgeom(polygon, 1) === linearring
 @test collect(GI.getgeom(polygon)) == [linearring, linearring]
@@ -179,6 +180,7 @@ polygon3d = GI.Polygon([linearring3d, linearring3d])
 # MultiPoint
 multipoint = GI.MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 @test multipoint == GI.MultiPoint(multipoint)
+@test GI.MultiPoint([(1, 2)]) == GI.MultiPoint((1, 2))
 @test GI.getgeom(multipoint, 1) === (1, 2)
 @test !GI.is3d(multipoint)
 @test GI.ncoord(multipoint) == 2
@@ -192,6 +194,7 @@ multipoint_crs = GI.MultiPoint(multipoint; crs=EPSG(4326))
 # GeometryCollection
 geoms = [line, linestring, linearring, multipoint, (1, 2)]
 collection = GI.GeometryCollection(geoms)
+@test GI.GeometryCollection([line]) == GI.GeometryCollection(line)
 @test collection == GI.GeometryCollection(collection)
 @test GI.getgeom(collection) == geoms
 @test GI.testgeometry(collection)
@@ -205,6 +208,7 @@ collection_crs = GI.GeometryCollection(collection; crs=EPSG(4326))
 # MultiCurve
 multicurve = GI.MultiCurve([linestring, linearring])
 @test collect(GI.getpoint(multicurve)) == vcat(collect(GI.getpoint(linestring)), collect(GI.getpoint(linearring)))
+@test GI.MultiCurve([linestring]) == GI.MultiCurve(linestring)
 @test multicurve == GI.MultiCurve(multicurve)
 @test GI.getgeom(multicurve, 1) === linestring
 @test !GI.is3d(multicurve)
@@ -221,6 +225,7 @@ multicurve_crs = GI.MultiCurve(multicurve; crs=EPSG(4326))
 polygon = GI.Polygon([linearring, linearring])
 multipolygon = GI.MultiPolygon([polygon])
 @test multipolygon == GI.MultiPolygon(multipolygon)
+@test multipolygon == GI.MultiPolygon(polygon)
 @test GI.getgeom(multipolygon, 1) === polygon
 @test !GI.is3d(multipolygon)
 @test GI.ncoord(multipolygon) == 2
@@ -238,6 +243,7 @@ multipolygon_crs = GI.MultiPolygon(multipolygon; crs=EPSG(4326))
 # PolyhedralSurface
 polyhedralsurface = GI.PolyhedralSurface([polygon, polygon])
 @test polyhedralsurface == GI.PolyhedralSurface(polyhedralsurface)
+@test GI.PolyhedralSurface(polygon) == GI.PolyhedralSurface(polygon)
 @test !GI.is3d(polyhedralsurface)
 @test GI.ncoord(polyhedralsurface) == 2
 @test @inferred(GI.extent(polyhedralsurface)) == Extent(X=(1, 5), Y=(2, 6))
@@ -282,6 +288,7 @@ feature = GI.Feature(multipolygon;
 
 # Feature Collection
 fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
+@test fc == GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature))
 @test fc === GI.FeatureCollection(fc)
 @test GI.crs(fc) == EPSG(4326)
 @test GI.extent(fc) == fc.extent

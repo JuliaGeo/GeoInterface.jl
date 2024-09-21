@@ -432,6 +432,9 @@ end
 function FeatureCollection(fc::FeatureCollection; crs=crs(fc), extent=extent(fc))
     FeatureCollection(parent(fc), crs, extent)
 end
+function FeatureCollection(fc::Feature; crs=crs(fc), extent=extent(fc))
+    FeatureCollection([fc], crs, extent)
+end
 function FeatureCollection(parent; crs=nothing, extent=nothing)
     if isfeaturecollection(parent)
         FeatureCollection(parent, crs, extent)
