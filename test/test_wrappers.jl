@@ -335,3 +335,47 @@ vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
 # @test collect(GI.getpoint(tin)) == collect(GI.getpoint(triangle))
 # @test_throws ArgumentError GI.TIN([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 # @test GI.testgeometry(tin)
+# Test trait promotion without array
+
+# Test that wrapping geometries in tuples and arrays works, 
+# and test that child geometries are wrapped in tuples.
+point = GI.Point(1, 2)
+@test GI.MultiPoint([point]) isa GI.MultiPoint
+@test GI.MultiPoint(point) isa GI.MultiPoint
+
+linestring = GI.LineString([(1,2), (3,4)])
+@test GI.MultiLineString([linestring]) isa GI.MultiLineString
+@test GI.MultiLineString(linestring) isa GI.MultiLineString
+
+polygon = GI.Polygon([[(0,0), (1,0), (1,1), (0,1), (0,0)]])
+@test GI.MultiPolygon([polygon]) isa GI.MultiPolygon
+@test GI.MultiPolygon(polygon) isa GI.MultiPolygon
+
+# Test that non-matching child traits throw an error
+@test_throws ArgumentError GI.MultiPoint(linestring)
+@test_throws ArgumentError GI.MultiLineString(polygon)
+@test_throws ArgumentError GI.MultiPolygon(point)
+
+# Test support for tuples of child geometries
+point_tuple = (GI.Point(1,2), GI.Point(3,4))
+@test GI.MultiPoint(point_tuple) isa GI.MultiPoint
+@test GI.ngeom(GI.MultiPoint(point_tuple)) == 2
+
+linestring_tuple = (GI.LineString([(1,2), (3,4)]), GI.LineString([(5,6), (7,8)]))
+@test GI.MultiLineString(linestring_tuple) isa GI.MultiLineString
+@test GI.ngeom(GI.MultiLineString(linestring_tuple)) == 2
+
+polygon_tuple = (GI.Polygon([[(0,0), (1,0), (1,1), (0,1), (0,0)]]), 
+                 GI.Polygon([[(2,2), (3,2), (3,3), (2,3), (2,2)]]))
+@test GI.MultiPolygon(polygon_tuple) isa GI.MultiPolygon
+@test GI.ngeom(GI.MultiPolygon(polygon_tuple)) == 2
+
+# Test wrapping single child geometry in tuple
+@test GI.MultiPoint((point,)) isa GI.MultiPoint
+@test GI.ngeom(GI.MultiPoint((point,))) == 1
+
+@test GI.MultiLineString((linestring,)) isa GI.MultiLineString
+@test GI.ngeom(GI.MultiLineString((linestring,))) == 1
+
+@test GI.MultiPolygon((polygon,)) isa GI.MultiPolygon
+@test GI.ngeom(GI.MultiPolygon((polygon,))) == 1
