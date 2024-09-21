@@ -98,7 +98,7 @@ isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 crs(::Nothing, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing)
 crs(::AbstractTrait, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing)
 
-function _check_dataapi_or_nothing(geom, key, default)
+function _get_dataapi_metadata(geom, key, default)
     if DataAPI.metadatasupport(geom).read
         if key in DataAPI.metadatakeys(geom)
             return DataAPI.metadata(geom, key; style = false)
