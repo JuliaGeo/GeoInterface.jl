@@ -180,8 +180,8 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # Is geom a single geometry ?
         if isgeometry(geom)
             if geomtrait(geom) isa $child_trait
-                # If geom is a child_trait, then make geom a vector and call again
-                return $geomtype([geom]; extent, crs)
+                # If geom is a child_trait, then make geom a tuple and call again
+                return $geomtype((geom,); extent, crs)
             else
                 # Wrap some geometry at the same level
                 geomtrait(geom) isa $trait || _argument_error(T, $trait)
@@ -191,7 +191,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             end
 
         # Otherwise wrap an array of child geometries
-        elseif geom isa AbstractArray
+        elseif geom isa AbstractArray || geom isa Tuple
             child = first(geom)
             children_match = findfirst(child -> !(geomtrait(child) isa $child_trait), geom)
 
@@ -206,7 +206,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
 
             # Where we have nested points, as in `coordinates(geom)`
             else
-                if child isa AbstractArray
+                if child isa AbstractArray || child isa Tuple
                     if $nesting === 2
                         all(child2 -> geomtrait(child2) isa PointTrait, child) || _parent_type_error($geomtype, $child_trait, geom)
                         Z1 = isnothing(Z) ? is3d(first(child)) : Z
