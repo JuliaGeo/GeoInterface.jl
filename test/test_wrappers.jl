@@ -287,8 +287,9 @@ feature = GI.Feature(multipolygon;
 @test_throws ArgumentError GI.Feature(:not_a_feature; properties=(x=1, y=2, z=3))
 
 # Feature Collection
-fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
-@test GI.getfeature(fc) == GI.getfeature(GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature)))
+fc_unwrapped = GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature))
+fc = GI.FeatureCollection(fc_unwrapped.parent; crs=EPSG(4326), extent=GI.extent(feature)) # so that `==` works since the underlying array is the same
+@test fc_unwrapped == fc
 @test GI.crs(fc) == GI.crs(GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature)))
 @test GI.extent(fc) == GI.extent(GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature)))
 @test fc === GI.FeatureCollection(fc)

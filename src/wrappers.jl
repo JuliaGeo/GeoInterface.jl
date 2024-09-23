@@ -437,8 +437,13 @@ function FeatureCollection(parent; crs=nothing, extent=nothing)
         FeatureCollection(parent, crs, extent)
     elseif isfeature(parent)
         # If `parent` is a single feature, wrap it in a featurecollection
-        # Note the use of 
-        FeatureCollection([parent], (@__MODULE__).crs(parent), (@__MODULE__).extent(parent))
+        # Note the use of `(@__MODULE__).crs(parent)` to explicitly reference
+        # `GeoInterface.crs`, since `crs` and `extent` are also keyword arguments.
+        FeatureCollection(
+            [parent], 
+            isnothing(crs) ? (@__MODULE__).crs(parent) : crs, 
+            isnothing(extent) ? (@__MODULE__).extent(parent) : extent
+        )
     else
         features = (parent isa AbstractArray) ? parent : collect(parent) 
         all(f -> isfeature(f), features) || _child_feature_error()
