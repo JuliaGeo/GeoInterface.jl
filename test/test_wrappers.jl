@@ -288,7 +288,9 @@ feature = GI.Feature(multipolygon;
 
 # Feature Collection
 fc = GI.FeatureCollection([feature]; crs=EPSG(4326), extent=GI.extent(feature))
-@test fc == GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature))
+@test GI.getfeature(fc) == GI.getfeature(GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature)))
+@test GI.crs(fc) == GI.crs(GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature)))
+@test GI.extent(fc) == GI.extent(GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature)))
 @test fc === GI.FeatureCollection(fc)
 @test GI.crs(fc) == EPSG(4326)
 @test GI.extent(fc) == fc.extent
