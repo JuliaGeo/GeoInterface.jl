@@ -285,6 +285,7 @@ feature = GI.Feature(multipolygon;
 @test GI.extent(feature) == GI.extent(multipolygon) 
 @test GI.testfeature(feature)
 @test_throws ArgumentError GI.Feature(:not_a_feature; properties=(x=1, y=2, z=3))
+@test GI.properties(GI.Feature(multipolygon)) == NamedTuple()
 
 # Feature Collection
 fc_unwrapped = GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature))
