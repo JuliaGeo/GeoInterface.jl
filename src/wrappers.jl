@@ -375,7 +375,7 @@ function Feature(f::Feature; crs=crs(f), extent=f.extent, properties=nothing)
     isnothing(properties) || @info "`properties` keyword not used when wrapping a feature"
     Feature(parent(f), crs, extent)
 end
-function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
+function Feature(geometry=nothing; properties=(;), crs=nothing, extent=nothing)
     if isnothing(geometry) || isgeometry(geometry)
         # Wrap a NamedTuple feature
         Feature((; geometry, properties...), crs, extent)
