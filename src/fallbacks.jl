@@ -123,10 +123,10 @@ function calc_extent(t::AbstractPointTrait, geom)
 end
 function calc_extent(t::AbstractGeometryTrait, geom)
     points = getpoint(t, geom)
-    X = extrema(p -> x(p), points)
-    Y = extrema(p -> y(p), points)
+    X = _nan_free_extrema(x, points)
+    Y = _nan_free_extrema(y, points)
     if is3d(geom)
-        Z = extrema(p -> z(p), points)
+        Z = _nan_free_extrema(z, points)
         Extent(; X, Y, Z)
     else
         Extent(; X, Y)
@@ -138,6 +138,24 @@ function calc_extent(::AbstractFeatureTrait, feature)
     isnothing(geom) ? nothing : extent(geom)
 end
 calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filter(!isnothing, collect(extent(f) for f in getfeature(t, fc))))
+
+function _nan_free_extrema(f, points)
+    agg_min = agg_max = f(first(points))
+    found = false
+    for point in points
+        c = f(point)
+        isnan(c) && continue
+        if found
+            agg_min = min(agg_min, c)
+            agg_max = max(agg_max, c)
+        else
+            found = true
+            agg_min = c
+            agg_max = c
+        end
+    end
+    return agg_min, agg_max
+end
 
 # Package level `GeoInterface.convert` method
 # Packages must implement their own `traittype` method
