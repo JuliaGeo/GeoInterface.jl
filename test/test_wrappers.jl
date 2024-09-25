@@ -8,6 +8,7 @@ GI.getcoord(point, 1)
 @test !GI.ismeasured(point)
 @test !GI.is3d(point)
 @test GI.ncoord(point) == 2
+@test GI.coordtype(point) == Int
 @test GI.extent(point) == Extent(X=(1, 1), Y=(2, 2))
 @test point == GI.Point(point)
 @test (GI.x(point), GI.y(point)) == (1, 2)
@@ -25,6 +26,7 @@ pointz = GI.Point(1, 2, 3)
 @test !GI.ismeasured(pointz)
 @test GI.is3d(pointz)
 @test GI.ncoord(pointz) == 3
+@test GI.coordtype(pointz) == Int
 @test (GI.x(pointz), GI.y(pointz), GI.z(pointz)) == (1, 2, 3)
 @test GI.testgeometry(pointz)
 @test GI.convert(GI, pointz) === pointz
@@ -37,6 +39,7 @@ pointzm = GI.Point(; X=1, Y=2, Z=3, M=4)
 @test GI.ismeasured(pointzm)
 @test GI.is3d(pointzm)
 @test GI.ncoord(pointzm) == 4
+@test GI.coordtype(pointzm) == Int
 @test pointzm == GI.Point(pointzm)
 @test point != GI.Point(pointzm)
 @test (GI.x(pointzm), GI.y(pointzm), GI.z(pointzm), GI.m(pointzm)) == (1, 2, 3, 4)
@@ -52,6 +55,7 @@ pointm = GI.Point((X=1, Y=2, M=3))
 @test GI.ismeasured(pointm)
 @test !GI.is3d(pointm)
 @test GI.ncoord(pointm) == 3
+@test GI.coordtype(pointm) == Int
 @test pointm == GI.Point(pointm)
 @test point != GI.Point(pointm)
 @test (GI.x(pointm), GI.y(pointm), GI.m(pointm)) == (1, 2, 3)
@@ -67,6 +71,7 @@ pointtm = GI.Point{false,true}(1, 2, 3)
 @test GI.ismeasured(pointtm)
 @test !GI.is3d(pointtm)
 @test GI.ncoord(pointtm) == 3
+@test GI.coordtype(pointtm) == Int
 @test (GI.x(pointtm), GI.y(pointtm), GI.m(pointtm)) == (1, 2, 3)
 @test_throws ArgumentError GI.z(pointtm)
 @test GI.testgeometry(pointtm)
@@ -79,6 +84,7 @@ pointa = GI.Point([1, 2])
 @test !GI.ismeasured(pointa)
 @test !GI.is3d(pointa)
 @test GI.ncoord(pointa) == 2
+@test GI.coordtype(pointa) == Int
 @test (GI.x(pointa), GI.y(pointa)) == (1, 2)
 @test GI.testgeometry(pointa)
 
@@ -130,6 +136,7 @@ linestring = GI.LineString([(1, 2), (3, 4)])
 @test GI.testgeometry(linestring)
 @test !GI.is3d(linestring)
 @test GI.ncoord(linestring) == 2
+@test GI.coordtype(linestring) == Int
 @test @inferred(GI.extent(linestring)) == Extent(X=(1, 3), Y=(2, 4))
 @test_throws ArgumentError GI.LineString([(1, 2)])
 linestring_crs = GI.LineString(linestring; crs=EPSG(4326))
@@ -200,6 +207,7 @@ collection = GI.GeometryCollection(geoms)
 @test GI.testgeometry(collection)
 @test !GI.is3d(collection)
 @test GI.ncoord(collection) == 2
+@test GI.coordtype(collection) == Int
 @test GI.extent(collection) == reduce(Extents.union, map(GI.extent, geoms))
 collection_crs = GI.GeometryCollection(collection; crs=EPSG(4326))
 @test parent(collection_crs) == parent(collection)
@@ -213,6 +221,7 @@ multicurve = GI.MultiCurve([linestring, linearring])
 @test GI.getgeom(multicurve, 1) === linestring
 @test !GI.is3d(multicurve)
 @test GI.ncoord(multicurve) == 2
+@test GI.coordtype(multicurve) == Int
 @test GI.extent(multicurve) == Extent(X=(1, 5), Y=(2, 6))
 @test_throws ArgumentError GI.MultiCurve([pointz, polygon])
 @test GI.testgeometry(multicurve)
@@ -229,6 +238,7 @@ multipolygon = GI.MultiPolygon([polygon])
 @test GI.getgeom(multipolygon, 1) === polygon
 @test !GI.is3d(multipolygon)
 @test GI.ncoord(multipolygon) == 2
+@test GI.coordtype(multipolygon) == Int
 @show polygon
 @show GI.getgeom(polygon, 1)
 # MultiPolygon extent does not infer, maybe due to nesting
@@ -246,6 +256,7 @@ polyhedralsurface = GI.PolyhedralSurface([polygon, polygon])
 @test GI.PolyhedralSurface(polygon) == GI.PolyhedralSurface(polygon)
 @test !GI.is3d(polyhedralsurface)
 @test GI.ncoord(polyhedralsurface) == 2
+@test GI.coordtype(polyhedralsurface) == Int
 @test @inferred(GI.extent(polyhedralsurface)) == Extent(X=(1, 5), Y=(2, 6))
 @test GI.getgeom(polyhedralsurface, 1) === polygon
 @test collect(GI.getgeom(polyhedralsurface)) == [polygon, polygon]
@@ -260,6 +271,7 @@ polyhedralsurface_crs = GI.PolyhedralSurface(polyhedralsurface; crs=EPSG(4326))
 multipolygon_coords = [[[[1, 2], [3, 4], [3, 2], [1, 4]]]]
 multipolygon = GI.MultiPolygon(multipolygon_coords)
 @test GI.coordinates(multipolygon) == multipolygon_coords
+@test GI.coordtype(multipolygon) == Int
 
 # Wrong parent type
 @test_throws ArgumentError GI.Point(nothing)
@@ -284,6 +296,7 @@ feature = GI.Feature(multipolygon;
 @test GI.crs(feature) == EPSG(4326)
 @test GI.extent(feature) == GI.extent(multipolygon) 
 @test GI.testfeature(feature)
+@test GI.coordtype(feature) == Int
 @test_throws ArgumentError GI.Feature(:not_a_feature; properties=(x=1, y=2, z=3))
 @test GI.properties(GI.Feature(multipolygon)) == NamedTuple()
 
@@ -301,6 +314,7 @@ fc = GI.FeatureCollection(fc_unwrapped.parent; crs=EPSG(4326), extent=GI.extent(
 @test_throws ArgumentError GI.FeatureCollection([1])
 vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
 @test GI.getfeature(vecfc, 1) == (geometry=(1,2), a=1, b=2)
+@test GI.coordtype(vecfc) == Int
 
 # TODO
 
