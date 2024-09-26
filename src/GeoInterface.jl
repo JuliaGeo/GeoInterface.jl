@@ -3,6 +3,7 @@ module GeoInterface
 using Extents: Extents, Extent
 using GeoFormatTypes: CoordinateReferenceSystemFormat
 using Base.Iterators: flatten
+import DataAPI
 
 export testgeometry, isgeometry, trait, geomtrait, ncoord, getcoord, ngeom, getgeom
 
