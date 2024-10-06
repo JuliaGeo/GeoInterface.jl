@@ -61,9 +61,9 @@ measures.
 abstract type WrapperGeometry{Z,M,T,C} end
 
 isgeometry(::Type{<:WrapperGeometry}) = true
-is3d(::WrapperGeometry{Z}) where Z = Z
-ismeasured(::WrapperGeometry{<:Any,M})  where M = M
-ncoord(::WrapperGeometry{Z, M}) where {Z, M} = 2 + Z + M
+is3d(::AbstractGeometryTrait, ::WrapperGeometry{Z}) where Z = Z
+ismeasured(::AbstractGeometryTrait, ::WrapperGeometry{<:Any,M})  where M = M
+ncoord(::AbstractGeometryTrait, ::WrapperGeometry{Z, M}) where {Z, M} = 2 + Z + M
 
 Base.parent(geom::WrapperGeometry) = geom.geom
 

@@ -8,13 +8,18 @@ function testgeometry(geom)
     type = geomtrait(geom)
     @assert !isnothing(type) "$geom doesn't implement `geomtrait`."
 
+    @assert hasmethod(ncoord, (typeof(type), typeof(geom))) "$geom does not correctly implement two argument `ncoord`"
+
     if type == PointTrait()
         n = ncoord(geom)
         if n >= 1  # point could be empty
             getcoord(geom, 1)  # point always needs at least 2
         end
+        @assert hasmethod(getcoord, (typeof(type), typeof(geom), Int)) "$geom does not correctly implement three argument `getcoord`"
     else
         n = ngeom(geom)
+        @assert hasmethod(ngeom, (typeof(type), typeof(geom))) "$geom does not correctly implement two argument `ngeom`"
+        @assert hasmethod(getgeom, (typeof(type), typeof(geom), Int)) "$geom does not correctly implement two argument `ngeom`"
         if n >= 1  # geometry could be empty
             g2 = getgeom(geom, 1)
             subtype = subtrait(type)
