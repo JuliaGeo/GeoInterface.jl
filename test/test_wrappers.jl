@@ -19,6 +19,7 @@ GI.getcoord(point, 1)
 point_crs = GI.Point(point; crs=EPSG(4326))
 @test parent(point_crs) === parent(point)
 @test GI.crs(point_crs) === EPSG(4326)
+@test GI.testgeometry(point)
 
 # 3D Point
 pointz = GI.Point(1, 2, 3)
@@ -29,6 +30,7 @@ pointz = GI.Point(1, 2, 3)
 @test GI.testgeometry(pointz)
 @test GI.convert(GI, pointz) === pointz
 @test GI.extent(pointz) == Extents.Extent(X=(1, 1), Y=(2, 2), Z=(3, 3))
+@test GI.testgeometry(pointz)
 
 # 3D measured point
 pointzm = GI.Point(; X=1, Y=2, Z=3, M=4)
@@ -45,6 +47,7 @@ pointzm = GI.Point(; X=1, Y=2, Z=3, M=4)
 pointzm_crs = GI.Point(; X=1, Y=2, Z=3, M=4, crs=EPSG(4326))
 @test parent(pointzm_crs) === parent(pointzm)
 @test GI.crs(pointzm_crs) === EPSG(4326)
+@test GI.testgeometry(pointzm)
 
 # Measured point
 pointm = GI.Point((X=1, Y=2, M=3))
@@ -60,6 +63,7 @@ pointm = GI.Point((X=1, Y=2, M=3))
 pointm_crs = GI.Point((X=1, Y=2, M=3); crs=EPSG(4326))
 @test parent(pointm_crs) === parent(pointm)
 @test GI.crs(pointm_crs) === EPSG(4326)
+@test GI.testgeometry(pointm)
 
 # Forced measured point with a tuple
 pointtm = GI.Point{false,true}(1, 2, 3)
@@ -73,6 +77,7 @@ pointtm = GI.Point{false,true}(1, 2, 3)
 pointtm_crs = GI.Point{false,true}(1, 2, 3; crs=EPSG(4326))
 @test parent(pointtm_crs) === parent(pointtm)
 @test GI.crs(pointtm_crs) === EPSG(4326)
+@test GI.testgeometry(pointtm)
 
 # Point made from an array
 pointa = GI.Point([1, 2])
@@ -81,6 +86,7 @@ pointa = GI.Point([1, 2])
 @test GI.ncoord(pointa) == 2
 @test (GI.x(pointa), GI.y(pointa)) == (1, 2)
 @test GI.testgeometry(pointa)
+@test GI.testgeometry(pointa)
 
 pointaz = GI.Point([1, 2, 3])
 @test !GI.ismeasured(pointaz)
@@ -88,12 +94,14 @@ pointaz = GI.Point([1, 2, 3])
 @test GI.ncoord(pointaz) == 3
 @test (GI.x(pointaz), GI.y(pointaz), GI.z(pointaz)) == (1, 2, 3)
 @test GI.testgeometry(pointaz)
+@test GI.testgeometry(pointaz)
 
 pointazm = GI.Point([1, 2, 3, 4])
 @test GI.ismeasured(pointazm)
 @test GI.is3d(pointazm)
 @test GI.ncoord(pointazm) == 4
 @test (GI.x(pointazm), GI.y(pointazm), GI.z(pointazm), GI.m(pointazm)) == (1, 2, 3, 4)
+@test GI.testgeometry(pointazm)
 @test GI.testgeometry(pointazm)
 
 # We can force a vector point to be measured
@@ -105,6 +113,7 @@ pointam = GI.Point{false,true}([1, 2, 3])
 @test_throws ArgumentError GI.z(pointam)
 @test GI.testgeometry(pointam)
 @test_throws ArgumentError GI.Point(1, 2, 3, 4, 5)
+@test GI.testgeometry(pointam)
 
 # Line
 line = GI.Line([(1, 2), (3, 4)])
@@ -115,12 +124,14 @@ line = GI.Line([(1, 2), (3, 4)])
 @test !GI.is3d(line)
 @test GI.ncoord(line) == 2
 @test GI.extent(line) == Extent(X=(1, 3), Y=(2, 4))
+@test GI.testgeometry(line)
 @test_throws ArgumentError GI.Line(point)
 @test_throws ArgumentError GI.Line([(1, 2)])
 @test_throws ArgumentError GI.Line([line, line])
 line_crs = GI.Line(line; crs=EPSG(4326))
 @test parent(line_crs) === parent(line)
 @test GI.crs(line_crs) === EPSG(4326)
+@test GI.testgeometry(line_crs)
 
 # LineString
 linestring = GI.LineString([(1, 2), (3, 4)])
@@ -131,10 +142,12 @@ linestring = GI.LineString([(1, 2), (3, 4)])
 @test !GI.is3d(linestring)
 @test GI.ncoord(linestring) == 2
 @test @inferred(GI.extent(linestring)) == Extent(X=(1, 3), Y=(2, 4))
+@test GI.testgeometry(linestring)
 @test_throws ArgumentError GI.LineString([(1, 2)])
 linestring_crs = GI.LineString(linestring; crs=EPSG(4326))
 @test parent(linestring_crs) === parent(linestring)
 @test GI.crs(linestring_crs) === EPSG(4326)
+@test GI.testgeometry(linestring_crs)
 
 # LinearRing
 linearring = GI.LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])
@@ -145,10 +158,12 @@ linearring = GI.LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])
 @test !GI.is3d(linearring)
 @test GI.ncoord(linearring) == 2
 @test @inferred(GI.extent(linearring)) == Extent(X=(1, 5), Y=(2, 6))
+@test GI.testgeometry(linearring)
 @test_throws ArgumentError GI.LinearRing([(1, 2)])
 linearring_crs = GI.LinearRing(linearring; crs=EPSG(4326))
 @test parent(linearring_crs) === parent(linearring)
 @test GI.crs(linearring_crs) === EPSG(4326)
+@test GI.testgeometry(linearring_crs)
 
 # Polygon
 polygon = GI.Polygon([linearring, linearring])
@@ -161,6 +176,7 @@ polygon = GI.Polygon([linearring, linearring])
 @test !GI.is3d(polygon)
 @test GI.ncoord(polygon) == 2
 @test @inferred(GI.extent(polygon)) == Extent(X=(1, 5), Y=(2, 6))
+@test GI.testgeometry(polygon)
 @test GI.convert(GI, MyPolygon()) isa GI.Polygon
 @test GI.convert(GI, polygon) === polygon
 polygon_crs = GI.Polygon(polygon; crs=EPSG(4326))
@@ -170,12 +186,15 @@ polygon_crs = GI.Polygon(polygon; crs=EPSG(4326))
 polygon = GI.Polygon([linestring, linestring])
 @test GI.getgeom(polygon, 1) === linestring
 @test collect(GI.getgeom(polygon)) == [linestring, linestring]
+@test GI.testgeometry(polygon)
 
 linearring3d = GI.LinearRing([(1, 2, 3), (3, 4, 5), (5, 6, 7), (1, 2, 3)])
 polygon3d = GI.Polygon([linearring3d, linearring3d])
 @test GI.is3d(polygon3d)
 @test GI.ncoord(polygon3d) == 3
 @test GI.extent(polygon3d) == Extents.Extent(X=(1, 5), Y=(2, 6), Z=(3, 7))
+@test GI.testgeometry(linearring3d)
+@test GI.testgeometry(polygon3d)
 
 # MultiPoint
 multipoint = GI.MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
@@ -185,11 +204,14 @@ multipoint = GI.MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 @test !GI.is3d(multipoint)
 @test GI.ncoord(multipoint) == 2
 @test @inferred(GI.extent(multipoint)) == Extent(X=(1, 9), Y=(2, 10))
+@test GI.testgeometry(multipoint)
 @test_throws ArgumentError GI.MultiPoint([[(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)]])
 @test GI.testgeometry(multipoint)
 multipoint_crs = GI.MultiPoint(multipoint; crs=EPSG(4326))
 @test parent(multipoint_crs) == parent(multipoint)
 @test GI.crs(multipoint_crs) === EPSG(4326)
+@test GI.testgeometry(multipoint_crs)
+
 
 # GeometryCollection
 geoms = [line, linestring, linearring, multipoint, (1, 2)]
