@@ -46,10 +46,7 @@ export AbstractGeometryTrait,
     FeatureTrait,
     AbstractFeatureCollectionTrait,
     FeatureCollectionTrait,
-    RasterTrait,
-    @enable,
-    @enable_geo_plots
-
+    RasterTrait
 
 include("types.jl")
 include("interface.jl")

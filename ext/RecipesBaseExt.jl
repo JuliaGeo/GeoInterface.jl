@@ -1,7 +1,7 @@
 module RecipesBaseExt
 
 using GeoInterface, RecipesBase
-
+import GeoInterface: @enable, @enable_geo_plots
 const GI = GeoInterface
 
 RecipesBase.@recipe function f(t::Union{GI.PointTrait,GI.MultiPointTrait}, geom)
@@ -19,7 +19,7 @@ RecipesBase.@recipe function f(t::Union{GI.PolygonTrait,GI.MultiPolygonTrait,GI.
     _coordvecs(t, geom)
 end
 
-RecipesBase.@recipe f(::GI.GeometryCollectionTrait, collection) = collect(getgeom(collection))
+RecipesBase.@recipe f(::GI.GeometryCollectionTrait, collection) = collect(GI.getgeom(collection))
 
 # Features
 RecipesBase.@recipe f(t::GI.FeatureTrait, feature) = GI.geometry(feature)
@@ -30,18 +30,18 @@ RecipesBase.@recipe f(t::GI.FeatureCollectionTrait, fc) = collect(GI.getfeature(
 # Convert coordinates to the form used by Plots.jl
 _coordvecs(::PointTrait, geom) = [tuple(GI.coordinates(geom)...)]
 function _coordvecs(::MultiPointTrait, geom)
-    n = npoint(geom)
+    n = GI.npoint(geom)
     # We use a fixed conditional instead of dispatch,
-    # as `is3d` may not be known at compile-time
-    if is3d(geom)
+    # as `GI.is3d` may not be known at compile-time
+    if GI.is3d(geom)
         _geom2coordvecs!(ntuple(_ -> Array{Float64}(undef, n), 3)..., geom)
     else
         _geom2coordvecs!(ntuple(_ -> Array{Float64}(undef, n), 2)..., geom)
     end
 end
 function _coordvecs(::AbstractLineStringTrait, geom)
-    n = npoint(geom)
-    if is3d(geom)
+    n = GI.npoint(geom)
+    if GI.is3d(geom)
         vecs = ntuple(_ -> Array{Float64}(undef, n), 3)
         return _geom2coordvecs!(vecs..., geom)
     else
@@ -52,8 +52,8 @@ end
 function _coordvecs(::MultiLineStringTrait, geom)
     function loop!(vecs, geom)
         i1 = 1
-        for line in getgeom(geom)
-            i2 = i1 + npoint(line) - 1
+        for line in GI.getgeom(geom)
+            i2 = i1 + GI.npoint(line) - 1
             vvecs = map(v -> view(v, i1:i2), vecs)
             _geom2coordvecs!(vvecs..., line)
             map(v -> v[i2+1] = NaN, vecs)
@@ -61,8 +61,8 @@ function _coordvecs(::MultiLineStringTrait, geom)
         end
         return vecs
     end
-    n = npoint(geom) + ngeom(geom)
-    if is3d(geom)
+    n = GI.npoint(geom) + ngeom(geom)
+    if GI.is3d(geom)
         vecs = ntuple(_ -> Array{Float64}(undef, n), 3)
         return loop!(vecs, geom)
     else
@@ -71,27 +71,27 @@ function _coordvecs(::MultiLineStringTrait, geom)
     end
 end
 function _coordvecs(::LinearRingTrait, geom)
-    points = getpoint(geom)
-    if is3d(geom)
-        return getcoord.(points, 1), getcoord.(points, 2), getcoord.(points, 3)
+    points = GI.getpoint(geom)
+    if GI.is3d(geom)
+        return GI.getcoord.(points, 1), GI.getcoord.(points, 2), GI.getcoord.(points, 3)
     else
-        return getcoord.(points, 1), getcoord.(points, 2)
+        return GI.getcoord.(points, 1), GI.getcoord.(points, 2)
     end
 end
 function _coordvecs(::PolygonTrait, geom)
-    ring = first(getgeom(geom)) # currently doesn't plot holes
-    points = getpoint(ring)
-    if is3d(geom)
-        return getcoord.(points, 1), getcoord.(points, 2), getcoord.(points, 3)
+    ring = first(GI.getgeom(geom)) # currently doesn't plot holes
+    points = GI.getpoint(ring)
+    if GI.is3d(geom)
+        return GI.getcoord.(points, 1), GI.getcoord.(points, 2), GI.getcoord.(points, 3)
     else
-        return getcoord.(points, 1), getcoord.(points, 2)
+        return GI.getcoord.(points, 1), GI.getcoord.(points, 2)
     end
 end
 function _coordvecs(::MultiPolygonTrait, geom)
     function loop!(vecs, geom)
         i1 = 1
-        for ring in getring(geom)
-            i2 = i1 + npoint(ring) - 1
+        for ring in GI.getring(geom)
+            i2 = i1 + GI.npoint(ring) - 1
             range = i1:i2
             vvecs = map(v -> view(v, range), vecs)
             _geom2coordvecs!(vvecs..., ring)
@@ -100,8 +100,8 @@ function _coordvecs(::MultiPolygonTrait, geom)
         end
         return vecs
     end
-    n = npoint(geom) + nring(geom)
-    if is3d(geom)
+    n = GI.npoint(geom) + GI.nring(geom)
+    if GI.is3d(geom)
         vecs = ntuple(_ -> Array{Float64}(undef, n), 3)
         return loop!(vecs, geom)
     else
@@ -114,17 +114,17 @@ end
 _coordvec(n) = Array{Float64}(undef, n)
 
 function _geom2coordvecs!(xs, ys, geom)
-    for (i, p) in enumerate(getpoint(geom))
-        xs[i] = x(p)
-        ys[i] = y(p)
+    for (i, p) in enumerate(GI.getpoint(geom))
+        xs[i] = GI.x(p)
+        ys[i] = GI.y(p)
     end
     return xs, ys
 end
 function _geom2coordvecs!(xs, ys, zs, geom)
-    for (i, p) in enumerate(getpoint(geom))
-        xs[i] = x(p)
-        ys[i] = y(p)
-        zs[i] = z(p)
+    for (i, p) in enumerate(GI.getpoint(geom))
+        xs[i] = GI.x(p)
+        ys[i] = GI.y(p)
+        zs[i] = GI.z(p)
     end
     return xs, ys, zs
 end
@@ -180,6 +180,6 @@ macro enable_geo_plots(typ)
 end
 
 # Enable Plots.jl for GeoInterface wrappers
-@enable GeoInterface.Wrappers.WrapperGeometry
+@enable GI.Wrappers.WrapperGeometry
 
 end
