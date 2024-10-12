@@ -1,4 +1,5 @@
 using GeoInterface
+using GeoFormatTypes
 using Extents
 using Test
 
@@ -20,6 +21,8 @@ end
 struct MyFeatureCollection{G}
     geoms::G
 end
+
+struct Raster end
 
 GeoInterface.isgeometry(::MyPoint) = true
 GeoInterface.geomtrait(::MyPoint) = PointTrait()
@@ -90,6 +93,12 @@ GeoInterface.trait(fc::MyFeatureCollection) = FeatureCollectionTrait()
 GeoInterface.nfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = length(fc.geoms)
 GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection) = fc.geoms
 GeoInterface.getfeature(::FeatureCollectionTrait, fc::MyFeatureCollection, i::Integer) = fc.geoms[i]
+
+GeoInterface.israster(::Type{<:Raster}) = true
+GeoInterface.trait(::Raster) = RasterTrait()
+GeoInterface.extent(::RasterTrait, ::Raster) = Extents.Extent()
+GeoInterface.crs(::RasterTrait, ::Raster) = GeoFormatTypes.EPSG(4326)
+
 
 @testset "Developer" begin
 
@@ -250,6 +259,11 @@ end
     @test GeoInterface.extent(features) == Extents.Extent(X=(1, 1), Y=(2, 2))
 end
 
+@testset "Raster" begin
+    raster = Raster()
+    @test GeoInterface.testraster(raster)
+end
+
 @testset "Conversion" begin
     struct XCurve end
     struct XPolygon end
@@ -259,7 +273,7 @@ end
     @test_throws Exception GeoInterface.convert(MyPolygon, geom)
     @test GeoInterface.convert(MyCurve)(geom) == geom
     @test_throws Exception GeoInterface.convert(MyPolygon)(geom)
-    
+
 end
 
 @testset "Operations" begin

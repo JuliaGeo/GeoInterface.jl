@@ -1,6 +1,7 @@
 module GeoInterface
 
 using Extents: Extents, Extent
+using GeoFormatTypes: CoordinateReferenceSystemFormat
 using Base.Iterators: flatten
 
 export testgeometry, isgeometry, trait, geomtrait, ncoord, getcoord, ngeom, getgeom
@@ -45,6 +46,7 @@ export AbstractGeometryTrait,
     FeatureTrait,
     AbstractFeatureCollectionTrait,
     FeatureCollectionTrait,
+    RasterTrait,
     @enable,
     @enable_geo_plots
 

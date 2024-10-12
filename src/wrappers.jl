@@ -88,7 +88,7 @@ function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T
     isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
 end
 
-# We eefine all the types in a loop so we have standardised docs and behaviour
+# We define all the types in a loop so we have standardised docs and behaviour
 # without too much repetition of code.
 # `child_trait` and `child_type` define the trait and type of child geometries
 # a geometry can be constructed from.
@@ -172,24 +172,31 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
     end
+
     @eval function $geomtype{Z,M}(geom::T; extent::E=nothing, crs::C=nothing) where {Z,M,T,E,C}
         Z isa Union{Bool,Nothing} || throw(ArgumentError("Z Parameter must be `true`, `false` or `nothing`"))
         M isa Union{Bool,Nothing} || throw(ArgumentError("M Parameter must be `true`, `false` or `nothing`"))
 
-        # Wrap some geometry at the same level
+        # Is geom a single geometry ?
         if isgeometry(geom)
-            geomtrait(geom) isa $trait || _argument_error(T, $trait)
-            Z1 = isnothing(Z) ? is3d(geom) : Z
-            M1 = isnothing(M) ? ismeasured(geom) : M
-            return $geomtype{Z1,M1,T,E,C}(geom, extent, crs)
+            if geomtrait(geom) isa $child_trait
+                # If geom is a child_trait, then make geom a vector and call again
+                return $geomtype([geom]; extent, crs)
+            else
+                # Wrap some geometry at the same level
+                geomtrait(geom) isa $trait || _argument_error(T, $trait)
+                Z1 = isnothing(Z) ? is3d(geom) : Z
+                M1 = isnothing(M) ? ismeasured(geom) : M
+                return $geomtype{Z1,M1,T,E,C}(geom, extent, crs)
+            end
 
         # Otherwise wrap an array of child geometries
         elseif geom isa AbstractArray
             child = first(geom)
-            chilren_match = all(child -> geomtrait(child) isa $child_trait, geom)
+            children_match = findfirst(child -> !(geomtrait(child) isa $child_trait), geom)
 
             # Where the next level down is the child geometry
-            if chilren_match
+            if isnothing(children_match)
                 if $(!isnothing(length_check))
                     $length_check(Base.length(geom)) || _length_error($geomtype, $length_check, geom)
                 end
@@ -219,7 +226,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                     end
                 end
                 # Otherwise compain the nested child type is wrong
-                _wrong_child_error($trait, $child_trait, child)
+                _wrong_child_error($trait, $child_trait, geom[children_match])
             end
         else
             # Or complain the parent type is wrong
@@ -368,7 +375,7 @@ function Feature(f::Feature; crs=crs(f), extent=f.extent, properties=nothing)
     isnothing(properties) || @info "`properties` keyword not used when wrapping a feature"
     Feature(parent(f), crs, extent)
 end
-function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
+function Feature(geometry=nothing; properties=(;), crs=nothing, extent=nothing)
     if isnothing(geometry) || isgeometry(geometry)
         # Wrap a NamedTuple feature
         Feature((; geometry, properties...), crs, extent)
@@ -428,6 +435,13 @@ end
 function FeatureCollection(parent; crs=nothing, extent=nothing)
     if isfeaturecollection(parent)
         FeatureCollection(parent, crs, extent)
+    elseif isfeature(parent)
+        # If `parent` is a single feature, wrap it in a featurecollection
+        FeatureCollection(
+            [parent], 
+            isnothing(crs) ? Wrappers.crs(parent) : crs, 
+            isnothing(extent) ? Wrappers.extent(parent) : extent
+        )
     else
         features = (parent isa AbstractArray) ? parent : collect(parent) 
         all(f -> isfeature(f), features) || _child_feature_error()
