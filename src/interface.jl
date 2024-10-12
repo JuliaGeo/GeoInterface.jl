@@ -44,7 +44,7 @@ isfeaturecollection(::Type{T}) where {T} = false
 Retrieve the geometrycolumn(s) of `featurecollection`; the fields (or columns in a table)
 which contain geometries that support GeoInterface.
 """
-geometrycolumns(featurecollection) = (:geometry,)
+geometrycolumns(featurecollection) = _get_dataapi_metadata(featurecollection, "GEOINTERFACE:geometrycolumns", (:geometry,))
 
 """
     GeoInterface.geometry(feat) => geom
