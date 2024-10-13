@@ -1,8 +1,45 @@
 module RecipesBaseExt
 
 using GeoInterface, RecipesBase
-import GeoInterface: @enable, @enable_geo_plots
+import GeoInterface: @enable_plots
 const GI = GeoInterface
+
+mutable struct GeoPlot
+    args
+end
+
+function geoplot(args...; kw...)
+    RecipesBase.plot(GeoPlot(args); kw...)
+end
+function geoplot!(args...; kw...)
+    RecipesBase.plot!(GeoPlot(args); kw...)
+end
+function geoplot!(plt::RecipesBase.AbstractPlot, args...; kw...)
+    RecipesBase.plot!(plt, GeoPlot(args); kw...)
+end
+
+RecipesBase.@recipe function f(gp::GeoPlot)
+    if GI.isgeometry(gp.args[1])
+        (trait(gp.args[1]), gp.args[1])
+    elseif GI.isfeature(gp.args[1])
+        (trait(gp.args[1]), gp.args[1])
+    elseif GI.isfeaturecollection(gp.args[1])
+        (trait(gp.args[1]), gp.args[1])
+    elseif gp.args[1] isa AbstractVector
+        x = [GeoPlot((arg,)) for arg in gp.args[1]]
+    else
+        error("No recipe found for $gp")
+    end
+end
+
+function RecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol,Base.Any}, gps::AbstractVector{GeoPlot})
+    series_list = RecipesBase.RecipeData[]
+    RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
+    for gp in Base.skipmissing(gps)
+        Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (gp,)))
+    end
+    series_list
+end
 
 RecipesBase.@recipe function f(t::Union{GI.PointTrait,GI.MultiPointTrait}, geom)
     seriestype --> :scatter
@@ -19,13 +56,29 @@ RecipesBase.@recipe function f(t::Union{GI.PolygonTrait,GI.MultiPolygonTrait,GI.
     _coordvecs(t, geom)
 end
 
-RecipesBase.@recipe f(::GI.GeometryCollectionTrait, collection) = collect(GI.getgeom(collection))
+function RecipesBase.apply_recipe(plotattributes::AbstractDict{Symbol,Any}, ::GI.GeometryCollectionTrait, collection)
+    series_list = RecipesBase.RecipeData[]
+    RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
+    for geom in GI.getgeom(collection)
+        Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (trait(geom), geom)))
+    end
+    series_list
+end
 
 # Features
-RecipesBase.@recipe f(t::GI.FeatureTrait, feature) = GI.geometry(feature)
+RecipesBase.@recipe function f(t::GI.FeatureTrait, feature)
+    geom = GI.geometry(feature)
+    (trait(geom), geom)
+end
 
-RecipesBase.@recipe f(t::GI.FeatureCollectionTrait, fc) = collect(GI.getfeature(fc))
-
+function RecipesBase.apply_recipe(plotattributes::AbstractDict{Symbol,Any}, ::GI.FeatureCollectionTrait, collection)
+    series_list = RecipesBase.RecipeData[]
+    RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
+    for feat in GI.getfeature(collection)
+        Base.push!(series_list, RecipesBase.RecipeData(plotattributes, (trait(feat), feat)))
+    end
+    series_list
+end
 
 # Convert coordinates to the form used by Plots.jl
 _coordvecs(::PointTrait, geom) = [tuple(GI.coordinates(geom)...)]
@@ -153,7 +206,7 @@ function expr_enable(typ)
 end
 
 """
-     GeoInterfaceRecipes.@enable(GeometryType)
+     @enable_plots(GeometryType)
 
 Macro to add plot recipes to a geometry type.
 
@@ -167,19 +220,14 @@ end
 ...
 
 # Enable Plots.jl plotting
-GeoInterfaceRecipes.@enable_geo_plots MyGeometry
+GeoInterfaceRecipes.@enable_plots MyGeometry
 ```
 """
-macro enable(typ)
-    esc(expr_enable(typ))
-end
-
-# Compat
-macro enable_geo_plots(typ)
+macro enable_plots(typ)
     esc(expr_enable(typ))
 end
 
 # Enable Plots.jl for GeoInterface wrappers
-@enable GI.Wrappers.WrapperGeometry
+@enable_plots GI.Wrappers.WrapperGeometry
 
 end
