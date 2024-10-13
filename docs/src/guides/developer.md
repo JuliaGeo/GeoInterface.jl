@@ -9,6 +9,12 @@ it could be useful to also implement some optional methods if they apply or are 
 If your package also supports geospatial operations on geometries--such as intersections--, please
 also implement those interfaces where applicable.
 
+GeoInterface also has some utility packages, `GeoInterfaceMakie` and `GeoInterfaceRecipes`, 
+which provide plotting support through their `@enable` macros.
+If you wish to implement plotting support for your geometry, please create a [package extension](https://pkgdocs.julialang.org/v1/creating-packages/#Conditional-loading-of-code-in-packages-(Extensions)) 
+that extends either `Makie` (for the Makie.jl ecosystem) or `RecipesBase` (for the Plots.jl ecosystem).
+You can find some examples of this pattern in [Shapefile.jl](https://github.com/JuliaGeo/Shapefile.jl/blob/main/ext/ShapefileMakieExt.jl) and [GeoJSON.jl](https://github.com/JuliaGeo/GeoJSON.jl/blob/main/ext/GeoJSONMakieExt.jl).
+
 Last but not least, we also provide an interface for rasters and features--geometries with properties--if applicable.
 
 ## Required for Geometry
