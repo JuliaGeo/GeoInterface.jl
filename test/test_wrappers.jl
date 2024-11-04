@@ -195,12 +195,12 @@ polygon = GI.Polygon([linearring, linearring])
 @test @inferred(GI.extent(polygon)) == Extent(X=(1, 5), Y=(2, 6))
 @test GI.convert(GI, MyPolygon()) isa GI.Polygon
 @test GI.convert(GI, polygon) === polygon
-test_display(polygon, "Polygon{false, false}([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])])",
+test_display(polygon, "Polygon{false, false}([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])",
                 "Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])")
 polygon_crs = GI.Polygon(polygon; crs=EPSG(4326))
 @test parent(polygon_crs) === parent(polygon)
 @test GI.crs(polygon_crs) === EPSG(4326)
-test_display(polygon_crs, "Polygon{false, false}([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])], crs = EPSG{1}((4326,)))",
+test_display(polygon_crs, "Polygon{false, false}([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])], crs = EPSG{1}((4326,)))",
                 "Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])")
 # Make sure `linestring` is also ok in polygons
 polygon = GI.Polygon([linestring, linestring])
@@ -229,7 +229,7 @@ test_display(multipoint, "MultiPoint{false, false}([(1, 2), (3, 4), (3, 2), (1, 
 multipoint_crs = GI.MultiPoint(multipoint; crs=EPSG(4326))
 @test parent(multipoint_crs) == parent(multipoint)
 @test GI.crs(multipoint_crs) === EPSG(4326)
-test_display(multipoint_crs, "MultiPoint{false, false}([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)], crs = EPSG{1}((4326,)))", "MultiPoint([(1,2),(3,4),(3,2),(1,4),(7,8),(9,10)])")
+test_display(multipoint_crs, "MultiPoint{false, false}([(1, 2), (3, 4), … (2) … , (7, 8), (9, 10)], crs = EPSG{1}((4326,)))", "MultiPoint([(1,2),(3,4),(3,2),(1,4),(7,8),(9,10)])")
 
 # GeometryCollection
 geoms = [line, linestring, linearring, multipoint, (1, 2)]
@@ -240,13 +240,13 @@ collection = GI.GeometryCollection(geoms)
 @test !GI.is3d(collection)
 @test GI.ncoord(collection) == 2
 @test GI.extent(collection) == reduce(Extents.union, map(GI.extent, geoms))
-test_display(collection, "GeometryCollection{false, false}([Line([(1, 2), (3, 4)]), LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)]), (1, 2)])",
-                    "GeometryCollection([Line([(1,2),(3,4)]),LineString([(1,2),(3,4)]),LinearRing([(1,2),(3,4),(5,6),(1,2)]),MultiPoint([(1,2),(3,4),(3,2),(1,4),(7,8),(9,10)]),(1,2)])")
+test_display(collection, "GeometryCollection{false, false}([Line([(1, 2), (3, 4)]), … (3) … , (1, 2)])",
+                    "GeometryCollection([Line([(1,2),(3,4)]),LineString([(1,2),(3,4)]),…(2)…,(1,2)])")
 collection_crs = GI.GeometryCollection(collection; crs=EPSG(4326))
 @test parent(collection_crs) == parent(collection)
 @test GI.crs(collection_crs) === EPSG(4326)
-test_display(collection_crs, "GeometryCollection{false, false}([Line([(1, 2), (3, 4)]), LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), MultiPoint([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)]), (1, 2)], crs = EPSG{1}((4326,)))",
-                    "GeometryCollection([Line([(1,2),(3,4)]),LineString([(1,2),(3,4)]),LinearRing([(1,2),(3,4),(5,6),(1,2)]),MultiPoint([(1,2),(3,4),(3,2),(1,4),(7,8),(9,10)]),(1,2)])")
+test_display(collection_crs, "GeometryCollection{false, false}([Line([(1, 2), (3, 4)]), … (3) … , (1, 2)], crs = EPSG{1}((4326,)))",
+                    "GeometryCollection([Line([(1,2),(3,4)]),LineString([(1,2),(3,4)]),…(2)…,(1,2)])")
 
 # MultiCurve
 multicurve = GI.MultiCurve([linestring, linearring])
@@ -258,13 +258,13 @@ multicurve = GI.MultiCurve([linestring, linearring])
 @test GI.extent(multicurve) == Extent(X=(1, 5), Y=(2, 6))
 @test_throws ArgumentError GI.MultiCurve([pointz, polygon])
 @test GI.testgeometry(multicurve)
-test_display(multicurve, "MultiCurve{false, false}([LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])])",
-                        "MultiCurve([LineString([(1,2),(3,4)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])")
+test_display(multicurve, "MultiCurve{false, false}([LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), … (2) … , (1, 2)])])",
+                        "MultiCurve([LineString([(1,2),(3,4)]),LinearRing([(1,2),(3,4),…(1)…,(1,2)])])")
 multicurve_crs = GI.MultiCurve(multicurve; crs=EPSG(4326))
 @test parent(multicurve_crs) == parent(multicurve)
 @test GI.crs(multicurve_crs) === EPSG(4326)
-test_display(multicurve_crs, "MultiCurve{false, false}([LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])], crs = EPSG{1}((4326,)))",
-                        "MultiCurve([LineString([(1,2),(3,4)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])")
+test_display(multicurve_crs, "MultiCurve{false, false}([LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), … (2) … , (1, 2)])], crs = EPSG{1}((4326,)))",
+                        "MultiCurve([LineString([(1,2),(3,4)]),LinearRing([(1,2),(3,4),…(1)…,(1,2)])])")
 
 # MultiPolygon
 polygon = GI.Polygon([linearring, linearring])
@@ -273,8 +273,8 @@ multipolygon = GI.MultiPolygon([polygon])
 @test GI.getgeom(multipolygon, 1) === polygon
 @test !GI.is3d(multipolygon)
 @test GI.ncoord(multipolygon) == 2
-test_display(multipolygon, "MultiPolygon{false, false}([Polygon([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])])])",
-                            "MultiPolygon([Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])])")
+test_display(multipolygon, "MultiPolygon{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])])",
+                            "MultiPolygon([Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])])])")
 # MultiPolygon extent does not infer, maybe due to nesting
 @test GI.extent(multipolygon) == Extent(X=(1, 5), Y=(2, 6))
 @test collect(GI.getpoint(multipolygon)) == collect(GI.getpoint(polygon))
@@ -283,8 +283,8 @@ test_display(multipolygon, "MultiPolygon{false, false}([Polygon([LinearRing([(1,
 multipolygon_crs = GI.MultiPolygon(multipolygon; crs=EPSG(4326))
 @test parent(multipolygon_crs) == parent(multipolygon)
 @test GI.crs(multipolygon_crs) === EPSG(4326)
-test_display(multipolygon_crs, "MultiPolygon{false, false}([Polygon([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])])], crs = EPSG{1}((4326,)))",
-                            "MultiPolygon([Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])])")
+test_display(multipolygon_crs, "MultiPolygon{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])], crs = EPSG{1}((4326,)))",
+                            "MultiPolygon([Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])])])")
 
 # PolyhedralSurface
 polyhedralsurface = GI.PolyhedralSurface([polygon, polygon])
@@ -297,13 +297,13 @@ polyhedralsurface = GI.PolyhedralSurface([polygon, polygon])
 @test GI.getgeom(polyhedralsurface, 1) == polygon
 @test collect(GI.getpoint(polyhedralsurface)) == vcat(collect(GI.getpoint(polygon)), collect(GI.getpoint(polygon)))
 @test GI.testgeometry(polyhedralsurface)
-test_display(polyhedralsurface, "PolyhedralSurface{false, false}([Polygon([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])]), Polygon([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])])])",
-                                "PolyhedralSurface([Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])]),Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])])")
+test_display(polyhedralsurface, "PolyhedralSurface{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])]), Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])])",
+                                "PolyhedralSurface([Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])]),Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])])])")
 polyhedralsurface_crs = GI.PolyhedralSurface(polyhedralsurface; crs=EPSG(4326))
 @test parent(polyhedralsurface_crs) == parent(polyhedralsurface)
 @test GI.crs(polyhedralsurface_crs) === EPSG(4326)
-test_display(polyhedralsurface_crs, "PolyhedralSurface{false, false}([Polygon([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])]), Polygon([LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)]), LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])])], crs = EPSG{1}((4326,)))",
-                                "PolyhedralSurface([Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])]),Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])])")
+test_display(polyhedralsurface_crs, "PolyhedralSurface{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])]), Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])], crs = EPSG{1}((4326,)))",
+                                "PolyhedralSurface([Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])]),Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])])])")
 
 # Round-trip coordinates
 multipolygon_coords = [[[[1, 2], [3, 4], [3, 2], [1, 4]]]]

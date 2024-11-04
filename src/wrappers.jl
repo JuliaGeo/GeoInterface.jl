@@ -172,11 +172,10 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
         
-        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
+        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
             compact = get(io, :compact, false)
             spacing = compact ? "" : " "
             show_mz &= !compact
-            screen_nrows, screen_ncols = displaysize(io)
 
             extent_str = ""
             crs_str = ""
@@ -195,35 +194,47 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             end
             str *= "("
             this_geom = getgeom(trait(geom), geom)
+            # keep track of how much space we've used + make sure we give this info to any child geoms so they don't go over the limit
+            currently_used_space = textwidth(str) + textwidth(extent_str) + textwidth(crs_str)
             if this_geom isa AbstractVector
                 # check here if we have enough room to display the whole object or if we need to condense the string
                 str *= "["
-                currently_used_space = textwidth(str) + textwidth(extent_str) + textwidth(crs_str) + 2 # +2 for brackets
-                length_of_one_object_in_chars = textwidth(_nice_geom_str(this_geom[1], false, compact))
-                num_objects_to_show = min(length(this_geom), floor(Int, (screen_ncols - currently_used_space - 1 #=triple dot character =#) / length_of_one_object_in_chars))
+                currently_used_space += 2 # +2 for brackets
+                available_space = screen_ncols - currently_used_space
+
+                space_per_object = floor(Int, available_space / length(this_geom))
+
+                length_of_one_object_in_chars = textwidth(_nice_geom_str(this_geom[1], false, compact, space_per_object))
+
+                # this makes sure that if we have 1 or 2 geometries here, we show both, but any more and we skip them
+                num_objects_to_show = min(length(this_geom), max(2, floor(Int, (available_space - 1 #=triple dot character =#) / length_of_one_object_in_chars)))
+
+                # separately track how many objects to show to the left and right of the ...()...
+                num_objects_left = num_objects_to_show == 1 ? 0 : ceil(Int, num_objects_to_show/2)
+                num_objects_right = max(1, floor(Int, num_objects_to_show/2))
                 
-                num_shown_each_side = ceil(Int, num_objects_to_show/2)
-                num_missing = length(this_geom) - num_objects_to_show
+                # how many objects are we skipping?
+                num_missing = length(this_geom) - (num_objects_left + num_objects_right)
                 
-                for i ∈ 1:num_shown_each_side
-                    str *= "$(_nice_geom_str(this_geom[i], false, compact)),$(spacing)"
+                for i ∈ 1:num_objects_left
+                    str *= "$(_nice_geom_str(this_geom[i], false, compact, space_per_object)),$(spacing)"
                 end
                 
                 if num_missing > 0
                     # report how many geometries aren't shown here
-                    str *= " … ($(num_missing)) … "
+                    str *= "…$(spacing)($(num_missing))$(spacing)…$(spacing),$(spacing)"
                 end
 
-                for i ∈ 1:num_shown_each_side
-                    str *= _nice_geom_str(this_geom[end - num_shown_each_side + i], false, compact)
-                    if i != num_shown_each_side
+                for i ∈ 1:num_objects_right
+                    str *= _nice_geom_str(this_geom[end - num_objects_right + i], false, compact, space_per_object)
+                    if i != num_objects_right
                         str *= ",$(spacing)"
                     end
                 end
                 
                 str *= "]"
             else
-                str *= _nice_geom_str(g, false, compact)
+                str *= _nice_geom_str(g, false, compact, screen_ncols - currently_used_space)
             end
 
             str *= extent_str
@@ -290,21 +301,22 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     end
 end
 
-function _nice_geom_str(geom, ::Bool, ::Bool) 
+function _nice_geom_str(geom, ::Bool, ::Bool, ::Int) 
     io = IOBuffer()
     show(io, MIME("text/plain"), geom)
     return String(take!(io))
 end
 
 # need a work around to pass the show_mz variable through - put string to a temp IOBuffer then read it
-function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, ::Bool) 
-    io = IOBuffer()
-    show(io, MIME("text/plain"), geom; show_mz = show_mz)
-    return String(take!(io))
+function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, compact::Bool, screen_ncols::Int) 
+    buf = IOBuffer()
+    io = IOContext(IOContext(buf, :compact => compact))
+    show(io, MIME("text/plain"), geom; show_mz = show_mz, screen_ncols = screen_ncols)
+    return String(take!(buf))
 end
 
 # handle tuples/vectors explicitly
-function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool)
+function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool, ::Int)
     spacing = compact ? "" : " "
     str = "["
     str *= _add_elements_with_spacing(geom, spacing)
@@ -312,7 +324,7 @@ function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool)
     return str
 end
 
-function _nice_geom_str(geom::Tuple, ::Bool, compact::Bool)
+function _nice_geom_str(geom::Tuple, ::Bool, compact::Bool, ::Int)
     spacing = compact ? "" : " "
     str = "("
     str *= _add_elements_with_spacing(geom, spacing)
