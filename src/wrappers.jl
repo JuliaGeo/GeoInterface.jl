@@ -61,9 +61,9 @@ measures.
 abstract type WrapperGeometry{Z,M,T,C} end
 
 isgeometry(::Type{<:WrapperGeometry}) = true
-is3d(::WrapperGeometry{Z}) where Z = Z
-ismeasured(::WrapperGeometry{<:Any,M})  where M = M
-ncoord(::WrapperGeometry{Z, M}) where {Z, M} = 2 + Z + M
+is3d(::AbstractGeometryTrait, ::WrapperGeometry{Z}) where Z = Z
+ismeasured(::AbstractGeometryTrait, ::WrapperGeometry{<:Any,M})  where M = M
+ncoord(::AbstractGeometryTrait, ::WrapperGeometry{Z, M}) where {Z, M} = 2 + Z + M
 
 Base.parent(geom::WrapperGeometry) = geom.geom
 
@@ -375,7 +375,7 @@ function Feature(f::Feature; crs=crs(f), extent=f.extent, properties=nothing)
     isnothing(properties) || @info "`properties` keyword not used when wrapping a feature"
     Feature(parent(f), crs, extent)
 end
-function Feature(geometry=nothing; properties=nothing, crs=nothing, extent=nothing)
+function Feature(geometry=nothing; properties=(;), crs=nothing, extent=nothing)
     if isnothing(geometry) || isgeometry(geometry)
         # Wrap a NamedTuple feature
         Feature((; geometry, properties...), crs, extent)
