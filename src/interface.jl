@@ -43,8 +43,18 @@ isfeaturecollection(::Type{T}) where {T} = false
 
 Retrieve the geometrycolumn(s) of `featurecollection`; the fields (or columns in a table)
 which contain geometries that support GeoInterface.
+
+This is always a `Tuple` of `Symbol`s.
 """
-geometrycolumns(featurecollection) = _get_dataapi_metadata(featurecollection, "GEOINTERFACE:geometrycolumns", (:geometry,)) # see `metadata.jl`
+function geometrycolumns(featurecollection)
+    gcs = _get_dataapi_metadata(featurecollection, "GEOINTERFACE:geometrycolumns", (:geometry,)) # see `metadata.jl`
+    return _aftercare_geometrycolumns(gcs)
+end
+
+_aftercare_geometrycolumns(gcs::Tuple{<: Vararg{Symbol}}) = gcs
+_aftercare_geometrycolumns(gcs::Tuple{<: Vararg{String}}) = Symbol.(gcs)
+_aftercare_geometrycolumns(gcs::String) = (Symbol(gcs),)
+_aftercare_geometrycolumns(gcs::Symbol) = (gcs,)
 
 """
     GeoInterface.geometry(feat) => geom
