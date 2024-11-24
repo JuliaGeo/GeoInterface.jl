@@ -1,7 +1,7 @@
 using Test
 using GeoInterface
 using GeoFormatTypes: EPSG
-using DataAPI
+using GeoInterface.DataAPI
 
 struct TestMetadata
     geometrycolumns
