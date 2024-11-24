@@ -51,8 +51,8 @@ function geometrycolumns(featurecollection)
     return _aftercare_geometrycolumns(gcs)
 end
 
-_aftercare_geometrycolumns(gcs::Tuple{<: Vararg{Symbol}}) = gcs
-_aftercare_geometrycolumns(gcs::Tuple{<: Vararg{String}}) = Symbol.(gcs)
+_aftercare_geometrycolumns(gcs::Tuple{Vararg{Symbol}}) = gcs
+_aftercare_geometrycolumns(gcs::Tuple{Vararg{String}}) = Symbol.(gcs)
 _aftercare_geometrycolumns(gcs::String) = (Symbol(gcs),)
 _aftercare_geometrycolumns(gcs::Symbol) = (gcs,)
 

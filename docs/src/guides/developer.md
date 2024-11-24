@@ -88,7 +88,7 @@ The `geometrycolumns` enables other packages to know which field in a row, or co
 
 It's important to note that the `geometrycolumns` should always return a `Tuple` of `Symbol`s.  However, it does have a fallback method
 that uses [DataAPI.jl](https://github.com/JuliaData/DataAPI.jl) metadata, if it exists, to retrieve the geometry columns.  This relies on
-the `GEOINTERFACE:geometrycolumns` metadata key.  GeoInterface.jl compatible writers may set this metadata key if writing to a format
+the `"GEOINTERFACE:geometrycolumns"` metadata key.  GeoInterface.jl compatible writers may set this metadata key if writing to a format
 that does not have its own mechanism to store known geometry columns, like Arrow.
 
 Optionally, the `crs` method can also be implemented:
@@ -100,7 +100,7 @@ This should return a `GeoFormatTypes.CoordinateReferenceSystem` type, such as `E
 or `ProjString(p4::String)`.  See [GeoFormatTypes.jl](https://github.com/JuliaGeo/GeoFormatTypes.jl) for more information.
 
 The `crs` method also has a fallback that uses [DataAPI.jl](https://github.com/JuliaData/DataAPI.jl) metadata, if it exists, to retrieve the CRS.
-GeoInterface searches for the `GEOINTERFACE:crs` metadata key to retrieve the CRS.
+GeoInterface searches for the `"GEOINTERFACE:crs"` metadata key to retrieve the CRS.
 
 ## Geospatial Operations
 ```julia

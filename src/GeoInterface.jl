@@ -56,6 +56,7 @@ include("fallbacks.jl")
 include("utils.jl")
 include("base.jl")
 include("wrappers.jl")
+include("metadata.jl")
 
 using .Wrappers
 using .Wrappers: geointerface_geomtype
