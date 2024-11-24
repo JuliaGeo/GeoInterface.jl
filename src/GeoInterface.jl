@@ -3,6 +3,7 @@ module GeoInterface
 using Extents: Extents, Extent
 using GeoFormatTypes: CoordinateReferenceSystemFormat
 using Base.Iterators: flatten
+import DataAPI
 
 export testgeometry, isgeometry, trait, geomtrait, ncoord, getcoord, ngeom, getgeom
 
@@ -55,6 +56,7 @@ include("fallbacks.jl")
 include("utils.jl")
 include("base.jl")
 include("wrappers.jl")
+include("metadata.jl")
 
 using .Wrappers
 using .Wrappers: geointerface_geomtype
