@@ -95,8 +95,11 @@ issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom)))
 issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
-crs(::Nothing, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing) # see `metadata.jl`
-crs(::AbstractTrait, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing) # see `metadata.jl`
+"The key used to retrieve and store the CRS from DataAPI.jl metadata, if no other solution exists in that format."
+const GEOINTERFACE_CRS_KEY = "GEOINTERFACE:crs"
+
+crs(::Nothing, geom) = _get_dataapi_metadata(geom, GEOINTERFACE_CRS_KEY, nothing) # see `metadata.jl`
+crs(::AbstractTrait, geom) = _get_dataapi_metadata(geom, GEOINTERFACE_CRS_KEY, nothing) # see `metadata.jl`
 
 # FeatureCollection
 getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))

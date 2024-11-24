@@ -39,6 +39,11 @@ isfeaturecollection(x::T) where {T} = isfeaturecollection(T)
 isfeaturecollection(::Type{T}) where {T} = false
 
 """
+The key used to retrieve and store the geometrycolumns from DataAPI.jl metadata, if no other solution exists in that format.
+"""
+const GEOINTERFACE_GEOMETRYCOLUMNS_KEY = "GEOINTERFACE:geometrycolumns"
+
+"""
     GeoInterface.geometrycolumns(featurecollection) => (:geometry,)
 
 Retrieve the geometrycolumn(s) of `featurecollection`; the fields (or columns in a table)
@@ -47,7 +52,7 @@ which contain geometries that support GeoInterface.
 This is always a `Tuple` of `Symbol`s.
 """
 function geometrycolumns(featurecollection)
-    gcs = _get_dataapi_metadata(featurecollection, "GEOINTERFACE:geometrycolumns", (:geometry,)) # see `metadata.jl`
+    gcs = _get_dataapi_metadata(featurecollection, GEOINTERFACE_GEOMETRYCOLUMNS_KEY, (:geometry,)) # see `metadata.jl`
     return _aftercare_geometrycolumns(gcs)
 end
 
