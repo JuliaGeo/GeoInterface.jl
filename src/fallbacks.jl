@@ -95,17 +95,8 @@ issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom)))
 issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
-crs(::Nothing, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing)
-crs(::AbstractTrait, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing)
-
-function _get_dataapi_metadata(geom::GeomType, key, default) where GeomType
-    if DataAPI.metadatasupport(GeomType).read
-        if key in DataAPI.metadatakeys(geom)
-            return DataAPI.metadata(geom, key; style = false)
-        end
-    end
-    return default
-end
+crs(::Nothing, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing) # see `metadata.jl`
+crs(::AbstractTrait, geom) = _get_dataapi_metadata(geom, "GEOINTERFACE:crs", nothing) # see `metadata.jl`
 
 # FeatureCollection
 getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))
