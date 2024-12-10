@@ -171,6 +171,79 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         convert(::Type{$geomtype}, ::$trait, geom) = $geomtype(geom)
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
+        
+        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
+            compact = get(io, :compact, false)
+            spacing = compact ? "" : " "
+            show_mz &= !compact
+
+            extent_str = ""
+            crs_str = ""
+            if !compact
+                if !isnothing(geom.extent)
+                    extent_str = ",$(spacing)extent$(spacing)=$(spacing)$(repr(MIME("text/plain"), geom.extent))"
+                end
+                if !isnothing(geom.crs)
+                    crs_str = ",$(spacing)crs$(spacing)=$(spacing)$(repr(MIME("text/plain"), geom.crs))"
+                end
+            end
+
+            str = "$($geomtype)"
+            if show_mz
+                str *= "{$Z,$(spacing)$M}"
+            end
+            str *= "("
+            this_geom = getgeom(trait(geom), geom)
+            # keep track of how much space we've used + make sure we give this info to any child geoms so they don't go over the limit
+            currently_used_space = textwidth(str) + textwidth(extent_str) + textwidth(crs_str)
+            if this_geom isa AbstractVector
+                # check here if we have enough room to display the whole object or if we need to condense the string
+                str *= "["
+                currently_used_space += 2 # +2 for brackets
+                available_space = screen_ncols - currently_used_space
+
+                space_per_object = floor(Int, available_space / length(this_geom))
+
+                length_of_one_object_in_chars = textwidth(_nice_geom_str(this_geom[1], false, compact, space_per_object))
+
+                # this makes sure that if we have 1 or 2 geometries here, we show both, but any more and we skip them
+                num_objects_to_show = min(length(this_geom), max(2, floor(Int, (available_space - 1 #=triple dot character =#) / length_of_one_object_in_chars)))
+
+                # separately track how many objects to show to the left and right of the ...()...
+                num_objects_left = num_objects_to_show == 1 ? 0 : ceil(Int, num_objects_to_show/2)
+                num_objects_right = max(1, floor(Int, num_objects_to_show/2))
+                
+                # how many objects are we skipping?
+                num_missing = length(this_geom) - (num_objects_left + num_objects_right)
+                
+                for i ∈ 1:num_objects_left
+                    str *= "$(_nice_geom_str(this_geom[i], false, compact, space_per_object)),$(spacing)"
+                end
+                
+                if num_missing > 0
+                    # report how many geometries aren't shown here
+                    str *= "…$(spacing)($(num_missing))$(spacing)…$(spacing),$(spacing)"
+                end
+
+                for i ∈ 1:num_objects_right
+                    str *= _nice_geom_str(this_geom[end - num_objects_right + i], false, compact, space_per_object)
+                    if i != num_objects_right
+                        str *= ",$(spacing)"
+                    end
+                end
+                
+                str *= "]"
+            else
+                str *= _nice_geom_str(g, false, compact, screen_ncols - currently_used_space)
+            end
+
+            str *= extent_str
+            str *= crs_str
+            
+            str *= ")"
+            print(io, str)
+            return nothing
+        end
     end
 
     @eval function $geomtype{Z,M}(geom::T; extent::E=nothing, crs::C=nothing) where {Z,M,T,E,C}
@@ -233,6 +306,42 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             _parent_type_error($geomtype, $child_trait, geom)
         end
     end
+end
+
+function _nice_geom_str(geom, ::Bool, ::Bool, ::Int) 
+    io = IOBuffer()
+    show(io, MIME("text/plain"), geom)
+    return String(take!(io))
+end
+# need a work around to pass the show_mz variable through - put string to a temp IOBuffer then read it
+function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, compact::Bool, screen_ncols::Int) 
+    buf = IOBuffer()
+    io = IOContext(IOContext(buf, :compact => compact))
+    show(io, MIME("text/plain"), geom; show_mz = show_mz, screen_ncols = screen_ncols)
+    return String(take!(buf))
+end
+# handle tuples/vectors explicitly
+function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool, ::Int)
+    spacing = compact ? "" : " "
+    str = "["
+    str *= _add_elements_with_spacing(geom, spacing)
+    str *= "]"
+    return str
+end
+function _nice_geom_str(geom::Tuple, ::Bool, compact::Bool, ::Int)
+    spacing = compact ? "" : " "
+    str = "("
+    str *= _add_elements_with_spacing(geom, spacing)
+    str *= ")"
+    return str
+end
+
+function _add_elements_with_spacing(itr, spacing::String = "")
+    str = ""
+    for x ∈ itr[1:end - 1]
+        str *= "$(x),$(spacing)"
+    end
+    str *= "$(itr[end])"
 end
 
 @noinline _wrong_child_error(geomtype, C, child) = throw(ArgumentError("$geomtype must have child objects with trait $C, got $(typeof(child)) with trait $(geomtrait(child))"))
@@ -340,6 +449,36 @@ function Base.:(==)(g1::Point, g2::Point)
 end
 Base.:(!=)(g1::Point, g2::Point) = !(g1 == g2)
 
+function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz::Bool = true) where {Z,M,T,C}
+    print(io, "Point")
+    this_crs = crs(point)
+
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
+
+    if !compact && show_mz
+        print(io, "{$Z, $M}")
+    end
+    print(io, "(")
+    trait = geomtrait(point)
+    print(io, "($(x(trait, point)),$(spacing)$(y(trait, point))")
+    if Z
+        print(io, ",$(spacing)$(z(trait, point))")
+    end
+    if M
+        print(io, ",$(spacing)$(m(trait, point))")
+    end
+    print(io, ")")
+
+    if !compact && !isnothing(this_crs)
+        print(io, ",$(spacing)crs$(spacing)=$(spacing)")
+        show(io, MIME("text/plain"), this_crs)
+    end
+    print(io, ")")
+
+    return nothing
+end
+
 @noinline _coord_length_error(Z, M, l) =
     throw(ArgumentError("Number of coordinates must be $(2 + Z + M) when `Z` is $Z and `M` is $M. Got $l"))
 @noinline _no_z_error() = throw(ArgumentError("Point has no `Z` coordinate"))
@@ -382,6 +521,36 @@ function Feature(geometry=nothing; properties=(;), crs=nothing, extent=nothing)
     else
         throw(ArgumentError("object must be a feature, geometry or `nothing`. Got $(typeof(geometry))"))
     end
+end
+
+function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
+    print(io, "Feature(")
+    show(io, MIME("text/plain"), f.parent.geometry; show_mz = show_mz)
+    non_geom_props = filter(!=(:geometry), propertynames(f.parent))
+    if !isempty(non_geom_props)
+        print(io, ",$(spacing)properties$(spacing)=$(spacing)(")
+        for (i, property) ∈ enumerate(non_geom_props)
+            print(io, "$(property)$(spacing)=$(spacing)")
+            show(io, getproperty(f.parent, property))
+            if i != length(non_geom_props)
+                print(io, ",$(spacing)")
+            end
+        end
+        print(io, ")")
+    end
+    if !compact
+        if !isnothing(f.extent)
+            print(io, ", extent$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), f.extent)
+        end
+        if !isnothing(f.crs)
+            print(io, ", crs$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), f.crs)
+        end
+    end
+    print(io, ")")
 end
 
 Base.parent(f::Feature) = f.parent
@@ -447,6 +616,33 @@ function FeatureCollection(parent; crs=nothing, extent=nothing)
         all(f -> isfeature(f), features) || _child_feature_error()
         FeatureCollection(parent, crs, extent)
     end
+end
+
+function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
+    print(io, "FeatureCollection(")
+    compact = get(io, :compact, false)
+    spacing = compact ? "" : " "
+    features = _parent_is_fc(fc) ? getfeature(trait(fc), parent(fc)) : parent(fc)
+    print(io, "[")
+    for (i, f) ∈ enumerate(features)
+        show(io, MIME("text/plain"), f; show_mz = !compact)
+        if i != length(features)
+            print(io, ",$(spacing)")
+        end
+    end
+    print(io, "]")
+    if !compact
+        if !isnothing(fc.crs)
+            print(io, ",$(spacing)crs$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), fc.crs)
+        end
+        if !isnothing(fc.extent)
+            print(io, ",$(spacing)extent$(spacing)=$(spacing)")
+            show(io, MIME("text/plain"), fc.extent)
+        end
+    end
+    print(io, ")")
+    return nothing
 end
 
 Base.parent(fc::FeatureCollection) = fc.parent
