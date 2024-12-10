@@ -306,7 +306,6 @@ function _nice_geom_str(geom, ::Bool, ::Bool, ::Int)
     show(io, MIME("text/plain"), geom)
     return String(take!(io))
 end
-
 # need a work around to pass the show_mz variable through - put string to a temp IOBuffer then read it
 function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, compact::Bool, screen_ncols::Int) 
     buf = IOBuffer()
@@ -314,7 +313,6 @@ function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, compact::Bool, scr
     show(io, MIME("text/plain"), geom; show_mz = show_mz, screen_ncols = screen_ncols)
     return String(take!(buf))
 end
-
 # handle tuples/vectors explicitly
 function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool, ::Int)
     spacing = compact ? "" : " "
@@ -323,7 +321,6 @@ function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool, ::Int)
     str *= "]"
     return str
 end
-
 function _nice_geom_str(geom::Tuple, ::Bool, compact::Bool, ::Int)
     spacing = compact ? "" : " "
     str = "("
@@ -523,13 +520,13 @@ function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
     compact = get(io, :compact, false)
     spacing = compact ? "" : " "
     print(io, "Feature(")
-    Base.show(io, MIME("text/plain"), f.parent.geometry; show_mz = show_mz)
+    show(io, MIME("text/plain"), f.parent.geometry; show_mz = show_mz)
     non_geom_props = filter(!=(:geometry), propertynames(f.parent))
     if !isempty(non_geom_props)
         print(io, ",$(spacing)properties$(spacing)=$(spacing)(")
         for (i, property) ∈ enumerate(non_geom_props)
             print(io, "$(property)$(spacing)=$(spacing)")
-            Base.show(io, getproperty(f.parent, property))
+            show(io, getproperty(f.parent, property))
             if i != length(non_geom_props)
                 print(io, ",$(spacing)")
             end
