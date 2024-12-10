@@ -18,11 +18,6 @@ struct MyCollection{N} <: MyAbstractGeom{N} end
 struct MyFeature end
 struct MyFeatureCollection end
 
-GeoInterfaceRecipes.@enable MyAbstractGeom
-GeoInterfaceRecipes.@enable MyFeature
-# Test legacy interface
-GeoInterfaceRecipes.@enable_geo_plots MyFeatureCollection
-
 GeoInterface.isgeometry(::MyAbstractGeom) = true
 GeoInterface.is3d(::GeoInterface.AbstractGeometryTrait, ::MyAbstractGeom{N}) where {N} = N == 3
 GeoInterface.ncoord(::GeoInterface.AbstractGeometryTrait, geom::MyAbstractGeom{N}) where {N} = N
@@ -65,33 +60,65 @@ GeoInterface.ncoord(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N
 GeoInterface.ngeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection) = 4
 GeoInterface.getgeom(::GeoInterface.GeometryCollectionTrait, geom::MyCollection{N}, i) where {N} = MyMultiPolygon{N}()
 
+GeoInterface.isfeature(::Type{MyFeature}) = true
 GeoInterface.trait(::MyFeature) = FeatureTrait()
+GeoInterface.isfeaturecollection(::Type{MyFeatureCollection}) = true
 GeoInterface.trait(::MyFeatureCollection) = FeatureCollectionTrait()
 GeoInterface.getfeature(::GeoInterface.FeatureCollectionTrait, geom::MyFeatureCollection, i) = MyFeature()
 GeoInterface.getfeature(::GeoInterface.FeatureCollectionTrait, geom::MyFeatureCollection) = [MyFeature(), MyFeature()]
 GeoInterface.geometry(geom::MyFeature) = rand((MyPolygon{2}(), MyMultiPolygon{2}()))
 GeoInterface.nfeature(::GeoInterface.FeatureTrait, geom::MyFeature) = 1
 
-@testset "plot" begin
-    # We just check if they actually run
-    # 2d
-    plot(MyPoint{2}())
-    plot(MyCurve{2}())
-    plot(MyLinearRing{2}())
-    plot(MyLineString{2}())
-    plot(MyMultiPoint{2}())
-    plot(MyPolygon{2}())
-    plot(MyMultiPolygon{2}())
-    plot(MyCollection{2}())
-    # 3d
-    plot(MyPoint{3}())
-    plot(MyCurve{3}())
-    plot(MyLinearRing{3}())
-    plot(MyLineString{3}())
-    plot(MyMultiPoint{3}())
-    plot(MyPolygon{3}())
-    plot(MyMultiPolygon{3}())
-    plot(MyCollection{3}())
-    plot(MyFeature())
-    plot(MyFeatureCollection())
+@testset "Plotting" begin
+    @testset "geoplot" begin
+        # We just check if they actually run
+        # 2d
+        GeoInterface.geoplot(MyPoint{2}())
+        GeoInterface.geoplot(MyCurve{2}())
+        GeoInterface.geoplot(MyLinearRing{2}())
+        GeoInterface.geoplot(MyLineString{2}())
+        GeoInterface.geoplot(MyMultiPoint{2}())
+        GeoInterface.geoplot(MyPolygon{2}())
+        GeoInterface.geoplot(MyMultiPolygon{2}())
+        GeoInterface.geoplot(MyCollection{2}())
+        # 3d
+        GeoInterface.geoplot(MyPoint{3}())
+        GeoInterface.geoplot(MyCurve{3}())
+        GeoInterface.geoplot(MyLinearRing{3}())
+        GeoInterface.geoplot(MyLineString{3}())
+        GeoInterface.geoplot(MyMultiPoint{3}())
+        GeoInterface.geoplot(MyPolygon{3}())
+        GeoInterface.geoplot(MyMultiPolygon{3}())
+        GeoInterface.geoplot(MyCollection{3}())
+        GeoInterface.geoplot(MyFeature())
+        GeoInterface.geoplot(MyFeatureCollection())
+    end
+
+    GeoInterfaceRecipes.@enable MyAbstractGeom
+    GeoInterfaceRecipes.@enable MyFeature
+    # Test legacy interface
+    GeoInterfaceRecipes.@enable_geo_plots MyFeatureCollection
+    @testset "plot" begin
+        # We just check if they actually run
+        # 2d
+        plot(MyPoint{2}())
+        plot(MyCurve{2}())
+        plot(MyLinearRing{2}())
+        plot(MyLineString{2}())
+        plot(MyMultiPoint{2}())
+        plot(MyPolygon{2}())
+        plot(MyMultiPolygon{2}())
+        plot(MyCollection{2}())
+        # 3d
+        plot(MyPoint{3}())
+        plot(MyCurve{3}())
+        plot(MyLinearRing{3}())
+        plot(MyLineString{3}())
+        plot(MyMultiPoint{3}())
+        plot(MyPolygon{3}())
+        plot(MyMultiPolygon{3}())
+        plot(MyCollection{3}())
+        plot(MyFeature())
+        plot(MyFeatureCollection())
+    end
 end
