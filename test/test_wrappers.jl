@@ -365,6 +365,18 @@ test_display(fc, "FeatureCollection([Feature(MultiPolygon{false, false}([Polygon
 vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
 @test GI.getfeature(vecfc, 1) == (geometry=(1,2), a=1, b=2)
 
+@testset "Extent skips NaN" begin
+    nan_multipoint = GI.MultiPoint([(1.0, NaN), (3.0, 4.0), (3.0, 2.0), (NaN, 4.0), (7.0, 8.0), (9.0, 10.0)])
+    nan_polygon = GI.Polygon(GI.LineString([(1.0, NaN), (3.0, 4.0), (3.0, 2.0), (NaN, 4.0), (7.0, 8.0), (9.0, 10.0)]))
+    @test GI.extent(nan_multipoint) == Extent(X = (1.0, 9.0), Y = (2.0, 10.0))
+    @test GI.extent(nan_polygon) == Extent(X = (1.0, 9.0), Y = (2.0, 10.0))
+
+    all_nan_multipoint = GI.MultiPoint([(NaN, NaN) for i in 1:10])
+    all_nan_ext = GI.extent(all_nan_multipoint)
+    @test all(isnan, all_nan_ext.X)
+    @test all(isnan, all_nan_ext.Y)
+end
+
 # TODO
 
 # # Triangle
