@@ -172,7 +172,9 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
         
-        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
+        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; 
+            show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]
+        ) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
             compact = get(io, :compact, false)
             spacing = compact ? "" : " "
             show_mz &= !compact
@@ -188,7 +190,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 end
             end
 
-            str = "$($geomtype)"
+            str = string($geomtype)
             if show_mz
                 str *= "{$Z,$(spacing)$M}"
             end
@@ -234,7 +236,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 
                 str *= "]"
             else
-                str *= _nice_geom_str(geom, false, compact, screen_ncols - currently_used_space)
+                str *= _nice_geom_str(parent(geom), false, compact, screen_ncols - currently_used_space)
             end
 
             str *= extent_str
