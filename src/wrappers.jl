@@ -234,7 +234,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 
                 str *= "]"
             else
-                str *= _nice_geom_str(g, false, compact, screen_ncols - currently_used_space)
+                str *= _nice_geom_str(geom, false, compact, screen_ncols - currently_used_space)
             end
 
             str *= extent_str
@@ -652,9 +652,9 @@ _child_feature_error() = throw(ArgumentError("child objects must be features"))
 isfeaturecollection(fc::Type{<:FeatureCollection}) = true
 trait(fc::FeatureCollection) = FeatureCollectionTrait()
 
-nfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
+nfeature(t::FeatureCollectionTrait, fc::FeatureCollection) =
     _parent_is_fc(fc) ? nfeature(t, parent(fc)) : length(parent(fc))
-getfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
+getfeature(t::FeatureCollectionTrait, fc::FeatureCollection) =
     _parent_is_fc(fc) ? getfeature(t, parent(fc)) : parent(fc)
 getfeature(t::FeatureCollectionTrait, fc::FeatureCollection, i::Integer) =
     _parent_is_fc(fc) ? getfeature(t, parent(fc), i) : parent(fc)[i]
