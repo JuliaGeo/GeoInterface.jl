@@ -43,11 +43,15 @@ end
         if geom == multipolygon
             # `plot!` wont work with the GeometryBasics version of this either
             # But `poly!` does
-            @test_nowarn Makie.poly!(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
+            @test_nowarn Makie.poly(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
         else
-            @test_nowarn Makie.plot!(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
+            @test_nowarn Makie.plot(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
         end
     end
+
+    @test_nowarn Makie.update_state_before_display!(fig)
+    @test_nowarn Makie.colorbuffer(fig.scene)
+    
     fig
 end
 
