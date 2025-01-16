@@ -234,7 +234,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 
                 str *= "]"
             else
-                str *= _nice_geom_str(g, false, compact, screen_ncols - currently_used_space)
+                str *= _nice_geom_str(this_geom, false, compact, screen_ncols - currently_used_space)
             end
 
             str *= extent_str
