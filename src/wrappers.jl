@@ -451,7 +451,7 @@ function Base.:(==)(g1::Point, g2::Point)
 end
 Base.:(!=)(g1::Point, g2::Point) = !(g1 == g2)
 
-function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz::Bool = true) where {Z,M,T,C}
+function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]) where {Z,M,T,C}
     print(io, "Point")
     this_crs = crs(point)
 
