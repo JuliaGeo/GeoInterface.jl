@@ -35,7 +35,7 @@ test_display(point, "Point{false, false}((1, 2))", "Point((1,2))")
 point_crs = GI.Point(point; crs=EPSG(4326))
 @test parent(point_crs) === parent(point)
 @test GI.crs(point_crs) === EPSG(4326)
-test_display(point_crs, "Point{false, false}((1, 2), crs = EPSG{1}((4326,)))", "Point((1,2))")
+test_display(point_crs, "Point{false, false}((1, 2), crs = \"EPSG:4326\")", "Point((1,2))")
 
 # 3D Point
 pointz = GI.Point(1, 2, 3)
@@ -80,7 +80,7 @@ test_display(pointm, "Point{false, true}((1, 2, 3))", "Point((1,2,3))")
 pointm_crs = GI.Point((X=1, Y=2, M=3); crs=EPSG(4326))
 @test parent(pointm_crs) === parent(pointm)
 @test GI.crs(pointm_crs) === EPSG(4326)
-test_display(pointm_crs, "Point{false, true}((1, 2, 3), crs = EPSG{1}((4326,)))", "Point((1,2,3))")
+test_display(pointm_crs, "Point{false, true}((1, 2, 3), crs = \"EPSG:4326\")", "Point((1,2,3))")
 
 # Forced measured point with a tuple
 pointtm = GI.Point{false,true}(1, 2, 3)
@@ -95,7 +95,7 @@ test_display(pointtm, "Point{false, true}((1, 2, 3))", "Point((1,2,3))")
 pointtm_crs = GI.Point{false,true}(1, 2, 3; crs=EPSG(4326))
 @test parent(pointtm_crs) === parent(pointtm)
 @test GI.crs(pointtm_crs) === EPSG(4326)
-test_display(pointtm_crs, "Point{false, true}((1, 2, 3), crs = EPSG{1}((4326,)))", "Point((1,2,3))")
+test_display(pointtm_crs, "Point{false, true}((1, 2, 3), crs = \"EPSG:4326\")", "Point((1,2,3))")
 
 # Point made from an array
 pointa = GI.Point([1, 2])
@@ -149,7 +149,7 @@ test_display(line, "Line{false, false}([(1, 2), (3, 4)])", "Line([(1,2),(3,4)])"
 line_crs = GI.Line(line; crs=EPSG(4326))
 @test parent(line_crs) === parent(line)
 @test GI.crs(line_crs) === EPSG(4326)
-test_display(line_crs, "Line{false, false}([(1, 2), (3, 4)], crs = EPSG{1}((4326,)))", "Line([(1,2),(3,4)])")
+test_display(line_crs, "Line{false, false}([(1, 2), (3, 4)], crs = \"EPSG:4326\")", "Line([(1,2),(3,4)])")
 
 # LineString
 linestring = GI.LineString([(1, 2), (3, 4)])
@@ -165,7 +165,7 @@ test_display(linestring, "LineString{false, false}([(1, 2), (3, 4)])", "LineStri
 linestring_crs = GI.LineString(linestring; crs=EPSG(4326))
 @test parent(linestring_crs) === parent(linestring)
 @test GI.crs(linestring_crs) === EPSG(4326)
-test_display(linestring_crs, "LineString{false, false}([(1, 2), (3, 4)], crs = EPSG{1}((4326,)))", "LineString([(1,2),(3,4)])")
+test_display(linestring_crs, "LineString{false, false}([(1, 2), (3, 4)], crs = \"EPSG:4326\")", "LineString([(1,2),(3,4)])")
 
 # LinearRing
 linearring = GI.LinearRing([(1, 2), (3, 4), (5, 6), (1, 2)])
@@ -181,7 +181,7 @@ test_display(linearring, "LinearRing{false, false}([(1, 2), (3, 4), (5, 6), (1, 
 linearring_crs = GI.LinearRing(linearring; crs=EPSG(4326))
 @test parent(linearring_crs) === parent(linearring)
 @test GI.crs(linearring_crs) === EPSG(4326)
-test_display(linearring_crs, "LinearRing{false, false}([(1, 2), (3, 4), (5, 6), (1, 2)], crs = EPSG{1}((4326,)))", "LinearRing([(1,2),(3,4),(5,6),(1,2)])")
+test_display(linearring_crs, "LinearRing{false, false}([(1, 2), (3, 4), (5, 6), (1, 2)], crs = \"EPSG:4326\")", "LinearRing([(1,2),(3,4),(5,6),(1,2)])")
 
 # Polygon
 polygon = GI.Polygon([linearring, linearring])
@@ -201,7 +201,7 @@ test_display(polygon, "Polygon{false, false}([LinearRing([(1, 2), … (2) … , 
 polygon_crs = GI.Polygon(polygon; crs=EPSG(4326))
 @test parent(polygon_crs) === parent(polygon)
 @test GI.crs(polygon_crs) === EPSG(4326)
-test_display(polygon_crs, "Polygon{false, false}([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])], crs = EPSG{1}((4326,)))",
+test_display(polygon_crs, "Polygon{false, false}([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])], crs = \"EPSG:4326\")",
                 "Polygon([LinearRing([(1,2),(3,4),(5,6),(1,2)]),LinearRing([(1,2),(3,4),(5,6),(1,2)])])")
 # Make sure `linestring` is also ok in polygons
 polygon = GI.Polygon([linestring, linestring])
@@ -231,7 +231,7 @@ test_display(multipoint, "MultiPoint{false, false}([(1, 2), (3, 4), (3, 2), (1, 
 multipoint_crs = GI.MultiPoint(multipoint; crs=EPSG(4326))
 @test parent(multipoint_crs) == parent(multipoint)
 @test GI.crs(multipoint_crs) === EPSG(4326)
-test_display(multipoint_crs, "MultiPoint{false, false}([(1, 2), (3, 4), … (2) … , (7, 8), (9, 10)], crs = EPSG{1}((4326,)))", "MultiPoint([(1,2),(3,4),(3,2),(1,4),(7,8),(9,10)])")
+test_display(multipoint_crs, "MultiPoint{false, false}([(1, 2), (3, 4), (3, 2), … (1) … , (7, 8), (9, 10)], crs = \"EPSG:4326\")", "MultiPoint([(1,2),(3,4),(3,2),(1,4),(7,8),(9,10)])")
 
 # GeometryCollection
 geoms = [line, linestring, linearring, multipoint, (1, 2)]
@@ -248,7 +248,7 @@ test_display(collection, "GeometryCollection{false, false}([Line([(1, 2), (3, 4)
 collection_crs = GI.GeometryCollection(collection; crs=EPSG(4326))
 @test parent(collection_crs) == parent(collection)
 @test GI.crs(collection_crs) === EPSG(4326)
-test_display(collection_crs, "GeometryCollection{false, false}([Line([(1, 2), (3, 4)]), … (3) … , (1, 2)], crs = EPSG{1}((4326,)))",
+test_display(collection_crs, "GeometryCollection{false, false}([Line([(1, 2), (3, 4)]), … (3) … , (1, 2)], crs = \"EPSG:4326\")",
                     "GeometryCollection([Line([(1,2),(3,4)]),LineString([(1,2),(3,4)]),…(2)…,(1,2)])")
 
 # MultiCurve
@@ -267,7 +267,7 @@ test_display(multicurve, "MultiCurve{false, false}([LineString([(1, 2), (3, 4)])
 multicurve_crs = GI.MultiCurve(multicurve; crs=EPSG(4326))
 @test parent(multicurve_crs) == parent(multicurve)
 @test GI.crs(multicurve_crs) === EPSG(4326)
-test_display(multicurve_crs, "MultiCurve{false, false}([LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), … (2) … , (1, 2)])], crs = EPSG{1}((4326,)))",
+test_display(multicurve_crs, "MultiCurve{false, false}([LineString([(1, 2), (3, 4)]), LinearRing([(1, 2), … (2) … , (1, 2)])], crs = \"EPSG:4326\")",
                         "MultiCurve([LineString([(1,2),(3,4)]),LinearRing([(1,2),(3,4),…(1)…,(1,2)])])")
 
 # MultiPolygon
@@ -288,7 +288,7 @@ test_display(multipolygon, "MultiPolygon{false, false}([Polygon([LinearRing([(1,
 multipolygon_crs = GI.MultiPolygon(multipolygon; crs=EPSG(4326))
 @test parent(multipolygon_crs) == parent(multipolygon)
 @test GI.crs(multipolygon_crs) === EPSG(4326)
-test_display(multipolygon_crs, "MultiPolygon{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])], crs = EPSG{1}((4326,)))",
+test_display(multipolygon_crs, "MultiPolygon{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])], crs = \"EPSG:4326\")",
                             "MultiPolygon([Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])])])")
 
 # PolyhedralSurface
@@ -308,7 +308,7 @@ test_display(polyhedralsurface, "PolyhedralSurface{false, false}([Polygon([Linea
 polyhedralsurface_crs = GI.PolyhedralSurface(polyhedralsurface; crs=EPSG(4326))
 @test parent(polyhedralsurface_crs) == parent(polyhedralsurface)
 @test GI.crs(polyhedralsurface_crs) === EPSG(4326)
-test_display(polyhedralsurface_crs, "PolyhedralSurface{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])]), Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])], crs = EPSG{1}((4326,)))",
+test_display(polyhedralsurface_crs, "PolyhedralSurface{false, false}([Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])]), Polygon([LinearRing([(1, 2), … (2) … , (1, 2)]), LinearRing([(1, 2), … (2) … , (1, 2)])])], crs = \"EPSG:4326\")",
                                 "PolyhedralSurface([Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])]),Polygon([LinearRing([(1,2),…(2)…,(1,2)]),LinearRing([(1,2),…(2)…,(1,2)])])])")
 
 # Round-trip coordinates
@@ -338,7 +338,7 @@ test_display(feature, "Feature(MultiPolygon{false, false}([Polygon([LinearRing([
 feature = GI.Feature(multipolygon; 
     properties=(x=1, y=2, z=3), crs=EPSG(4326), extent=extent(multipolygon)
 )
-test_display(feature, "Feature(MultiPolygon{false, false}([Polygon([LinearRing([[1, 2], [3, 4], [3, 2], [1, 4]])])]), properties = (x = 1, y = 2, z = 3), crs = EPSG{1}((4326,)))",
+test_display(feature, "Feature(MultiPolygon{false, false}([Polygon([LinearRing([[1, 2], [3, 4], [3, 2], [1, 4]])])]), properties = (x = 1, y = 2, z = 3), crs = \"EPSG:4326\")",
                     "Feature(MultiPolygon([Polygon([LinearRing([[1,2],[3,4],[3,2],[1,4]])])]),properties=(x=1,y=2,z=3))")
 @test GI.geometry(feature) === multipolygon
 @test GI.properties(feature) === (x=1, y=2, z=3)
@@ -359,7 +359,7 @@ fc = GI.FeatureCollection(fc_unwrapped.parent; crs=EPSG(4326), extent=GI.extent(
 @test GI.extent(fc) == fc.extent
 @test first(GI.getfeature(fc)) == GI.getfeature(fc, 1) === feature
 @test GI.testfeaturecollection(fc)
-test_display(fc, "FeatureCollection([Feature(MultiPolygon{false, false}([Polygon([LinearRing([[1, 2], [3, 4], [3, 2], [1, 4]])])]), properties = (x = 1, y = 2, z = 3), crs = EPSG{1}((4326,)))], crs = EPSG{1}((4326,)), extent = Extent(X = (1, 3), Y = (2, 4)))",
+test_display(fc, "FeatureCollection([Feature(MultiPolygon{false, false}([Polygon([LinearRing([[1, 2], [3, 4], [3, 2], [1, 4]])])]), properties = (x = 1, y = 2, z = 3), crs = \"EPSG:4326\")], crs = \"EPSG:4326\", extent = Extent(X = (1, 3), Y = (2, 4)))",
                 "FeatureCollection([Feature(MultiPolygon([Polygon([LinearRing([[1,2],[3,4],[3,2],[1,4]])])]),properties=(x=1,y=2,z=3))])")
 @test_throws ArgumentError GI.FeatureCollection([1])
 vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
