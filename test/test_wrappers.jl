@@ -6,12 +6,12 @@ using GeoInterface.Wrappers
 function test_display(geom, expected_str, expected_compact_str)
     # checks non-compact string repr
     generated_str = sprint() do io
-        show(io, MIME"text/plain"(), geom)  
+        show(IOContext(io, :displaysize => (24, 80)), MIME"text/plain"(), geom)  
     end
     @test expected_str == generated_str
     # checks compact string repr
     generated_compact_str = sprint() do io
-        show(IOContext(io, :compact => true), MIME"text/plain"(), geom)
+        show(IOContext(io, :displaysize => (24, 80), :compact => true), MIME"text/plain"(), geom)
     end
     @test expected_compact_str == generated_compact_str
 end
