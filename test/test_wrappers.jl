@@ -365,27 +365,31 @@ test_display(fc, "FeatureCollection([Feature(MultiPolygon{false, false}([Polygon
 vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
 @test GI.getfeature(vecfc, 1) == (geometry=(1,2), a=1, b=2)
 
+
+
+struct MaPointRappa
+    x::Float64
+    y::Float64
+end
+
 @testset "Wrapped geometry printing" begin
-    struct MyPoint
-        x::Float64
-        y::Float64
-    end
-    GI.geomtrait(::MyPoint) = GI.PointTrait()
-    GI.ncoord(::GI.PointTrait, ::MyPoint) = 2
-    GI.x(::GI.PointTrait, p::MyPoint) = p.x
-    GI.y(::GI.PointTrait, p::MyPoint) = p.y
+
+    GI.geomtrait(::MaPointRappa) = GI.PointTrait()
+    GI.ncoord(::GI.PointTrait, ::MaPointRappa) = 2
+    GI.x(::GI.PointTrait, p::MaPointRappa) = p.x
+    GI.y(::GI.PointTrait, p::MaPointRappa) = p.y
     
 
-    test_display(GI.Point(MyPoint(1.0, 2.0)), "Point{false, false}((1.0, 2.0))", "Point((1.0,2.0))")
+    test_display(GI.Point(MaPointRappa(1.0, 2.0)), "Point{false, false}((1.0, 2.0))", "Point((1.0,2.0))")
 
-    GI.geomtrait(::Vector{MyPoint}) = GI.LineStringTrait()
-    GI.npoint(::GI.LineStringTrait, v::Vector{MyPoint}) = length(v)
-    GI.getpoint(::GI.LineStringTrait, v::Vector{MyPoint}, i::Integer) = v[i]
+    GI.geomtrait(::Vector{MaPointRappa}) = GI.LineStringTrait()
+    GI.npoint(::GI.LineStringTrait, v::Vector{MaPointRappa}) = length(v)
+    GI.getpoint(::GI.LineStringTrait, v::Vector{MaPointRappa}, i::Integer) = v[i]
 
     test_display(
-        GI.LineString([MyPoint(1.0, 2.0), MyPoint(3.0, 4.0)]), 
-        "LineString{false, false}([MyPoint(1.0, 2.0), MyPoint(3.0, 4.0)])", 
-        "LineString([MyPoint(1.0,2.0),MyPoint(3.0,4.0)])" # FIXME: this should not show the point type!
+        GI.LineString([MaPointRappa(1.0, 2.0), MaPointRappa(3.0, 4.0)]), 
+        "LineString{false, false}([MaPointRappa(1.0, 2.0), MaPointRappa(3.0, 4.0)])", 
+        "LineString([MaPointRappa(1.0, 2.0),MaPointRappa(3.0, 4.0)])" # FIXME: this should not show the point type!
     )
 end
 
