@@ -88,6 +88,11 @@ function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T
     isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
 end
 
+# Forward all 2-argument show calls to the 3-argument version
+# with a "text/plain" MIME type.  This gives us a consistent target
+# to implement the show methods.
+Base.show(io::IO, geom::WrapperGeometry) = show(io, MIME"text/plain"(), geom)
+
 # We define all the types in a loop so we have standardised docs and behaviour
 # without too much repetition of code.
 # `child_trait` and `child_type` define the trait and type of child geometries
