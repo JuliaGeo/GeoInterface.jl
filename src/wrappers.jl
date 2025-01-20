@@ -88,6 +88,11 @@ function ngeom(trait::AbstractGeometryTrait, geom::WrapperGeometry{<:Any,<:Any,T
     isgeometry(T) ? ngeom(parent(geom)) : length(parent(geom))
 end
 
+# Forward all 2-argument show calls to the 3-argument version
+# with a "text/plain" MIME type.  This gives us a consistent target
+# to implement the show methods.
+Base.show(io::IO, geom::WrapperGeometry) = show(io, MIME"text/plain"(), geom)
+
 # We define all the types in a loop so we have standardised docs and behaviour
 # without too much repetition of code.
 # `child_trait` and `child_type` define the trait and type of child geometries
@@ -172,7 +177,9 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
         # But not if geom is already a WrapperGeometry
         convert(::Type{$geomtype}, ::$trait, geom::$geomtype) = geom
         
-        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
+        function Base.show(io::IO, ::MIME"text/plain", geom::$geomtype{Z, M, T, E, C}; 
+            show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]
+        ) where {Z, M, T, E <: Union{Nothing,Extents.Extent}, C}
             compact = get(io, :compact, false)
             spacing = compact ? "" : " "
             show_mz &= !compact
@@ -181,14 +188,14 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
             crs_str = ""
             if !compact
                 if !isnothing(geom.extent)
-                    extent_str = ",$(spacing)extent$(spacing)=$(spacing)$(repr(MIME("text/plain"), geom.extent))"
+                    extent_str = ",$(spacing)extent$(spacing)=$(spacing)$(repr(MIME"text/plain"(), geom.extent))"
                 end
                 if !isnothing(geom.crs)
-                    crs_str = ",$(spacing)crs$(spacing)=$(spacing)$(repr(MIME("text/plain"), geom.crs))"
+                    crs_str = ",$(spacing)crs$(spacing)=$(spacing)\"$(repr(MIME"text/plain"(), geom.crs))\""
                 end
             end
 
-            str = "$($geomtype)"
+            str = string($geomtype)
             if show_mz
                 str *= "{$Z,$(spacing)$M}"
             end
@@ -234,7 +241,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 
                 str *= "]"
             else
-                str *= _nice_geom_str(g, false, compact, screen_ncols - currently_used_space)
+                str *= _nice_geom_str(parent(geom), false, compact, screen_ncols - currently_used_space)
             end
 
             str *= extent_str
@@ -310,14 +317,14 @@ end
 
 function _nice_geom_str(geom, ::Bool, ::Bool, ::Int) 
     io = IOBuffer()
-    show(io, MIME("text/plain"), geom)
+    show(io, MIME"text/plain"(), geom)
     return String(take!(io))
 end
 # need a work around to pass the show_mz variable through - put string to a temp IOBuffer then read it
 function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, compact::Bool, screen_ncols::Int) 
     buf = IOBuffer()
     io = IOContext(IOContext(buf, :compact => compact))
-    show(io, MIME("text/plain"), geom; show_mz = show_mz, screen_ncols = screen_ncols)
+    show(io, MIME"text/plain"(), geom; show_mz = show_mz, screen_ncols = screen_ncols)
     return String(take!(buf))
 end
 # handle tuples/vectors explicitly
@@ -449,7 +456,7 @@ function Base.:(==)(g1::Point, g2::Point)
 end
 Base.:(!=)(g1::Point, g2::Point) = !(g1 == g2)
 
-function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz::Bool = true) where {Z,M,T,C}
+function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz::Bool = true, screen_ncols::Int = displaysize(io)[2]) where {Z,M,T,C}
     print(io, "Point")
     this_crs = crs(point)
 
@@ -472,7 +479,9 @@ function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz
 
     if !compact && !isnothing(this_crs)
         print(io, ",$(spacing)crs$(spacing)=$(spacing)")
-        show(io, MIME("text/plain"), this_crs)
+        print(io, "\"")
+        show(io, MIME"text/plain"(), this_crs)
+        print(io, "\"")
     end
     print(io, ")")
 
@@ -527,7 +536,7 @@ function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
     compact = get(io, :compact, false)
     spacing = compact ? "" : " "
     print(io, "Feature(")
-    show(io, MIME("text/plain"), f.parent.geometry; show_mz = show_mz)
+    show(io, MIME"text/plain"(), f.parent.geometry; show_mz = show_mz)
     non_geom_props = filter(!=(:geometry), propertynames(f.parent))
     if !isempty(non_geom_props)
         print(io, ",$(spacing)properties$(spacing)=$(spacing)(")
@@ -543,11 +552,12 @@ function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
     if !compact
         if !isnothing(f.extent)
             print(io, ", extent$(spacing)=$(spacing)")
-            show(io, MIME("text/plain"), f.extent)
+            show(io, MIME"text/plain"(), f.extent)
         end
         if !isnothing(f.crs)
-            print(io, ", crs$(spacing)=$(spacing)")
-            show(io, MIME("text/plain"), f.crs)
+            print(io, ", crs$(spacing)=$(spacing)\"")
+            show(io, MIME"text/plain"(), f.crs)
+            print(io, "\"")
         end
     end
     print(io, ")")
@@ -625,7 +635,7 @@ function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
     features = _parent_is_fc(fc) ? getfeature(trait(fc), parent(fc)) : parent(fc)
     print(io, "[")
     for (i, f) ∈ enumerate(features)
-        show(io, MIME("text/plain"), f; show_mz = !compact)
+        show(io, MIME"text/plain"(), f; show_mz = !compact)
         if i != length(features)
             print(io, ",$(spacing)")
         end
@@ -633,12 +643,13 @@ function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
     print(io, "]")
     if !compact
         if !isnothing(fc.crs)
-            print(io, ",$(spacing)crs$(spacing)=$(spacing)")
-            show(io, MIME("text/plain"), fc.crs)
+            print(io, ",$(spacing)crs$(spacing)=$(spacing)\"")
+            show(io, MIME"text/plain"(), fc.crs)
+            print(io, "\"")
         end
         if !isnothing(fc.extent)
             print(io, ",$(spacing)extent$(spacing)=$(spacing)")
-            show(io, MIME("text/plain"), fc.extent)
+            show(io, MIME"text/plain"(), fc.extent)
         end
     end
     print(io, ")")
@@ -652,9 +663,9 @@ _child_feature_error() = throw(ArgumentError("child objects must be features"))
 isfeaturecollection(fc::Type{<:FeatureCollection}) = true
 trait(fc::FeatureCollection) = FeatureCollectionTrait()
 
-nfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
+nfeature(t::FeatureCollectionTrait, fc::FeatureCollection) =
     _parent_is_fc(fc) ? nfeature(t, parent(fc)) : length(parent(fc))
-getfeature(::FeatureCollectionTrait, fc::FeatureCollection) =
+getfeature(t::FeatureCollectionTrait, fc::FeatureCollection) =
     _parent_is_fc(fc) ? getfeature(t, parent(fc)) : parent(fc)
 getfeature(t::FeatureCollectionTrait, fc::FeatureCollection, i::Integer) =
     _parent_is_fc(fc) ? getfeature(t, parent(fc), i) : parent(fc)[i]
