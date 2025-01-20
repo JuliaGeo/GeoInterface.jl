@@ -2,18 +2,18 @@ using Test, GeoFormatTypes, Extents
 import GeoInterface as GI
 using GeoInterface.Wrappers
 
-# use this to test our string representations for geoms
-buf = IOBuffer()
-compact_buf = IOContext(buf, :compact => true)
-
 # checks that our string display for geoms in regular/compact form is as expected
 function test_display(geom, expected_str, expected_compact_str)
     # checks non-compact string repr
-    show(buf, MIME"text/plain"(), geom)
-    @test expected_str == String(take!(buf))
+    generated_str = sprint() do io
+        show(io, MIME"text/plain"(), geom)  
+    end
+    @test expected_str == generated_str
     # checks compact string repr
-    show(compact_buf, MIME"text/plain"(), geom)
-    @test expected_compact_str == String(take!(buf))
+    generated_compact_str = sprint() do io
+        show(IOContext(io, :compact => true), MIME"text/plain"(), geom)
+    end
+    @test expected_compact_str == generated_compact_str
 end
 
 # Point
