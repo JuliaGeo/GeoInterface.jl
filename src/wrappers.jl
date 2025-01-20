@@ -191,7 +191,7 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                     extent_str = ",$(spacing)extent$(spacing)=$(spacing)$(repr(MIME"text/plain"(), geom.extent))"
                 end
                 if !isnothing(geom.crs)
-                    crs_str = ",$(spacing)crs$(spacing)=$(spacing)$(repr(MIME"text/plain"(), geom.crs))"
+                    crs_str = ",$(spacing)crs$(spacing)=$(spacing)\"$(repr(MIME"text/plain"(), geom.crs))\""
                 end
             end
 
@@ -479,7 +479,9 @@ function Base.show(io::IO, ::MIME"text/plain", point::Point{Z, M, T, C}; show_mz
 
     if !compact && !isnothing(this_crs)
         print(io, ",$(spacing)crs$(spacing)=$(spacing)")
+        print(io, "\"")
         show(io, MIME"text/plain"(), this_crs)
+        print(io, "\"")
     end
     print(io, ")")
 
@@ -553,8 +555,9 @@ function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
             show(io, MIME"text/plain"(), f.extent)
         end
         if !isnothing(f.crs)
-            print(io, ", crs$(spacing)=$(spacing)")
+            print(io, ", crs$(spacing)=$(spacing)\"")
             show(io, MIME"text/plain"(), f.crs)
+            print(io, "\"")
         end
     end
     print(io, ")")
@@ -640,8 +643,9 @@ function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
     print(io, "]")
     if !compact
         if !isnothing(fc.crs)
-            print(io, ",$(spacing)crs$(spacing)=$(spacing)")
+            print(io, ",$(spacing)crs$(spacing)=$(spacing)\"")
             show(io, MIME"text/plain"(), fc.crs)
+            print(io, "\"")
         end
         if !isnothing(fc.extent)
             print(io, ",$(spacing)extent$(spacing)=$(spacing)")
