@@ -34,18 +34,24 @@ end
     ]
     fig = Figure()
     for (i, geom) in enumerate(geoms)
-        Makie.plot!(Axis(fig[i, 1], title="$(GI.geomtrait(geom))"), geom)
-        if geom == multipoint
-            # `plot!` wont even work with the GeometryBasics version of this
-            continue
-        elseif geom == multipolygon
+        # Even the GeometryBasics version of this will fail
+        # though the conversion succeeds, so we skip this
+        geom == multipoint && continue
+        # Construct a plot inside an axis
+        Makie.plot(fig[i, 1], geom; axis = (; type = Axis, title = "$(GI.geomtrait(geom))"))
+
+        if geom == multipolygon
             # `plot!` wont work with the GeometryBasics version of this either
             # But `poly!` does
-            @test_nowarn Makie.poly!(Axis(fig[i, 2], title="Vector of $(GI.geomtrait(geom))"), [geom, geom])
+            @test_nowarn Makie.poly(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
         else
-            @test_nowarn Makie.plot!(Axis(fig[i, 2], title="Vector of $(GI.geomtrait(geom))"), [geom, geom])
+            @test_nowarn Makie.plot(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
         end
     end
+
+    @test_nowarn Makie.update_state_before_display!(fig)
+    @test_nowarn Makie.colorbuffer(fig.scene)
+    
     fig
 end
 

@@ -1,13 +1,15 @@
 name = "GeoInterface"
 uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 authors = ["JuliaGeo and contributors"]
-version = "1.3.7"
+version = "1.4.1"
 
 [deps]
+DataAPI = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
 Extents = "411431e0-e8b7-467b-b5e0-f676ba4f2910"
 GeoFormatTypes = "68eda718-8dee-11e9-39e7-89f7f65f511f"
 
 [compat]
+DataAPI = "1"
 Extents = "0.1.1"
 GeoFormatTypes = "0.4"
 julia = "1"
