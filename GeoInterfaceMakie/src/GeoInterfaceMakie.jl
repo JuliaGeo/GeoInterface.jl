@@ -249,6 +249,18 @@ to_multipoint(geom::AbstractVector) = to_multipoint.(GeoInterface.trait.(geom), 
 to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.convert(GB, geom)])
 to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
 
+# Special handling for extents - treat 2d extents as Rect2
+
+using GeoInterface: Extent
+
+const _TWOD_TUPLE_EXTENT_TYPE = Union{<: Extent{(:X, :Y), T}, <: Extent{(:Y, :X), T}} where T <: NTuple{2, NTuple{2, <: Number}} # wide type range to allow unitful extents eventually
+
+function _ext2_to_rect2(ext::Extent)
+    Rect2((ext.X[1], ext.Y[1]), (ext.X[2] - ext.X[1], ext.Y[2] - ext.Y[1]))
+end
+
+Makie.convert_single_argument(ext::_TWOD_TUPLE_EXTENT_TYPE) = _ext2_to_rect2(ext)
+Makie.convert_single_argument(ext::AbstractVector{<: _TWOD_TUPLE_EXTENT_TYPE}) = _ext2_to_rect2.(ext)
 
 # TODO 
 # Features and Feature collections
