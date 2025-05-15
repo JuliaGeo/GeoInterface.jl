@@ -148,7 +148,7 @@ calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filte
 # corresponding geometry type
 function convert(package::Module, geom)
     t = trait(geom)
-    convert(package, trait, geom)
+    convert(package, t, geom)
 end
 function convert(package::Module, trait::AbstractTrait, geom)
     isdefined(package, :geointerface_geomtype) || throw(ArgumentError("$package does not implement `geointerface_geomtype`. Please request this be implemented in a github issue."))
