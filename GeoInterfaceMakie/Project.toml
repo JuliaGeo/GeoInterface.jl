@@ -23,6 +23,8 @@ julia = "1.6"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 LibGEOS = "a90b1aa1-3769-5649-ba7e-abc5a9d163eb"
 Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+MakieCore = "20f20a25-4f0e-4fdf-b5d1-57303727442b"
+GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
