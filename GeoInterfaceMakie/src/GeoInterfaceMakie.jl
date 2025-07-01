@@ -1,7 +1,7 @@
 module GeoInterfaceMakie
 
 using GeoInterface
-import MakieCore as MC
+import Makie as MC
 import GeometryBasics as GB
 import GeoInterface as GI
 
@@ -51,13 +51,13 @@ function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple whe
     end
     if Missing <: T
         return MC.convert_arguments(
-            plottrait, 
+            plottrait,
             map(
                 operator_nangeom_if_missing_or_func(
-                    func_to_apply, 
-                    trait, 
+                    func_to_apply,
+                    trait,
                     GI.ncoord(first(geoms_without_missings))
-                ), 
+                ),
                 geoms
             )
         )
@@ -121,12 +121,12 @@ end
 
     GeoInterfaceMakie.@enable(GeometryType)
 
-Enable Makie based plotting for a type `Geom` that implements the geometry interface 
+Enable Makie based plotting for a type `Geom` that implements the geometry interface
 defined in `GeoInterface`.
 
 # Usage
 ```julia
-struct MyGeometry 
+struct MyGeometry
 ...
 end
 # overload GeoInterface for MyGeometry
@@ -190,7 +190,7 @@ function _needs_multification_trait(geoms)
             elseif GI.MultiPointTrait() ∈ traits || GI.PointTrait() ∈ traits
                 return true, GI.MultiPointTrait()
             end
-        else 
+        else
             # A robust solution is to:
             # - Traverse the array to find the first non-geometrycollection element
             # If that fails, then introspect the first element as was done earlier, to
@@ -250,7 +250,7 @@ to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.con
 to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
 
 
-# TODO 
+# TODO
 # Features and Feature collections
 # https://github.com/JuliaGeo/GeoInterface.jl/pull/72#issue-1406325596
 

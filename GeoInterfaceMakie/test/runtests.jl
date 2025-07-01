@@ -1,6 +1,5 @@
 import GeoInterfaceMakie
 using Test
-import LibGEOS
 using LibGEOS
 import GeoInterface as GI
 using Makie, CairoMakie
@@ -10,8 +9,8 @@ GeoInterfaceMakie.@enable(LibGEOS.AbstractGeometry)
 
 @testset "Makie plotting LibGEOS MultiLineString shows additional lines #83" begin
     mls = readgeom("MULTILINESTRING ((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))")
-    expected = [[0.0, 0.0], [3.0, 0.0], [3.0, 3.0], [0.0, 3.0], [0.0, 0.0], 
-                [NaN, NaN], 
+    expected = [[0.0, 0.0], [3.0, 0.0], [3.0, 3.0], [0.0, 3.0], [0.0, 0.0],
+                [NaN, NaN],
                 [1.0, 1.0], [2.0, 1.0], [2.0, 2.0], [1.0, 2.0], [1.0, 1.0]]
 
     @test isequal(Makie.convert_arguments(Makie.Lines, mls), (expected,))
@@ -28,8 +27,8 @@ end
         unitsquare,
         GI.difference(bigsquare, smallsquare),
         LibGEOS.boundary(unitsquare),
-        multipolygon, 
-        point, 
+        multipolygon,
+        point,
         multipoint,
     ]
     fig = Figure()
@@ -51,7 +50,7 @@ end
 
     @test_nowarn Makie.update_state_before_display!(fig)
     @test_nowarn Makie.colorbuffer(fig.scene)
-    
+
     fig
 end
 
@@ -87,7 +86,7 @@ end
     @test_nowarn Makie.plot(lines)
     polys = [GI.Polygon([GI.LinearRing(Point2d[(1, 2), (3, 4), (5, 5), (1, 2)])]), GI.Polygon([GI.LinearRing(Point2d[(7, 8), (9, 10), (11, 11), (7, 8)])]), missing]
     @test_nowarn Makie.plot(polys)
-    # Now we test that appropriate "missing" (i.e., NaN) polygons 
+    # Now we test that appropriate "missing" (i.e., NaN) polygons
     # are inserted in the correct place, so that we have the same
     # number of elements post conversion as pre conversion.  This
     # allows colors to be propagated correctly through the array.
