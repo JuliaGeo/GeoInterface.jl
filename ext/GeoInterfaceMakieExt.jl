@@ -4,29 +4,12 @@ import Makie
 import GeometryBasics as GB
 import GeoInterface as GI
 
-
-GI._makie_plottype(geom) = plottype_from_geomtrait(GI.geomtrait(geom))
-
-function plottype_from_geomtrait(::Union{GI.LineStringTrait,GI.MultiLineStringTrait})
-    Makie.Lines
-end
-function plottype_from_geomtrait(::Union{GI.PointTrait,GI.MultiPointTrait})
-    Makie.Scatter
-end
-function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTrait,GI.MultiPolygonTrait,GI.LinearRingTrait})
-    Makie.Poly
-end
-
-function GI._convert_arguments(t, geom)::Tuple
+# Functions called from the macro in GeoInterface 
+GI._makie_plottype(geom) = _plottype_from_geomtrait(GI.geomtrait(geom))
+function GI._makie_convert_arguments(t, geom)::Tuple
     geob = GI.convert(GB, geom)
     return Makie.convert_arguments(t, geob)
 end
-
-function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims; numtype=Float64)
-    nan_geom = _nan_geom(trait, ndims, numtype)
-    return x -> ismissing(x) ? nan_geom : func(x)
-end
-
 function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
     geoms_without_missings = Missing <: T ? skipmissing(geoms) : geoms
     # assess whether multification is needed!
@@ -51,7 +34,7 @@ function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::
         return Makie.convert_arguments(
             plottrait, 
             map(
-                operator_nangeom_if_missing_or_func(
+                _operator_nangeom_if_missing_or_func(
                     func_to_apply, 
                     trait, 
                     GI.ncoord(first(geoms_without_missings))
@@ -64,6 +47,20 @@ function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::
     end
 end
 
+function _plottype_from_geomtrait(::Union{GI.LineStringTrait,GI.MultiLineStringTrait})
+    Makie.Lines
+end
+function _plottype_from_geomtrait(::Union{GI.PointTrait,GI.MultiPointTrait})
+    Makie.Scatter
+end
+function _plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTrait,GI.MultiPolygonTrait,GI.LinearRingTrait})
+    Makie.Poly
+end
+
+function _operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims; numtype=Float64)
+    nan_geom = _nan_geom(trait, ndims, numtype)
+    return x -> ismissing(x) ? nan_geom : func(x)
+end
 
 # Creating empty geometries from traits
 function _geomtrait_for_array(arr)
