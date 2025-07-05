@@ -1,6 +1,5 @@
 using GeoInterface
 using GeoInterface.Wrappers
-using RecipesBase
 using Plots
 using Test
 
@@ -11,24 +10,24 @@ using Test
     feature2 = Feature(polygon2)
     # 2d
     Plots.plot(Point(1.0, 2.0))
-    plot(linearring2)
-    plot(MultiPoint([Point(1.0, 2.0), Point(2.0, 3.0)]))
-    plot(polygon2)
-    plot(MultiPolygon([polygon]))
+    Plots.plot(linearring2)
+    Plots.plot(MultiPoint([Point(1.0, 2.0), Point(2.0, 3.0)]))
+    Plots.plot(polygon2)
+    Plots.plot(MultiPolygon([polygon]))
     # TODO this needs to handle mixed objects properly
-    plot(GeometryCollection([polygon]))
-    plot(feature2)
-    plot(FeatureCollection([feature2]))
+    Plots.plot(GeometryCollection([polygon]))
+    Plots.plot(feature2)
+    Plots.plot(FeatureCollection([feature2]))
     # 3d
     linearring3 = LinearRing([Point(1.0, 2.0, 3.0), Point(2.0, 3.0, 4.0), Point(2.0, 1.0, 4.0), Point(1.0, 2.0, 3.0)])
     polygon3 = Polygon([linearring3])
     feature3 = Feature(polygon3)
-    plot(Point(1.0, 2.0, 3.0))
-    plot(linearring3)
-    plot(MultiPoint([Point(1.0, 2.0, 3.0), Point(5.0, 4.0, 2.0)]))
-    plot(polygon3)
-    plot(MultiPolygon([polygon3]))
-    plot(GeometryCollection(polygon3))
-    plot(feature3)
-    plot(FeatureCollection([feature3]))
+    Plots.plot(Point(1.0, 2.0, 3.0))
+    Plots.plot(linearring3)
+    Plots.plot(MultiPoint([Point(1.0, 2.0, 3.0), Point(5.0, 4.0, 2.0)]))
+    Plots.plot(polygon3)
+    Plots.plot(MultiPolygon([polygon3]))
+    Plots.plot(GeometryCollection(polygon3))
+    Plots.plot(feature3)
+    Plots.plot(FeatureCollection([feature3]))
 end

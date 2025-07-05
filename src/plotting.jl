@@ -1,6 +1,6 @@
-function _plottype end
-function _convert_arguments end
-function _convert_array_arguments end
+function _makie_plottype end
+function _makie_convert_arguments end
+function _makie_convert_array_arguments end
 
 """
 
@@ -35,55 +35,55 @@ function expr_enable_makie(LocalMakie, Geom)
     quote
         # plottype
         function $LocalMakie.plottype(geom::$Geom)
-            $_plottype(geom)
+            $_makie_plottype(geom)
         end
         function $LocalMakie.plottype(geom::AbstractArray{<:$Geom})
-            $_plottype(first(geom))
+            $_makie_plottype(first(geom))
         end
         function $LocalMakie.plottype(geom::AbstractArray{<:Union{Missing,<:$Geom}})
-            $_plottype(first(skipmissing(geom)))
+            $_makie_plottype(first(skipmissing(geom)))
         end
         # we need `AbstractVector` specifically for dispatch
         function $LocalMakie.plottype(geom::AbstractVector{<:$Geom})
-            $_plottype(first(geom))
+            $_makie_plottype(first(geom))
         end
         function $LocalMakie.plottype(geom::AbstractVector{<:Union{Missing,<:$Geom}})
-            $_plottype(first(skipmissing(geom)))
+            $_makie_plottype(first(skipmissing(geom)))
         end
 
         # convert_arguments
         function $LocalMakie.convert_arguments(p::Type{<:$LocalMakie.Poly}, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
+            $_makie_convert_arguments(p, geom)
         end
         function $LocalMakie.convert_arguments(p::Type{<:$LocalMakie.Poly}, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
+            $_makie_convert_array_arguments(p, geoms)
         end
         function $LocalMakie.convert_arguments(p::Type{<:$LocalMakie.Poly}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
+            $_makie_convert_array_arguments(p, geoms)
         end
         function $LocalMakie.convert_arguments(p::$LocalMakie.PointBased, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
+            $_makie_convert_arguments(p, geom)
         end
         function $LocalMakie.convert_arguments(p::$LocalMakie.PointBased, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
+            $_makie_convert_array_arguments(p, geoms)
         end
         function $LocalMakie.convert_arguments(p::$LocalMakie.PointBased, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
+            $_makie_convert_array_arguments(p, geoms)
         end
         function $LocalMakie.convert_arguments(p::Type{<:$LocalMakie.Lines}, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
+            $_makie_convert_arguments(p, geom)
         end
         function $LocalMakie.convert_arguments(p::Type{<:$LocalMakie.Lines}, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
+            $_makie_convert_array_arguments(p, geoms)
         end
         function $LocalMakie.convert_arguments(p::Type{<:$LocalMakie.Lines}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
+            $_makie_convert_array_arguments(p, geoms)
         end
     end
 end
 
-function _apply_recipe end
-function _apply_recipe_array end
+function _plots_apply_recipe end
+function _plots_apply_recipe_array end
 
 """
      GeoInterface.@enable_plots(RecipesBase, GeometryType)
@@ -117,10 +117,10 @@ function expr_enable_plots(LocalRecipesBase, typ)
         # We recreate the apply_recipe functions manually here
         # as nesting the @recipe macro doesn't work.
         function $LocalRecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::$typ)
-            $_apply_recipe(plotattributes, geom)
+            $_plots_apply_recipe(plotattributes, geom)
         end
         function $LocalRecipesBase.apply_recipe(plotattributes::Base.AbstractDict{Base.Symbol, Base.Any}, geom::Base.AbstractVector{<:Base.Union{Base.Missing,<:$typ}})
-            $_apply_recipe_array(plotattributes, geom)
+            $_plots_apply_recipe_array(plotattributes, geom)
         end
     end
 end

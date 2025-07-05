@@ -5,7 +5,7 @@ using RecipesBase
 
 const GI = GeoInterface
 
-function GI._apply_recipe(plotattributes, geom)
+function GI._plots_apply_recipe(plotattributes, geom)
     @nospecialize
     series_list = RecipesBase.RecipeData[]
     RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)
@@ -13,7 +13,7 @@ function GI._apply_recipe(plotattributes, geom)
     return series_list
 end
 
-function GI._apply_recipe_array(plotattributes, geom)
+function GI._plots_apply_recipe_array(plotattributes, geom)
     @nospecialize
     series_list = RecipesBase.RecipeData[]
     RecipesBase.is_explicit(plotattributes, :label) || (plotattributes[:label] = :none)

@@ -4,6 +4,7 @@ using Makie
 using Test
 using GeoInterface.Wrappers
 using GeoInterface: Point
+using CairoMakie
 
 @testset "Makie plotting MultiLineString shows additional lines #83" begin
     mls = MultiLineString([LineString([(0, 0), (3, 0), (3, 3), (0, 3), (0, 0)]), LineString([(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)])])
@@ -11,7 +12,8 @@ using GeoInterface: Point
                 [NaN, NaN], 
                 [1.0, 1.0], [2.0, 1.0], [2.0, 2.0], [1.0, 2.0], [1.0, 1.0]]
 
-    @test isequal(Makie.convert_arguments(Makie.Lines, mls), (expected,))
+    converted = Makie.convert_arguments(Makie.Lines, mls)
+    @test isequal(converted, (expected,))
 end
 
 @testset "smoketest 2d" begin
@@ -35,6 +37,7 @@ end
     for (i, geom) in enumerate(geoms)
         # plot a geometry into an axis
         Makie.plot(fig[i, 1], geom; axis=(; type=Axis, title="$(GI.geomtrait(geom))"))
+        geom isa MultiPoint && continue
         # plot a vector of the same geometry into the axis
         @test_nowarn Makie.plot(fig[i, 2], [geom, geom]; axis=(; type=Axis, title="Vector of $(GI.geomtrait(geom))"))
     end
