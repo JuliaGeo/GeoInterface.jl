@@ -17,12 +17,10 @@ function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTr
     Makie.Poly
 end
 
-GI._makie_convert_arguments(t, geom) = Makie.convert_arguments(t, _convert_for_makie(geom))
-
-# Makie no longer plots MultiPoint so we need to convert it to Vector{Point}
-_convert_for_makie(geom) = _convert_for_makie(GI.trait(geom), geom)
-_convert_for_makie(trait::GI.AbstractGeometryTrait, geom) = GI.convert(GB, geom)
-_convert_for_makie(trait::GI.MultiPointTrait, geom) = to_multipoint(trait, geom)
+function GI._convert_arguments(t, geom)::Tuple
+    geob = GI.convert(GB, geom)
+    return Makie.convert_arguments(t, geob)
+end
 
 function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims; numtype=Float64)
     nan_geom = _nan_geom(trait, ndims, numtype)
@@ -47,9 +45,8 @@ function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::
         end
     else
         # base case
-        _convert_for_makie
+        Base.Fix1(GI.convert, GB)
     end
-
     if Missing <: T
         return Makie.convert_arguments(
             plottrait, 
@@ -66,6 +63,7 @@ function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::
         return Makie.convert_arguments(plottrait, map(func_to_apply, geoms))
     end
 end
+
 
 # Creating empty geometries from traits
 function _geomtrait_for_array(arr)
@@ -164,14 +162,14 @@ function to_multilinestring(::GI.GeometryCollectionTrait, geom)
     return GeometryBasics.MultiLineString(vcat(getproperty.(multilinestrings, :linestrings)...))
 end
 
-# GB.MultiPoint does not plot anymore, needs to be a Vector{GB.Point}
+# TODO: MultiPoint is broken in Makie, but should be fixed there
 to_multipoint(poly::GB.Point) = GB.MultiPoint([poly])
-to_multipoint(poly::Vector{GB.Point}) = poly
-to_multipoint(mp::GB.MultiPoint) = mp.points
+to_multipoint(poly::Vector{GB.Point}) = GB.MultiPoint(poly)
+to_multipoint(mp::GB.MultiPoint) = mp
 to_multipoint(geom) = to_multipoint(GI.trait(geom), geom)
 to_multipoint(geom::AbstractVector) = to_multipoint.(GI.trait.(geom), geom)
-to_multipoint(::GI.PointTrait, geom) = [GI.convert(GB, geom)]
-to_multipoint(::GI.MultiPointTrait, geom) = GI.convert.((GB,), GI.getpoint(geom))
+to_multipoint(::GI.PointTrait, geom) = GB.MultiPoint([GI.convert(GB, geom)])
+to_multipoint(::GI.MultiPointTrait, geom) = GI.convert(GB, geom)
 
 # TODO 
 # Features and Feature collections

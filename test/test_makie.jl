@@ -35,9 +35,10 @@ end
     # Plot them all onto one figure
     fig = Figure()
     for (i, geom) in enumerate(geoms)
+        # MultiPoint is broken in Makie
+        geom isa MultiPoint && continue
         # plot a geometry into an axis
         Makie.plot(fig[i, 1], geom; axis=(; type=Axis, title="$(GI.geomtrait(geom))"))
-        geom isa MultiPoint && continue
         # plot a vector of the same geometry into the axis
         @test_nowarn Makie.plot(fig[i, 2], [geom, geom]; axis=(; type=Axis, title="Vector of $(GI.geomtrait(geom))"))
     end
