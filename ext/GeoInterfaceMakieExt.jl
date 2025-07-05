@@ -17,8 +17,13 @@ function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTr
     Makie.Poly
 end
 
-function GI._convert_arguments(t, geom)::Tuple
+GI._convert_arguments(t, geom) = GI._convert_arguments(t, trait(geom), geom)
+function GI._convert_arguments(t, ::GI.AbstractGeometryTrait, geom)::Tuple
     geob = GI.convert(GB, geom)
+    return Makie.convert_arguments(t, geob)
+end
+function GI._convert_arguments(t, ::GI.MultiPointTrait, geom)::Tuple
+    geob = to_multipoint(GB, geom)
     return Makie.convert_arguments(t, geob)
 end
 
@@ -162,19 +167,20 @@ function to_multilinestring(::GI.GeometryCollectionTrait, geom)
     return GeometryBasics.MultiLineString(vcat(getproperty.(multilinestrings, :linestrings)...))
 end
 
+# GB.MultiPoint does not plot anymore, needs to be a Vector{GB.Point}
 to_multipoint(poly::GB.Point) = GB.MultiPoint([poly])
-to_multipoint(poly::Vector{GB.Point}) = GB.MultiPoint(poly)
+to_multipoint(poly::Vector{GB.Point}) = poly
 to_multipoint(mp::GB.MultiPoint) = mp
 to_multipoint(geom) = to_multipoint(GI.trait(geom), geom)
 to_multipoint(geom::AbstractVector) = to_multipoint.(GI.trait.(geom), geom)
-to_multipoint(::GI.PointTrait, geom) = GB.MultiPoint([GI.convert(GB, geom)])
-to_multipoint(::GI.MultiPointTrait, geom) = GI.convert(GB, geom)
+to_multipoint(::GI.PointTrait, geom) = [GI.convert(GB, geom)]
+to_multipoint(::GI.MultiPointTrait, geom) = GI.convert.(GB, GI.getpoint(geom))
 
 # TODO 
 # Features and Feature collections
 # https://github.com/JuliaGeo/GI.jl/pull/72#issue-1406325596
 
-# Enable Plots.jl for GI wrappers
+# Enable Makie.jl for GI wrappers
 GI.@enable_makie Makie GI.WrapperGeometry
 
 end
