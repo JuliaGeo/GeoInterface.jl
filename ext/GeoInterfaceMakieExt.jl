@@ -7,13 +7,13 @@ import GeoInterface as GI
 
 GI._plottype(geom) = plottype_from_geomtrait(GI.geomtrait(geom))
 
-function plottype_from_geomtrait(::Union{GI.LineStringTrait, GI.MultiLineStringTrait})
+function plottype_from_geomtrait(::Union{GI.LineStringTrait,GI.MultiLineStringTrait})
     Makie.Lines
 end
-function plottype_from_geomtrait(::Union{GI.PointTrait, GI.MultiPointTrait})
+function plottype_from_geomtrait(::Union{GI.PointTrait,GI.MultiPointTrait})
     Makie.Scatter
 end
-function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait, GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
+function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTrait,GI.MultiPolygonTrait,GI.LinearRingTrait})
     Makie.Poly
 end
 
@@ -41,7 +41,7 @@ function GI._convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple 
         elseif trait isa GI.MultiPolygonTrait
             to_multipoly
         else
-            error("GeoInterfaceMakie: We don't support mixed single-and-multi geometries for this multi trait yet: $(trait)")
+            error("GeoInterface: We don't support mixed single-and-multi geometries for this multi trait yet: $(trait)")
         end
     else
         # base case
@@ -137,12 +137,12 @@ end
 to_multipoly(poly::GB.Polygon) = GB.MultiPolygon([poly])
 to_multipoly(poly::Vector{GB.Polygon}) = GB.MultiPolygon(poly)
 to_multipoly(mp::GB.MultiPolygon) = mp
-to_multipoly(geom) = to_multipoly(GeoInterface.trait(geom), geom)
-to_multipoly(::Nothing, geom::AbstractVector) = to_multipoly.(GeoInterface.trait.(geom), geom)
-to_multipoly(::GeoInterface.PolygonTrait, geom) = GB.MultiPolygon([GeoInterface.convert(GB, geom)])
-to_multipoly(::GeoInterface.MultiPolygonTrait, geom) = GeoInterface.convert(GB, geom)
+to_multipoly(geom) = to_multipoly(GI.trait(geom), geom)
+to_multipoly(::Nothing, geom::AbstractVector) = to_multipoly.(GI.trait.(geom), geom)
+to_multipoly(::GI.PolygonTrait, geom) = GB.MultiPolygon([GI.convert(GB, geom)])
+to_multipoly(::GI.MultiPolygonTrait, geom) = GI.convert(GB, geom)
 
-function to_multipoly(::GeoInterface.GeometryCollectionTrait, geom)
+function to_multipoly(::GI.GeometryCollectionTrait, geom)
     ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait}, GI.getgeom(geom))
     multipolys = to_multipoly(ls_or_mls)
     return GB.MultiPolygon(vcat(getproperty.(multipolys, :polygons)...))
@@ -151,12 +151,12 @@ end
 to_multilinestring(poly::GB.LineString) = GB.MultiLineString([poly])
 to_multilinestring(poly::Vector{GB.Polygon}) = GB.MultiLineString(poly)
 to_multilinestring(mp::GB.MultiLineString) = mp
-to_multilinestring(geom) = to_multilinestring(GeoInterface.trait(geom), geom)
-to_multilinestring(geom::AbstractVector) = to_multilinestring.(GeoInterface.trait.(geom), geom)
-to_multilinestring(::GeoInterface.LineStringTrait, geom) = GB.MultiLineString([GeoInterface.convert(GB, geom)])
-to_multilinestring(::GeoInterface.MultiLineStringTrait, geom) = GeoInterface.convert(GB, geom)
+to_multilinestring(geom) = to_multilinestring(GI.trait(geom), geom)
+to_multilinestring(geom::AbstractVector) = to_multilinestring.(GI.trait.(geom), geom)
+to_multilinestring(::GI.LineStringTrait, geom) = GB.MultiLineString([GI.convert(GB, geom)])
+to_multilinestring(::GI.MultiLineStringTrait, geom) = GI.convert(GB, geom)
 
-function to_multilinestring(::GeoInterface.GeometryCollectionTrait, geom)
+function to_multilinestring(::GI.GeometryCollectionTrait, geom)
     ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait}, GI.getgeom(geom))
     multilinestrings = to_multilinestring(ls_or_mls)
     return GeometryBasics.MultiLineString(vcat(getproperty.(multilinestrings, :linestrings)...))
@@ -165,16 +165,16 @@ end
 to_multipoint(poly::GB.Point) = GB.MultiPoint([poly])
 to_multipoint(poly::Vector{GB.Point}) = GB.MultiPoint(poly)
 to_multipoint(mp::GB.MultiPoint) = mp
-to_multipoint(geom) = to_multipoint(GeoInterface.trait(geom), geom)
-to_multipoint(geom::AbstractVector) = to_multipoint.(GeoInterface.trait.(geom), geom)
-to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.convert(GB, geom)])
-to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
+to_multipoint(geom) = to_multipoint(GI.trait(geom), geom)
+to_multipoint(geom::AbstractVector) = to_multipoint.(GI.trait.(geom), geom)
+to_multipoint(::GI.PointTrait, geom) = GB.MultiPoint([GI.convert(GB, geom)])
+to_multipoint(::GI.MultiPointTrait, geom) = GI.convert(GB, geom)
 
 # TODO 
 # Features and Feature collections
-# https://github.com/JuliaGeo/GeoInterface.jl/pull/72#issue-1406325596
+# https://github.com/JuliaGeo/GI.jl/pull/72#issue-1406325596
 
-# Enable Plots.jl for GeoInterface wrappers
-GeoInterface.@enable_makie Makie GeoInterface.WrapperGeometry
+# Enable Plots.jl for GI wrappers
+GI.@enable_makie Makie GI.WrapperGeometry
 
 end
