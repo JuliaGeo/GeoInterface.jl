@@ -1,27 +1,25 @@
-module GeoInterfaceMakie
+module GeoInterfaceMakieExt
 
-using GeoInterface
-import MakieCore as MC
+import Makie
 import GeometryBasics as GB
 import GeoInterface as GI
 
 
-function _plottype(geom)
-    plottype_from_geomtrait(GI.geomtrait(geom))
-end
+GI._plottype(geom) = plottype_from_geomtrait(GI.geomtrait(geom))
+
 function plottype_from_geomtrait(::Union{GI.LineStringTrait, GI.MultiLineStringTrait})
-    MC.Lines
+    Makie.Lines
 end
 function plottype_from_geomtrait(::Union{GI.PointTrait, GI.MultiPointTrait})
-    MC.Scatter
+    Makie.Scatter
 end
 function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait, GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
-    MC.Poly
+    Makie.Poly
 end
 
-function _convert_arguments(t, geom)::Tuple
+function GI._convert_arguments(t, geom)::Tuple
     geob = GI.convert(GB, geom)
-    return MC.convert_arguments(t, geob)
+    return Makie.convert_arguments(t, geob)
 end
 
 function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims, numtype = Float64)
@@ -29,7 +27,7 @@ function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTra
     return x -> ismissing(x) ? nan_geom : func(x)
 end
 
-function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
+function GI._convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
     geoms_without_missings = Missing <: T ? skipmissing(geoms) : geoms
     # assess whether multification is needed!
     # Multification is the conversion of a vector of mixed single and multi-geometry types,
@@ -50,7 +48,7 @@ function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple whe
         Base.Fix1(GI.convert, GB)
     end
     if Missing <: T
-        return MC.convert_arguments(
+        return Makie.convert_arguments(
             plottrait, 
             map(
                 operator_nangeom_if_missing_or_func(
@@ -62,86 +60,9 @@ function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple whe
             )
         )
     else # no missings, do this the regular way
-        return MC.convert_arguments(plottrait, map(func_to_apply, geoms))
+        return Makie.convert_arguments(plottrait, map(func_to_apply, geoms))
     end
 end
-
-function expr_enable(Geom)
-    quote
-        # plottype
-        function $MC.plottype(geom::$Geom)
-            $_plottype(geom)
-        end
-        function $MC.plottype(geom::AbstractArray{<:$Geom})
-            $_plottype(first(geom))
-        end
-        function $MC.plottype(geom::AbstractArray{<:Union{Missing,<:$Geom}})
-            $_plottype(first(skipmissing(geom)))
-        end
-        # we need `AbstractVector` specifically for dispatch
-        function $MC.plottype(geom::AbstractVector{<:$Geom})
-            $_plottype(first(geom))
-        end
-        function $MC.plottype(geom::AbstractVector{<:Union{Missing,<:$Geom}})
-            $_plottype(first(skipmissing(geom)))
-        end
-
-        # convert_arguments
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
-        end
-        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-    end
-end
-
-"""
-
-    GeoInterfaceMakie.@enable(GeometryType)
-
-Enable Makie based plotting for a type `Geom` that implements the geometry interface 
-defined in `GeoInterface`.
-
-# Usage
-```julia
-struct MyGeometry 
-...
-end
-# overload GeoInterface for MyGeometry
-...
-
-# Enable Makie.jl plotting
-GeoInterfaceMakie.@enable MyGeometry
-```
-"""
-macro enable(Geom)
-    esc(expr_enable(Geom))
-end
-
-# Enable Makie.jl for GeoInterface wrappers
-@enable GeoInterface.Wrappers.WrapperGeometry
 
 
 # Creating empty geometries from traits
@@ -249,9 +170,11 @@ to_multipoint(geom::AbstractVector) = to_multipoint.(GeoInterface.trait.(geom), 
 to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.convert(GB, geom)])
 to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
 
-
 # TODO 
 # Features and Feature collections
 # https://github.com/JuliaGeo/GeoInterface.jl/pull/72#issue-1406325596
+
+# Enable Plots.jl for GeoInterface wrappers
+GeoInterface.@enable_makie Makie GeoInterface.WrapperGeometry
 
 end

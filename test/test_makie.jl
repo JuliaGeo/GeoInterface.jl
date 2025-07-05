@@ -1,15 +1,11 @@
-import GeoInterfaceMakie
-using Test
-import LibGEOS
-using LibGEOS
 import GeoInterface as GI
-using Makie, CairoMakie
-using Makie: Point2d
 
-GeoInterfaceMakie.@enable(LibGEOS.AbstractGeometry)
+using CairoMakie
+using Makie
+using Test
 
-@testset "Makie plotting LibGEOS MultiLineString shows additional lines #83" begin
-    mls = readgeom("MULTILINESTRING ((0 0,3 0,3 3,0 3,0 0),(1 1,2 1,2 2,1 2,1 1))")
+@testset "Makie plotting MultiLineString shows additional lines #83" begin
+    mls = MultiLineString([LineString([(0, 0), (3, 0), (3, 3), (0, 3), (0, 0)]), LineString([(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)])])
     expected = [[0.0, 0.0], [3.0, 0.0], [3.0, 3.0], [0.0, 3.0], [0.0, 0.0], 
                 [NaN, NaN], 
                 [1.0, 1.0], [2.0, 1.0], [2.0, 2.0], [1.0, 2.0], [1.0, 1.0]]
@@ -18,44 +14,34 @@ GeoInterfaceMakie.@enable(LibGEOS.AbstractGeometry)
 end
 
 @testset "smoketest 2d" begin
-    unitsquare = readgeom("POLYGON((0 0, 0 1, 1 1, 1 0, 0 0))")
-    bigsquare = readgeom("POLYGON((0 0, 11 0, 11 11, 0 11, 0 0))")
-    smallsquare = readgeom("POLYGON((5 5, 8 5, 8 8, 5 8, 5 5))")
-    multipolygon = GI.union(smallsquare, unitsquare)
-    point = readgeom("POINT(1 0)")
-    multipoint = readgeom("MULTIPOINT(1 2, 2 3, 3 4)")
+    # Set up test geometries
+    unitsquare = Polygon(LineString([(0, 0), (0, 1), (1, 1), (1, 0), (0, 0)]))
+    Makie.plot(unitsquare)
+    bigsquare = Polygon(LineString([(0, 0), (11, 0), (11, 11), (0, 11), (0, 0)]))
+    smallsquare = Polygon(LineString([(5, 5), (8, 5), (8, 8), (5, 8), (5, 5)]))
+    multipolygon = MultiPolygon([smallsquare, unitsquare])
+    point = Point(1, 0)
+    multipoint = MultiPoint([(1, 2), (2, 3), (3, 4)])
     geoms = [
         unitsquare,
-        GI.difference(bigsquare, smallsquare),
-        LibGEOS.boundary(unitsquare),
         multipolygon, 
         point, 
         multipoint,
     ]
+
+    # Plot them all onto one figure
     fig = Figure()
     for (i, geom) in enumerate(geoms)
-        # Even the GeometryBasics version of this will fail
-        # though the conversion succeeds, so we skip this
-        geom == multipoint && continue
-        # Construct a plot inside an axis
-        Makie.plot(fig[i, 1], geom; axis = (; type = Axis, title = "$(GI.geomtrait(geom))"))
-
-        if geom == multipolygon
-            # `plot!` wont work with the GeometryBasics version of this either
-            # But `poly!` does
-            @test_nowarn Makie.poly(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
-        else
-            @test_nowarn Makie.plot(fig[i, 2], [geom, geom]; axis = (; type = Axis, title = "Vector of $(GI.geomtrait(geom))"))
-        end
+        geom isa MultiPoint && continue
+        # plot a geometry into an axis
+        Makie.plot(fig[i, 1], geom; axis=(; type=Axis, title="$(GI.geomtrait(geom))"))
+        # plot a vector of the same geometry into the axis
+        @test_nowarn Makie.plot(fig[i, 2], [geom, geom]; axis=(; type=Axis, title="Vector of $(GI.geomtrait(geom))"))
     end
-
     @test_nowarn Makie.update_state_before_display!(fig)
     @test_nowarn Makie.colorbuffer(fig.scene)
-    
     fig
 end
-
-
 
 @testset "Make sure that Makie can plot NaN-based geometry correctly" begin
     f, a, p = poly(Makie.GeometryBasics.Polygon([Point2f(NaN)]))
@@ -81,11 +67,11 @@ end
 
 @testset "handle missing values" begin
     # First test that missing values get the right dispatches
-    points = [GI.Point(1., 2.), GI.Point(3., 4.), missing]
+    points = [GI.Point(1.0, 2.0), GI.Point(3.0, 4.0), missing]
     @test_nowarn Makie.plot(points)
     lines = [GI.LineString(Point2d[(1, 2), (3, 4)]), GI.LineString(Point2d[(5, 4), (5, 6)]), missing]
     @test_nowarn Makie.plot(lines)
-    polys = [GI.Polygon([GI.LinearRing(Point2d[(1, 2), (3, 4), (5, 5), (1, 2)])]), GI.Polygon([GI.LinearRing(Point2d[(7, 8), (9, 10), (11, 11), (7, 8)])]), missing]
+    polys = [GI.Polygon([GI.LinearRing([(1, 2), (3, 4), (5, 5), (1, 2)])]), GI.Polygon([GI.LinearRing([(7, 8), (9, 10), (11, 11), (7, 8)])]), missing]
     @test_nowarn Makie.plot(polys)
     # Now we test that appropriate "missing" (i.e., NaN) polygons 
     # are inserted in the correct place, so that we have the same
