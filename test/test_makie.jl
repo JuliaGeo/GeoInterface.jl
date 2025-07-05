@@ -1,8 +1,9 @@
 import GeoInterface as GI
 
-using CairoMakie
 using Makie
 using Test
+using GeoInterface.Wrappers
+using GeoInterface: Point
 
 @testset "Makie plotting MultiLineString shows additional lines #83" begin
     mls = MultiLineString([LineString([(0, 0), (3, 0), (3, 3), (0, 3), (0, 0)]), LineString([(1, 1), (2, 1), (2, 2), (1, 2), (1, 1)])])
@@ -32,7 +33,6 @@ end
     # Plot them all onto one figure
     fig = Figure()
     for (i, geom) in enumerate(geoms)
-        geom isa MultiPoint && continue
         # plot a geometry into an axis
         Makie.plot(fig[i, 1], geom; axis=(; type=Axis, title="$(GI.geomtrait(geom))"))
         # plot a vector of the same geometry into the axis

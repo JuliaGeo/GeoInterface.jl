@@ -17,17 +17,14 @@ function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTr
     Makie.Poly
 end
 
-GI._convert_arguments(t, geom) = GI._convert_arguments(t, GI.trait(geom), geom)
-function GI._convert_arguments(t, ::GI.AbstractGeometryTrait, geom)::Tuple
-    geob = GI.convert(GB, geom)
-    return Makie.convert_arguments(t, geob)
-end
-function GI._convert_arguments(t, ::GI.MultiPointTrait, geom)::Tuple
-    geob = to_multipoint(geom)
-    return Makie.convert_arguments(t, geob)
-end
+GI._convert_arguments(t, geom) = GI._convert_arguments(t, _convert_for_makie(geom))
 
-function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims, numtype = Float64)
+# Makie no longer plots MultiPoint so we need to convert it to Vector{Point}
+_convert_for_makie(geom) = _convert_for_makie(GI.trait(geom), geom)
+_convert_for_makie(trait::GI.AbstractGeometryTrait, geom) = GI.convert(GB, geom)
+_convert_for_makie(trait::GI.MultiPointTrait, geom) = to_multipoint(trait, geom)
+
+function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims; numtype=Float64)
     nan_geom = _nan_geom(trait, ndims, numtype)
     return x -> ismissing(x) ? nan_geom : func(x)
 end
@@ -50,8 +47,9 @@ function GI._convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple 
         end
     else
         # base case
-        Base.Fix1(GI.convert, GB)
+        Base.Fix1(_convert_for_makie, GB)
     end
+
     if Missing <: T
         return Makie.convert_arguments(
             plottrait, 
@@ -174,7 +172,7 @@ to_multipoint(mp::GB.MultiPoint) = mp
 to_multipoint(geom) = to_multipoint(GI.trait(geom), geom)
 to_multipoint(geom::AbstractVector) = to_multipoint.(GI.trait.(geom), geom)
 to_multipoint(::GI.PointTrait, geom) = [GI.convert(GB, geom)]
-to_multipoint(::GI.MultiPointTrait, geom) = GI.convert.(GB, GI.getpoint(geom))
+to_multipoint(::GI.MultiPointTrait, geom) = GI.convert.((GB,), GI.getpoint(geom))
 
 # TODO 
 # Features and Feature collections
