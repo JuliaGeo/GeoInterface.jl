@@ -23,7 +23,7 @@ function GI._convert_arguments(t, ::GI.AbstractGeometryTrait, geom)::Tuple
     return Makie.convert_arguments(t, geob)
 end
 function GI._convert_arguments(t, ::GI.MultiPointTrait, geom)::Tuple
-    geob = to_multipoint(GB, geom)
+    geob = to_multipoint(geom)
     return Makie.convert_arguments(t, geob)
 end
 
