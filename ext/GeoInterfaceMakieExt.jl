@@ -17,7 +17,7 @@ function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTr
     Makie.Poly
 end
 
-GI._convert_arguments(t, geom) = GI._convert_arguments(t, trait(geom), geom)
+GI._convert_arguments(t, geom) = GI._convert_arguments(t, GI.trait(geom), geom)
 function GI._convert_arguments(t, ::GI.AbstractGeometryTrait, geom)::Tuple
     geob = GI.convert(GB, geom)
     return Makie.convert_arguments(t, geob)
