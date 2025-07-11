@@ -1,35 +1,16 @@
-module GeoInterfaceMakie
+module GeoInterfaceMakieExt
 
-using GeoInterface
-import MakieCore as MC
+import Makie
 import GeometryBasics as GB
 import GeoInterface as GI
 
-
-function _plottype(geom)
-    plottype_from_geomtrait(GI.geomtrait(geom))
-end
-function plottype_from_geomtrait(::Union{GI.LineStringTrait, GI.MultiLineStringTrait})
-    MC.Lines
-end
-function plottype_from_geomtrait(::Union{GI.PointTrait, GI.MultiPointTrait})
-    MC.Scatter
-end
-function plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait, GI.PolygonTrait,GI.MultiPolygonTrait, GI.LinearRingTrait})
-    MC.Poly
-end
-
-function _convert_arguments(t, geom)::Tuple
+# Functions called from the macro in GeoInterface 
+GI._makie_plottype(geom) = _plottype_from_geomtrait(GI.geomtrait(geom))
+function GI._makie_convert_arguments(t, geom)::Tuple
     geob = GI.convert(GB, geom)
-    return MC.convert_arguments(t, geob)
+    return Makie.convert_arguments(t, geob)
 end
-
-function operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims, numtype = Float64)
-    nan_geom = _nan_geom(trait, ndims, numtype)
-    return x -> ismissing(x) ? nan_geom : func(x)
-end
-
-function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
+function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
     geoms_without_missings = Missing <: T ? skipmissing(geoms) : geoms
     # assess whether multification is needed!
     # Multification is the conversion of a vector of mixed single and multi-geometry types,
@@ -43,17 +24,17 @@ function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple whe
         elseif trait isa GI.MultiPolygonTrait
             to_multipoly
         else
-            error("GeoInterfaceMakie: We don't support mixed single-and-multi geometries for this multi trait yet: $(trait)")
+            error("GeoInterface: We don't support mixed single-and-multi geometries for this multi trait yet: $(trait)")
         end
     else
         # base case
         Base.Fix1(GI.convert, GB)
     end
     if Missing <: T
-        return MC.convert_arguments(
+        return Makie.convert_arguments(
             plottrait, 
             map(
-                operator_nangeom_if_missing_or_func(
+                _operator_nangeom_if_missing_or_func(
                     func_to_apply, 
                     trait, 
                     GI.ncoord(first(geoms_without_missings))
@@ -62,87 +43,24 @@ function _convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple whe
             )
         )
     else # no missings, do this the regular way
-        return MC.convert_arguments(plottrait, map(func_to_apply, geoms))
+        return Makie.convert_arguments(plottrait, map(func_to_apply, geoms))
     end
 end
 
-function expr_enable(Geom)
-    quote
-        # plottype
-        function $MC.plottype(geom::$Geom)
-            $_plottype(geom)
-        end
-        function $MC.plottype(geom::AbstractArray{<:$Geom})
-            $_plottype(first(geom))
-        end
-        function $MC.plottype(geom::AbstractArray{<:Union{Missing,<:$Geom}})
-            $_plottype(first(skipmissing(geom)))
-        end
-        # we need `AbstractVector` specifically for dispatch
-        function $MC.plottype(geom::AbstractVector{<:$Geom})
-            $_plottype(first(geom))
-        end
-        function $MC.plottype(geom::AbstractVector{<:Union{Missing,<:$Geom}})
-            $_plottype(first(skipmissing(geom)))
-        end
-
-        # convert_arguments
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Poly}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::$MC.PointBased, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
-        end
-        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::$MC.PointBased, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geom::$Geom; kw...)
-            $_convert_arguments(p, geom)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:$Geom}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-        function $MC.convert_arguments(p::Type{<:$MC.Lines}, geoms::AbstractArray{<:Union{Missing,<:$Geom}}; kw...)
-            $_convert_array_arguments(p, geoms)
-        end
-    end
+function _plottype_from_geomtrait(::Union{GI.LineStringTrait,GI.MultiLineStringTrait})
+    Makie.Lines
+end
+function _plottype_from_geomtrait(::Union{GI.PointTrait,GI.MultiPointTrait})
+    Makie.Scatter
+end
+function _plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTrait,GI.MultiPolygonTrait,GI.LinearRingTrait})
+    Makie.Poly
 end
 
-"""
-
-    GeoInterfaceMakie.@enable(GeometryType)
-
-Enable Makie based plotting for a type `Geom` that implements the geometry interface 
-defined in `GeoInterface`.
-
-# Usage
-```julia
-struct MyGeometry 
-...
+function _operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims; numtype=Float64)
+    nan_geom = _nan_geom(trait, ndims, numtype)
+    return x -> ismissing(x) ? nan_geom : func(x)
 end
-# overload GeoInterface for MyGeometry
-...
-
-# Enable Makie.jl plotting
-GeoInterfaceMakie.@enable MyGeometry
-```
-"""
-macro enable(Geom)
-    esc(expr_enable(Geom))
-end
-
-# Enable Makie.jl for GeoInterface wrappers
-@enable GeoInterface.Wrappers.WrapperGeometry
-
 
 # Creating empty geometries from traits
 function _geomtrait_for_array(arr)
@@ -216,12 +134,12 @@ end
 to_multipoly(poly::GB.Polygon) = GB.MultiPolygon([poly])
 to_multipoly(poly::Vector{GB.Polygon}) = GB.MultiPolygon(poly)
 to_multipoly(mp::GB.MultiPolygon) = mp
-to_multipoly(geom) = to_multipoly(GeoInterface.trait(geom), geom)
-to_multipoly(::Nothing, geom::AbstractVector) = to_multipoly.(GeoInterface.trait.(geom), geom)
-to_multipoly(::GeoInterface.PolygonTrait, geom) = GB.MultiPolygon([GeoInterface.convert(GB, geom)])
-to_multipoly(::GeoInterface.MultiPolygonTrait, geom) = GeoInterface.convert(GB, geom)
+to_multipoly(geom) = to_multipoly(GI.trait(geom), geom)
+to_multipoly(::Nothing, geom::AbstractVector) = to_multipoly.(GI.trait.(geom), geom)
+to_multipoly(::GI.PolygonTrait, geom) = GB.MultiPolygon([GI.convert(GB, geom)])
+to_multipoly(::GI.MultiPolygonTrait, geom) = GI.convert(GB, geom)
 
-function to_multipoly(::GeoInterface.GeometryCollectionTrait, geom)
+function to_multipoly(::GI.GeometryCollectionTrait, geom)
     ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiPolygonTrait, GI.PolygonTrait}, GI.getgeom(geom))
     multipolys = to_multipoly(ls_or_mls)
     return GB.MultiPolygon(vcat(getproperty.(multipolys, :polygons)...))
@@ -230,28 +148,31 @@ end
 to_multilinestring(poly::GB.LineString) = GB.MultiLineString([poly])
 to_multilinestring(poly::Vector{GB.Polygon}) = GB.MultiLineString(poly)
 to_multilinestring(mp::GB.MultiLineString) = mp
-to_multilinestring(geom) = to_multilinestring(GeoInterface.trait(geom), geom)
-to_multilinestring(geom::AbstractVector) = to_multilinestring.(GeoInterface.trait.(geom), geom)
-to_multilinestring(::GeoInterface.LineStringTrait, geom) = GB.MultiLineString([GeoInterface.convert(GB, geom)])
-to_multilinestring(::GeoInterface.MultiLineStringTrait, geom) = GeoInterface.convert(GB, geom)
+to_multilinestring(geom) = to_multilinestring(GI.trait(geom), geom)
+to_multilinestring(geom::AbstractVector) = to_multilinestring.(GI.trait.(geom), geom)
+to_multilinestring(::GI.LineStringTrait, geom) = GB.MultiLineString([GI.convert(GB, geom)])
+to_multilinestring(::GI.MultiLineStringTrait, geom) = GI.convert(GB, geom)
 
-function to_multilinestring(::GeoInterface.GeometryCollectionTrait, geom)
+function to_multilinestring(::GI.GeometryCollectionTrait, geom)
     ls_or_mls = filter(x -> GI.geomtrait(x) isa Union{GI.MultiLineStringTrait, GI.LineStringTrait}, GI.getgeom(geom))
     multilinestrings = to_multilinestring(ls_or_mls)
     return GeometryBasics.MultiLineString(vcat(getproperty.(multilinestrings, :linestrings)...))
 end
 
+# TODO: MultiPoint is broken in Makie, but should be fixed there
 to_multipoint(poly::GB.Point) = GB.MultiPoint([poly])
 to_multipoint(poly::Vector{GB.Point}) = GB.MultiPoint(poly)
 to_multipoint(mp::GB.MultiPoint) = mp
-to_multipoint(geom) = to_multipoint(GeoInterface.trait(geom), geom)
-to_multipoint(geom::AbstractVector) = to_multipoint.(GeoInterface.trait.(geom), geom)
-to_multipoint(::GeoInterface.PointTrait, geom) = GB.MultiPoint([GeoInterface.convert(GB, geom)])
-to_multipoint(::GeoInterface.MultiPointTrait, geom) = GeoInterface.convert(GB, geom)
-
+to_multipoint(geom) = to_multipoint(GI.trait(geom), geom)
+to_multipoint(geom::AbstractVector) = to_multipoint.(GI.trait.(geom), geom)
+to_multipoint(::GI.PointTrait, geom) = GB.MultiPoint([GI.convert(GB, geom)])
+to_multipoint(::GI.MultiPointTrait, geom) = GI.convert(GB, geom)
 
 # TODO 
 # Features and Feature collections
-# https://github.com/JuliaGeo/GeoInterface.jl/pull/72#issue-1406325596
+# https://github.com/JuliaGeo/GI.jl/pull/72#issue-1406325596
+
+# Enable Makie.jl for GI wrappers
+GI.@enable_makie Makie GI.WrapperGeometry
 
 end
