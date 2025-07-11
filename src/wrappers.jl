@@ -434,6 +434,11 @@ convert(::Type{Point}, ::PointTrait, geom) = Point(geom)
 convert(::Type{Point}, ::PointTrait, geom::Point) = geom
 extent(trait::PointTrait, geom::Point) = extent(trait, parent(geom)) 
 
+coordtype(::Point{<:Any,<:Any,<:AbstractArray{T}}) where T = T 
+coordtype(::Point{<:Any,<:Any,<:NTuple{<:Any,T}}) where T = T 
+coordtype(::Point{<:Any,<:Any,<:NamedTuple{<:Any,<:NTuple{<:Any,T}}}) where T = T 
+coordtype(p::Point) = coordtype(parent(p))
+
 x(trait::PointTrait, geom::Point) = x(trait, parent(geom))
 y(trait::PointTrait, geom::Point) = y(trait, parent(geom))
 z(trait::PointTrait, geom::Point{true}) = z(trait, parent(geom))

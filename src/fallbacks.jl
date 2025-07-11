@@ -8,6 +8,11 @@ const default_coord_names = (:X, :Y, :Z, :M)
 
 coordnames(t::AbstractGeometryTrait, geom) = default_coord_names[1:ncoord(t, geom)]
 
+@inline coordtype(::FeatureCollectionTrait, fc) = coordtype(getfeature(fc, 1))
+@inline coordtype(::FeatureTrait, feature) = coordtype(geometry(feature))
+@inline coordtype(::AbstractGeometryTrait, geom) = coordtype(getgeom(geom, 1))
+@inline coordtype(::PointTrait, geom) = typeof(x(geom))
+
 # Maybe hardcode dimension order? At least for X and Y?
 x(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:X), coordnames(geom)))
 y(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Y), coordnames(geom)))
