@@ -1,7 +1,7 @@
 name = "GeoInterface"
 uuid = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
 authors = ["JuliaGeo and contributors"]
-version = "1.5"
+version = "1.5.0"
 
 [deps]
 DataAPI = "9a962f9c-6df0-11e9-0e5d-c546b8b5ee8a"
