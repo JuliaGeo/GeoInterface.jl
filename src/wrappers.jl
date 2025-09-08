@@ -33,7 +33,7 @@ import ..GeoInterface: isgeometry, isfeature, isfeaturecollection, is3d, ismeasu
        ngeom, npoint, nring, nhole, ncoord,
        nfeature, getfeature, geometry, properties
 
-export Point, Line, LineString, LinearRing, Polygon, MultiPoint, MultiPolygon, MultiLineString, MultiCurve,
+export WrapperGeometry, Point, Line, LineString, LinearRing, Polygon, MultiPoint, MultiPolygon, MultiLineString, MultiCurve,
     PolyhedralSurface, GeometryCollection, Feature, FeatureCollection
 
 # TODO
