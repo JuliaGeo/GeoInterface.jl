@@ -679,6 +679,21 @@ geom type for the trait using the modules `geointerface_traittype` method.
 
 `convert(T::Type)` or `convert(m::Module)` return curried versions of that function, 
 just like `==`.
+
+# Extended help
+
+For developers, the base implementation is `GeoInterface.convert(::YourGeomType, ::AbstractTrait, some_other_geom)`.
+This is the method signature that must be implemented for a custom geometry type.  
+    
+Users may also call this method directly, if they know the exact output - this can sometimes 
+save the Julia compiler some work and cause more optimal code to be generated.
+
+For convenience and type stability there is a `convert(::Module, ::AbstractTrait, geom)` method
+that is particularly useful when the trait of a geometry needs to be propagated deep within the 
+stack.  
+
+This helps to prevent the compiler from losing the trait information, especially useful 
+when dealing with sumtype-like implementations or opaque pointers from C libraries.
 """
 convert(T, geom) = convert(T, geomtrait(geom), geom)
 convert(::Type{T}, x::T) where {T} = x  # no-op
