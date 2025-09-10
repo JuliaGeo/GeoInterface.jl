@@ -453,10 +453,16 @@ Retrieve the extent (bounding box) for given geom or feature.
 In SF this is defined as `envelope`.
 
 `Extents.extent(obj)` will be called if `extent(trait(obj), obj)`,
-is not defined so it may be preferable to define `Extents.extent` directly.
+is not defined, so it is preferable to define `Extents.extent` directly.
 
-When `fallback` is true, and the obj does not have an extent,
+When `fallback` is true, and the `obj` does not have an extent,
 an extent is calculated from the coordinates of all geometries in `obj`.
+
+!!! note NaN values
+    The GeoInterface extent calculation **ignores** all NaN values in coordinates,
+    but if all coordinates are NaN, it returns a NaN extent.
+
+    For example, the extent of `[(0, 0), (NaN, 1)]` is `X = (0, 0), Y = (0, 1)`.
 """
 function extent(obj; fallback=true)
     t = trait(obj)
