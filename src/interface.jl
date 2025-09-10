@@ -598,6 +598,15 @@ Returns a geometric object that represents the convex hull of the given `geom`.
 convexhull(geom) = convexhull(geomtrait(geom), geom)
 
 """
+    coordtype(geom) -> Type
+
+Return the type of the coordinates in the geom. 
+
+Usually `<: AbstractFloat` but can be any `Number`.
+"""
+coordtype(geom) = coordtype(trait(geom), geom)
+
+"""
     x(geom) -> Number
 
 Return the :X coordinate of the given `geom`.
