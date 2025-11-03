@@ -34,7 +34,7 @@ makedocs(;
         ],
     ],
     doctest=true,
-    warnonly=true
+    warnonly=[:cross_references, :missing_docs]
 )
 
 deploydocs(;
