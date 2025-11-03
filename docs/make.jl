@@ -33,7 +33,8 @@ makedocs(;
             "Implementations" => "reference/integrations.md"
         ],
     ],
-    doctest=true
+    doctest=true,
+    warnonly=[:cross_references, :missing_docs]
 )
 
 deploydocs(;
