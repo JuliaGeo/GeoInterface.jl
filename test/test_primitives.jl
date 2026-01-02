@@ -8,6 +8,7 @@ struct MyPoint end
 struct MyEmptyPoint end
 struct MyCurve end
 struct MyPolygon end
+struct MyEmptyPolygon end
 struct MyTriangle end
 struct MyMultiPoint end
 struct MyMultiCurve end
@@ -45,6 +46,12 @@ GeoInterface.geomtrait(::MyPolygon) = PolygonTrait()
 GeoInterface.ngeom(::PolygonTrait, geom::MyPolygon) = 2
 GeoInterface.getgeom(::PolygonTrait, geom::MyPolygon, i) = MyCurve()
 GeoInterface.ncoord(t::PolygonTrait, geom::MyPolygon) = 2
+
+GeoInterface.isgeometry(::Type{MyEmptyPolygon}) = true
+GeoInterface.geomtrait(::MyEmptyPolygon) = PolygonTrait()
+GeoInterface.ngeom(::PolygonTrait, geom::MyEmptyPolygon) = 0
+GeoInterface.getgeom(::PolygonTrait, geom::MyEmptyPolygon, i) = nothing
+GeoInterface.isempty(::PolygonTrait, geom::MyEmptyPolygon) = true
 
 GeoInterface.isgeometry(::Type{MyTriangle}) = true
 GeoInterface.geomtrait(::MyTriangle) = TriangleTrait()
@@ -173,6 +180,11 @@ GeoInterface.crs(::RasterTrait, ::Raster) = GeoFormatTypes.EPSG(4326)
         @test GeoInterface.nring(geom) == 1
         @test GeoInterface.nhole(geom) == 0
         @test GeoInterface.npoint(geom) == 3
+
+        geom = MyEmptyPolygon()
+        @test GeoInterface.isempty(geom)
+        @test GeoInterface.nring(geom) == 0
+        @test GeoInterface.npoint(geom) == 0
     end
 
     @testset "MultiPoint" begin
