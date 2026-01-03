@@ -62,9 +62,9 @@ getpoint(t::AbstractMultiCurveTrait, geom) = flatten((p for p in getpoint(ls)) f
 npolygon(t::AbstractMultiPolygonTrait, geom) = ngeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom) = getgeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom, i) = getgeom(t, geom, i)
-nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p)::Int for p in getpolygon(t, geom); init=0)
+nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(t, geom); init=0)
 getring(t::AbstractMultiPolygonTrait, geom) = flatten((r for r in getring(p)) for p in getpolygon(t, geom))
-npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r)::Int for r in getring(t, geom); init=0)
+npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(t, geom); init=0)
 getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## Surface
