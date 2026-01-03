@@ -43,7 +43,7 @@ getexterior(t::AbstractPolygonTrait, geom) = getring(t, geom, 1)
 nhole(t::AbstractPolygonTrait, geom) = nring(t, geom) - 1
 gethole(t::AbstractPolygonTrait, geom) = (getgeom(t, geom, i) for i in 2:ngeom(t, geom))
 gethole(t::AbstractPolygonTrait, geom, i) = getring(t, geom, i + 1)
-npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
+npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom); init=0)
 getpoint(t::AbstractPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## MultiPoint
@@ -55,16 +55,16 @@ getpoint(t::AbstractMultiPointTrait, geom, i) = getgeom(t, geom, i)
 nlinestring(t::AbstractMultiCurveTrait, geom) = ngeom(t, geom)
 getlinestring(t::AbstractMultiCurveTrait, geom) = getgeom(t, geom)
 getlinestring(t::AbstractMultiCurveTrait, geom, i) = getgeom(t, geom, i)
-npoint(t::AbstractMultiCurveTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom))
+npoint(t::AbstractMultiCurveTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom); init=0)
 getpoint(t::AbstractMultiCurveTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
 
 ## MultiPolygon
 npolygon(t::AbstractMultiPolygonTrait, geom) = ngeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom) = getgeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom, i) = getgeom(t, geom, i)
-nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(t, geom))
+nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(t, geom); init=0)
 getring(t::AbstractMultiPolygonTrait, geom) = flatten((r for r in getring(p)) for p in getpolygon(t, geom))
-npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(t, geom))
+npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(t, geom); init=0)
 getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## Surface
@@ -130,6 +130,7 @@ function calc_extent(t::AbstractPointTrait, geom)
     end
 end
 function calc_extent(t::AbstractGeometryTrait, geom)
+    isempty(t, geom) && return nothing
     points = getpoint(t, geom)
     X = extrema(p -> x(p), points)
     Y = extrema(p -> y(p), points)
