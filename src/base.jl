@@ -153,3 +153,33 @@ GeoInterface.trait(fc::MaybeArrayFeatureCollection) = _is_array_featurecollectio
 GeoInterface.nfeature(::FeatureCollectionTrait, fc::MaybeArrayFeatureCollection) = _is_array_featurecollection(fc) ? Base.length(fc) : nothing
 GeoInterface.getfeature(::FeatureCollectionTrait, fc::MaybeArrayFeatureCollection, i::Integer) = _is_array_featurecollection(fc) ? fc[i] : nothing
 GeoInterface.geometrycolumns(fc::MaybeArrayFeatureCollection) = _is_array_featurecollection(fc) ? (:geometry,) : nothing
+
+# Extents.Extent as RectangleTrait
+GeoInterface.isgeometry(::Type{Extent{(:X, :Y), V}}) where V <:Tuple  = true
+GeoInterface.isgeometry(::Type{Extent{(:X, :Y, :Z), V}}) where V <:Tuple  = true
+GeoInterface.isgeometry(::Type{Extent{(:X, :Y, :Z, :M), V}}) where V <:Tuple  = true
+GeoInterface.geomtrait(::Extents.Extent) = RectangleTrait()
+GeoInterface.ncoord(::RectangleTrait, geom::Extent{(:X, :Y)}) = 2
+GeoInterface.ncoord(::RectangleTrait, geom::Extent{(:X, :Y, :Z)}) = 3
+GeoInterface.ncoord(::RectangleTrait, geom::Extent{(:X, :Y, :Z, :M)}) = 4
+GeoInterface.ngeom(::RectangleTrait, geom::Extents.Extent) = 1  # Rectangle has one ring
+function GeoInterface.getgeom(::RectangleTrait, geom::Extents.Extent{(:X, :Y)}, i::Integer)
+    i == 1 || throw(BoundsError(geom, i))
+
+    x_bounds = geom.X
+    y_bounds = geom.Y
+    
+    corners = [
+            (x_bounds[1], y_bounds[1]),  # bottom-left
+            (x_bounds[2], y_bounds[1]),  # bottom-right  
+            (x_bounds[2], y_bounds[2]),  # top-right
+            (x_bounds[1], y_bounds[2]),  # top-left
+            (x_bounds[1], y_bounds[1])   # close the ring
+    ]
+    # Wrap the corners in a LinearRing
+    return GeoInterface.LinearRing(corners)
+end
+
+function GeoInterface.getgeom(::RectangleTrait, geom::Extents.Extent, i::Integer)
+    throw(ArgumentError("Extents with dimension other than XY are not supported as RectangleTrait geometries"))
+end

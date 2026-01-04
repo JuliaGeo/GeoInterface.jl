@@ -542,3 +542,26 @@ Extents.extent(::ExtentPolygon) = Extent(X=(1, 2), Y=(3, 4))
     @test isnothing(GeoInterface.extent(1))
     @test isnothing(GeoInterface.extent(nothing, 1))
 end
+
+@testset "Extent as RectangleTrait" begin
+    # Create an extent
+    extent = Extent(X=(1.0, 3.0), Y=(2.0, 4.0))
+    
+    @test GeoInterface.isgeometry(extent)
+    @test GeoInterface.geomtrait(extent) isa RectangleTrait
+    @test GeoInterface.ncoord(extent) == 2
+    @test GeoInterface.ngeom(extent) == 1
+    
+    ring = GeoInterface.getgeom(extent, 1)
+    @test GeoInterface.geomtrait(ring) isa LinearRingTrait
+    @test GeoInterface.npoint(ring) == 5  # 4 corners + closing point
+    @inferred GeoInterface.getpoint(extent)
+    corners = collect(GeoInterface.getpoint(extent))
+    @test corners[1] == (1.0, 2.0)  # bottom-left
+    @test corners[2] == (3.0, 2.0)  # bottom-right
+    @test corners[3] == (3.0, 4.0)  # top-right
+    @test corners[4] == (1.0, 4.0)  # top-left
+    @test corners[5] == (1.0, 2.0)  # closed ring
+    
+    @test testgeometry(extent)
+end
