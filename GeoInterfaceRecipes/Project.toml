@@ -1,0 +1,11 @@
+name = "GeoInterfaceRecipes"
+uuid = "0329782f-3d07-4b52-b9f6-d3137cf03c7a"
+authors = ["JuliaGeo and contributors"]
+version = "1.0.3"
+
+[deps]
+GeoInterface = "cf35fbd7-0cd7-5166-be24-54bfbe79505f"
+
+[compat]
+GeoInterface = "1.5"
+julia = "1.6"
