@@ -380,7 +380,6 @@ vecfc = GI.FeatureCollection([(geometry=(1,2), a=1, b=2)])
 @test GI.coordtype(vecfc) == Int
 
 
-
 struct MaPointRappa
     x::Float64
     y::Float64
@@ -405,6 +404,21 @@ end
         "LineString{false, false}([MaPointRappa(1.0, 2.0), MaPointRappa(3.0, 4.0)])", 
         "LineString([MaPointRappa(1.0, 2.0),MaPointRappa(3.0, 4.0)])" # FIXME: this should not show the point type!
     )
+end
+
+@testset "Extent skips NaN (#166)" begin
+    @testset "NaNs mixed with real values" begin
+        nan_multipoint = GI.MultiPoint([(1.0, NaN), (3.0, 4.0), (3.0, 2.0), (NaN, 4.0), (7.0, 8.0), (9.0, 10.0)])
+        nan_polygon = GI.Polygon(GI.LineString([(1.0, NaN), (3.0, 4.0), (3.0, 2.0), (NaN, 4.0), (7.0, 8.0), (9.0, 10.0)]))
+        @test GI.extent(nan_multipoint) == Extent(X = (1.0, 9.0), Y = (2.0, 10.0))
+        @test GI.extent(nan_polygon) == Extent(X = (1.0, 9.0), Y = (2.0, 10.0))
+    end
+    @testset "All NaN extent should be NaN" begin
+        all_nan_multipoint = GI.MultiPoint([(NaN, NaN) for i in 1:10])
+        all_nan_ext = GI.extent(all_nan_multipoint)
+        @test all(isnan, all_nan_ext.X)
+        @test all(isnan, all_nan_ext.Y)
+    end
 end
 
 # TODO
