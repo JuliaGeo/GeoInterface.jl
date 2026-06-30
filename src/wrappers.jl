@@ -661,6 +661,20 @@ function Base.show(io::IO, ::MIME"text/plain", fc::FeatureCollection)
     return nothing
 end
 
+# Extent constructor
+function LinearRing(ext::Extents.Extent) 
+    LinearRing(
+        [(ext.X[1], ext.Y[1]),
+         (ext.X[2], ext.Y[1]),
+         (ext.X[2], ext.Y[2]),
+         (ext.X[1], ext.Y[2]),
+         (ext.X[1], ext.Y[1]),
+        ]
+    )
+end
+Polygon(ext::Extents.Extent) = Polygon([LinearRing(ext)])
+MultiPolygon(ext::Extents.Extent) =     MultiPolygon([Polygon(ext)])
+
 Base.parent(fc::FeatureCollection) = fc.parent
 
 _child_feature_error() = throw(ArgumentError("child objects must be features"))
