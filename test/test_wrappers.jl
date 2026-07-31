@@ -361,6 +361,20 @@ test_display(feature, "Feature(MultiPolygon{false, false}([Polygon([LinearRing([
 @test_throws ArgumentError GI.Feature(:not_a_feature; properties=(x=1, y=2, z=3))
 @test GI.properties(GI.Feature(multipolygon)) == NamedTuple()
 
+# Feature display dispatch
+tuple_feature = GI.Feature((1, 2); properties=(name="tuple",))
+point_feature = GI.Feature(GI.Point(3, 4); properties=(name="point",))
+test_display(
+    tuple_feature,
+    "Feature((1, 2), properties = (name = \"tuple\"))",
+    "Feature((1, 2),properties=(name=\"tuple\"))",
+)
+test_display(
+    GI.FeatureCollection([tuple_feature, point_feature]),
+    "FeatureCollection([Feature((1, 2), properties = (name = \"tuple\")), Feature(Point{false, false}((3, 4)), properties = (name = \"point\"))])",
+    "FeatureCollection([Feature((1, 2),properties=(name=\"tuple\")),Feature(Point((3,4)),properties=(name=\"point\"))])",
+)
+
 # Feature Collection
 fc_unwrapped = GI.FeatureCollection(feature; crs=EPSG(4326), extent=GI.extent(feature))
 fc = GI.FeatureCollection(fc_unwrapped.parent; crs=EPSG(4326), extent=GI.extent(feature)) # so that `==` works since the underlying array is the same

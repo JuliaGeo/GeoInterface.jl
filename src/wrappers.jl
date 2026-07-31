@@ -537,11 +537,18 @@ function Feature(geometry=nothing; properties=(;), crs=nothing, extent=nothing)
     end
 end
 
+_show_feature_geometry(io::IO, mime::MIME, geometry, ::Bool) =
+    show(io, mime, geometry)
+
+_show_feature_geometry(
+    io::IO, mime::MIME, geometry::WrapperGeometry, show_mz::Bool
+) = show(io, mime, geometry; show_mz)
+
 function Base.show(io::IO, ::MIME"text/plain", f::Feature; show_mz::Bool = true)
     compact = get(io, :compact, false)
     spacing = compact ? "" : " "
     print(io, "Feature(")
-    show(io, MIME"text/plain"(), f.parent.geometry; show_mz = show_mz)
+    _show_feature_geometry(io, MIME"text/plain"(), f.parent.geometry, show_mz)
     non_geom_props = filter(!=(:geometry), propertynames(f.parent))
     if !isempty(non_geom_props)
         print(io, ",$(spacing)properties$(spacing)=$(spacing)(")
