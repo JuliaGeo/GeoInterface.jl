@@ -7,7 +7,7 @@ import GeoInterface as GI
 # Functions called from the macro in GeoInterface 
 GI._makie_plottype(geom) = _plottype_from_geomtrait(GI.geomtrait(geom))
 function GI._makie_convert_arguments(t, geom)::Tuple
-    geob = GI.convert(GB, geom)
+    geob = _convert_for_plottrait(t, geom)
     return Makie.convert_arguments(t, geob)
 end
 function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::Tuple where T
@@ -28,7 +28,7 @@ function GI._makie_convert_array_arguments(plottrait, geoms::AbstractArray{T})::
         end
     else
         # base case
-        Base.Fix1(GI.convert, GB)
+        Base.Fix1(_convert_for_plottrait, plottrait)
     end
     if Missing <: T
         return Makie.convert_arguments(
@@ -56,6 +56,13 @@ end
 function _plottype_from_geomtrait(::Union{GI.GeometryCollectionTrait,GI.PolygonTrait,GI.MultiPolygonTrait,GI.LinearRingTrait})
     Makie.Poly
 end
+
+# Conversion to GeometryBasics, given the plot trait the geometry is headed for.
+# A `LinearRing` converts to a `LineString`, which `poly` has no recipe for, so when
+# plotting as `Poly` it becomes the exterior ring of a `Polygon` instead.
+_convert_for_plottrait(plottrait, geom) = _convert_for_plottrait(plottrait, GI.geomtrait(geom), geom)
+_convert_for_plottrait(plottrait, trait, geom) = GI.convert(GB, geom)
+_convert_for_plottrait(::Type{<:Makie.Poly}, ::GI.LinearRingTrait, geom) = GB.Polygon(GI.convert(GB, geom))
 
 function _operator_nangeom_if_missing_or_func(func, trait::GI.AbstractGeometryTrait, ndims; numtype=Float64)
     nan_geom = _nan_geom(trait, ndims, numtype)
