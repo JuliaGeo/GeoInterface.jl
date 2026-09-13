@@ -83,3 +83,17 @@ end
     # allows colors to be propagated correctly through the array.
     @test_nowarn Makie.poly(polys; color = 1:length(polys))
 end
+
+@testset "LinearRing plots as a filled polygon" begin
+    GB = Makie.GeometryBasics
+    ring = GI.LinearRing([(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 0.0)])
+    @test Makie.plottype(ring) <: Makie.Poly
+    # `poly` has no recipe for a `LineString`, so a ring must become a `Polygon`
+    @test only(Makie.convert_arguments(Makie.Poly, ring)) isa GB.Polygon
+    @test only(Makie.convert_arguments(Makie.Poly, [ring, ring])) isa Vector{<:GB.Polygon}
+    @test_nowarn Makie.poly([ring, ring])
+    # while `lines` keeps converting the ring to a `LineString`, i.e. points
+    @test GI.convert(GB, ring) isa GB.LineString
+    @test only(Makie.convert_arguments(Makie.Lines, ring)) isa Vector{<:Makie.Point}
+    @test_nowarn Makie.lines(ring)
+end
