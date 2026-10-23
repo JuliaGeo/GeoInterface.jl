@@ -434,6 +434,10 @@ convert(::Type{Point}, ::PointTrait, geom) = Point(geom)
 convert(::Type{Point}, ::PointTrait, geom::Point) = geom
 extent(trait::PointTrait, geom::Point) = extent(trait, parent(geom)) 
 
+ngeom(::PointTrait, geom::Point) = error("`GI.ngeom` on a Point is not allowed!  To get the number of dimensions use `GI.ncoord` instead.")
+getgeom(::PointTrait, geom::Point) = error("`GI.getgeom` on a Point is not allowed!  To get the number of dimensions use `GI.getcoord` instead, or `GI.x, GI.y, GI.z, GI.t`")
+getgeom(::PointTrait, geom::Point, i) = error("`GI.getgeom` on a Point is not allowed!  To get the number of dimensions use `GI.getcoord` instead, or `GI.x, GI.y, GI.z, GI.t`")
+
 coordtype(::Point{<:Any,<:Any,<:AbstractArray{T}}) where T = T 
 coordtype(::Point{<:Any,<:Any,<:NTuple{<:Any,T}}) where T = T 
 coordtype(::Point{<:Any,<:Any,<:NamedTuple{<:Any,<:NTuple{<:Any,T}}}) where T = T 
