@@ -79,8 +79,8 @@ const NamedTuplePointM = Union{
     NamedTuple{(:X, :M, :Y),<:PointTuple3},
     NamedTuple{(:M, :Y, :X),<:PointTuple3},
     NamedTuple{(:M, :X, :Y),<:PointTuple3},
-    NamedTuple{(:Y, :X, :Z),<:PointTuple3},
-    NamedTuple{(:Y, :Z, :X),<:PointTuple3},
+    NamedTuple{(:Y, :X, :M),<:PointTuple3},
+    NamedTuple{(:Y, :M, :X),<:PointTuple3},
 }
 const NamedTuplePointZM = Union{
     NamedTuple{(:X, :Y, :Z, :M),<:PointTuple4},
