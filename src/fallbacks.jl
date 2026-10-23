@@ -8,6 +8,11 @@ const default_coord_names = (:X, :Y, :Z, :M)
 
 coordnames(t::AbstractGeometryTrait, geom) = default_coord_names[1:ncoord(t, geom)]
 
+@inline coordtype(::FeatureCollectionTrait, fc) = coordtype(getfeature(fc, 1))
+@inline coordtype(::FeatureTrait, feature) = coordtype(geometry(feature))
+@inline coordtype(::AbstractGeometryTrait, geom) = coordtype(getgeom(geom, 1))
+@inline coordtype(::PointTrait, geom) = typeof(x(geom))
+
 # Maybe hardcode dimension order? At least for X and Y?
 x(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:X), coordnames(geom)))
 y(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Y), coordnames(geom)))
@@ -38,7 +43,7 @@ getexterior(t::AbstractPolygonTrait, geom) = getring(t, geom, 1)
 nhole(t::AbstractPolygonTrait, geom) = nring(t, geom) - 1
 gethole(t::AbstractPolygonTrait, geom) = (getgeom(t, geom, i) for i in 2:ngeom(t, geom))
 gethole(t::AbstractPolygonTrait, geom, i) = getring(t, geom, i + 1)
-npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom))
+npoint(t::AbstractPolygonTrait, geom) = sum(npoint(p) for p in getring(t, geom); init=0)
 getpoint(t::AbstractPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## MultiPoint
@@ -50,16 +55,16 @@ getpoint(t::AbstractMultiPointTrait, geom, i) = getgeom(t, geom, i)
 nlinestring(t::AbstractMultiCurveTrait, geom) = ngeom(t, geom)
 getlinestring(t::AbstractMultiCurveTrait, geom) = getgeom(t, geom)
 getlinestring(t::AbstractMultiCurveTrait, geom, i) = getgeom(t, geom, i)
-npoint(t::AbstractMultiCurveTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom))
+npoint(t::AbstractMultiCurveTrait, geom) = sum(npoint(ls) for ls in getgeom(t, geom); init=0)
 getpoint(t::AbstractMultiCurveTrait, geom) = flatten((p for p in getpoint(ls)) for ls in getgeom(t, geom))
 
 ## MultiPolygon
 npolygon(t::AbstractMultiPolygonTrait, geom) = ngeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom) = getgeom(t, geom)
 getpolygon(t::AbstractMultiPolygonTrait, geom, i) = getgeom(t, geom, i)
-nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(t, geom))
+nring(t::AbstractMultiPolygonTrait, geom) = sum(nring(p) for p in getpolygon(t, geom); init=0)
 getring(t::AbstractMultiPolygonTrait, geom) = flatten((r for r in getring(p)) for p in getpolygon(t, geom))
-npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(t, geom))
+npoint(t::AbstractMultiPolygonTrait, geom) = sum(npoint(r) for r in getring(t, geom); init=0)
 getpoint(t::AbstractMultiPolygonTrait, geom) = flatten((p for p in getpoint(r)) for r in getring(t, geom))
 
 ## Surface
@@ -95,8 +100,11 @@ issimple(t::AbstractMultiPointTrait, geom) = allunique((getgeom(t, geom)))
 issimple(t::AbstractMultiCurveTrait, geom) = all(issimple.(getgeom(t, geom)))
 isclosed(t::AbstractMultiCurveTrait, geom) = all(isclosed.(getgeom(t, geom)))
 
-crs(::Nothing, geom) = nothing
-crs(::AbstractTrait, geom) = nothing
+"The key used to retrieve and store the CRS from DataAPI.jl metadata, if no other solution exists in that format."
+const GEOINTERFACE_CRS_KEY = "GEOINTERFACE:crs"
+
+crs(::Nothing, geom) = _get_dataapi_metadata(geom, GEOINTERFACE_CRS_KEY, nothing) # see `metadata.jl`
+crs(::AbstractTrait, geom) = _get_dataapi_metadata(geom, GEOINTERFACE_CRS_KEY, nothing) # see `metadata.jl`
 
 # FeatureCollection
 getfeature(t::AbstractFeatureCollectionTrait, fc) = (getfeature(t, fc, i) for i in 1:nfeature(t, fc))
@@ -122,6 +130,7 @@ function calc_extent(t::AbstractPointTrait, geom)
     end
 end
 function calc_extent(t::AbstractGeometryTrait, geom)
+    isempty(t, geom) && return nothing
     points = getpoint(t, geom)
     X = extrema(p -> x(p), points)
     Y = extrema(p -> y(p), points)
@@ -145,6 +154,9 @@ calc_extent(t::AbstractFeatureCollectionTrait, fc) = reduce(Extents.union, filte
 # corresponding geometry type
 function convert(package::Module, geom)
     t = trait(geom)
+    convert(package, t, geom)
+end
+function convert(package::Module, t::AbstractTrait, geom)
     isdefined(package, :geointerface_geomtype) || throw(ArgumentError("$package does not implement `geointerface_geomtype`. Please request this be implemented in a github issue."))
     convert(package.geointerface_geomtype(t), t, geom)
 end

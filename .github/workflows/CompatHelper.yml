@@ -15,7 +15,7 @@ jobs:
         run: which julia
         continue-on-error: true
       - name: Install Julia, but only if it is not already available in the PATH
-        uses: julia-actions/setup-julia@v2
+        uses: julia-actions/setup-julia@v3
         with:
           version: '1'
           arch: ${{ runner.arch }}
@@ -37,11 +37,7 @@ jobs:
       - name: "Run CompatHelper"
         run: |
           import CompatHelper
-          CompatHelper.main(; subdirs=[
-              ".",
-              "GeoInterfaceMakie",
-              "GeoInterfaceRecipes",
-          ])
+          CompatHelper.main()
         shell: julia --color=yes {0}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

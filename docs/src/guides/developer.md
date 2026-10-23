@@ -9,6 +9,12 @@ it could be useful to also implement some optional methods if they apply or are 
 If your package also supports geospatial operations on geometries--such as intersections--, please
 also implement those interfaces where applicable.
 
+GeoInterface also has some utility packages, `GeoInterfaceMakie` and `GeoInterfaceRecipes`, 
+which provide plotting support through their `@enable` macros.
+If you wish to implement plotting support for your geometry, please create a [package extension](https://pkgdocs.julialang.org/v1/creating-packages/#Conditional-loading-of-code-in-packages-(Extensions)) 
+that extends either `Makie` (for the Makie.jl ecosystem) or `RecipesBase` (for the Plots.jl ecosystem).
+You can find some examples of this pattern in [Shapefile.jl](https://github.com/JuliaGeo/Shapefile.jl/blob/main/ext/ShapefileMakieExt.jl) and [GeoJSON.jl](https://github.com/JuliaGeo/GeoJSON.jl/blob/main/ext/GeoJSONMakieExt.jl).
+
 Last but not least, we also provide an interface for rasters and features--geometries with properties--if applicable.
 
 ## Required for Geometry
@@ -85,6 +91,22 @@ GeoInterface.geometrycolumns(::customcollection) = (:geometry,)  # can be multip
 ```
 
 The `geometrycolumns` enables other packages to know which field in a row, or column in a table, contains the geometry or geometries.
+
+It's important to note that the `geometrycolumns` should always return a `Tuple` of `Symbol`s.  However, it does have a fallback method
+that uses [DataAPI.jl](https://github.com/JuliaData/DataAPI.jl) metadata, if it exists, to retrieve the geometry columns.  This relies on
+the `"GEOINTERFACE:geometrycolumns"` metadata key.  GeoInterface.jl compatible writers may set this metadata key if writing to a format
+that does not have its own mechanism to store known geometry columns, like Arrow.
+
+Optionally, the `crs` method can also be implemented:
+```julia
+GeoInterface.crs(::customcollection)
+```
+
+This should return a `GeoFormatTypes.CoordinateReferenceSystem` type, such as `EPSG(code::Int)`, `WellKnownText(GeoFormatTypes.CRS(), wkt::String)`, 
+or `ProjString(p4::String)`.  See [GeoFormatTypes.jl](https://github.com/JuliaGeo/GeoFormatTypes.jl) for more information.
+
+The `crs` method also has a fallback that uses [DataAPI.jl](https://github.com/JuliaData/DataAPI.jl) metadata, if it exists, to retrieve the CRS.
+GeoInterface searches for the `"GEOINTERFACE:crs"` metadata key to retrieve the CRS.
 
 ## Geospatial Operations
 ```julia

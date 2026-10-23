@@ -1,17 +1,22 @@
-[![Build Status](https://github.com/JuliaGeo/GeoInterface.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/JuliaGeo/GeoInterface.jl/actions/workflows/CI.yml?query=branch%3Amain)
+# GeoInterfaceRecipes.jl
 
-# GeoInterfaceRecipes
+**This package is deprecated.**
 
-Plot recipes for GeoInterface objects, using RecipesBase.jl (and Plots.jl)
+Plotting recipes for GeoInterface geometries are now built directly into [GeoInterface.jl](https://github.com/JuliaGeo/GeoInterface.jl) as package extensions:
 
-# Usage
-Add RecipesBase.jl support to a type that implements GeoInterface:
+- **Plots.jl support**: Load `GeoInterface` with `Plots` and recipes work automatically
+- **Makie.jl support**: Load `GeoInterface` with `Makie` and `GeometryBasics` for Makie plotting
+
+## Migration
+
+No action is needed. Simply remove `GeoInterfaceRecipes` from your dependencies and use `GeoInterface` directly with your preferred plotting package.
+
 ```julia
-struct MyGeometry
-...
-end
-# overload GeoInterface methods
-...
-import GeoInterfaceRcipes
-GeoInterfaceMakie.@enable_geo_plots MyGeometry
+using GeoInterface
+using Plots  # or using Makie
+
+# Plotting just works
+plot(my_geometry)
 ```
+
+This empty package exists only to provide a smooth upgrade path for users who had GeoInterfaceRecipes.jl in their dependencies.

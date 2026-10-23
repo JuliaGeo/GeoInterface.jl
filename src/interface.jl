@@ -39,12 +39,27 @@ isfeaturecollection(x::T) where {T} = isfeaturecollection(T)
 isfeaturecollection(::Type{T}) where {T} = false
 
 """
+The key used to retrieve and store the geometrycolumns from DataAPI.jl metadata, if no other solution exists in that format.
+"""
+const GEOINTERFACE_GEOMETRYCOLUMNS_KEY = "GEOINTERFACE:geometrycolumns"
+
+"""
     GeoInterface.geometrycolumns(featurecollection) => (:geometry,)
 
 Retrieve the geometrycolumn(s) of `featurecollection`; the fields (or columns in a table)
 which contain geometries that support GeoInterface.
+
+This is always a `Tuple` of `Symbol`s.
 """
-geometrycolumns(featurecollection) = (:geometry,)
+function geometrycolumns(featurecollection)
+    gcs = _get_dataapi_metadata(featurecollection, GEOINTERFACE_GEOMETRYCOLUMNS_KEY, (:geometry,)) # see `metadata.jl`
+    return _aftercare_geometrycolumns(gcs)
+end
+
+_aftercare_geometrycolumns(gcs::Tuple{Vararg{Symbol}}) = gcs
+_aftercare_geometrycolumns(gcs::Tuple{Vararg{String}}) = Symbol.(gcs)
+_aftercare_geometrycolumns(gcs::String) = (Symbol(gcs),)
+_aftercare_geometrycolumns(gcs::Symbol) = (gcs,)
 
 """
     GeoInterface.geometry(feat) => geom
@@ -583,6 +598,15 @@ Returns a geometric object that represents the convex hull of the given `geom`.
 convexhull(geom) = convexhull(geomtrait(geom), geom)
 
 """
+    coordtype(geom) -> Type
+
+Return the type of the coordinates in the geom. 
+
+Usually `<: AbstractFloat` but can be any `Number`.
+"""
+coordtype(geom) = coordtype(trait(geom), geom)
+
+"""
     x(geom) -> Number
 
 Return the :X coordinate of the given `geom`.
@@ -658,6 +682,21 @@ geom type for the trait using the modules `geointerface_traittype` method.
 
 `convert(T::Type)` or `convert(m::Module)` return curried versions of that function, 
 just like `==`.
+
+# Extended help
+
+For developers, the base implementation is `GeoInterface.convert(::YourGeomType, ::AbstractTrait, some_other_geom)`.
+This is the method signature that must be implemented for a custom geometry type.  
+    
+Users may also call this method directly, if they know the exact output - this can sometimes 
+save the Julia compiler some work and cause more optimal code to be generated.
+
+For convenience and type stability there is a `convert(::Module, ::AbstractTrait, geom)` method
+that is particularly useful when the trait of a geometry needs to be propagated deep within the 
+stack.  
+
+This helps to prevent the compiler from losing the trait information, especially useful 
+when dealing with sumtype-like implementations or opaque pointers from C libraries.
 """
 convert(T, geom) = convert(T, geomtrait(geom), geom)
 convert(::Type{T}, x::T) where {T} = x  # no-op

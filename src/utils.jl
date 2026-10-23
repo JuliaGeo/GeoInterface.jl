@@ -5,6 +5,7 @@ Test whether the required interface for your `geom` has been implemented correct
 """
 function testgeometry(geom)
     @assert isgeometry(geom) "$geom doesn't implement `isgeometry`."
+    @assert isgeometry(typeof(geom)) "Type{$(typeof(geom))} doesn't implement `isgeometry`."
     type = geomtrait(geom)
     @assert !isnothing(type) "$geom doesn't implement `geomtrait`."
 
