@@ -23,8 +23,11 @@ is3d(::AbstractGeometryTrait, geom) = !isnothing(_coordindex(coordnames(geom), :
 ismeasured(::AbstractGeometryTrait, geom) = !isnothing(_coordindex(coordnames(geom), :M))
 isempty(::AbstractGeometryTrait, geom) = false
 
-# `coordnames` can't be inferred when `ncoord` is only known at runtime, so split on
-# the common lengths to avoid dynamic dispatch and allocations in `findfirst`.
+# Manual union splitting. When `ncoord` is only known at runtime, `coordnames` is
+# inferred as `Tuple` of unknown length, so `findfirst` on it is a slow runtime dispatch.
+# Inside each `isa` branch the tuple type is concrete, so `findfirst` is resolved at
+# compile time: the branches are identical on purpose. When `coordnames` is inferred,
+# only the matching branch is compiled.
 @inline function _coordindex(names, name::Symbol)
     if names isa NTuple{2,Symbol}
         findfirst(isequal(name), names)
