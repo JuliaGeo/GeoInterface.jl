@@ -485,6 +485,13 @@ end
         @test collect(GeoInterface.getcoord(geom)) == [3, 1, 2, 4]
         @test GeoInterface.coordnames(geom) == (:Z, :X, :Y, :M)
 
+        for geom in ((; Y=2, X=1, M=4), (; Y=2, M=4, X=1))
+            @test testgeometry(geom)
+            @test !GeoInterface.is3d(geom)
+            @test GeoInterface.ismeasured(geom)
+            @test (GeoInterface.x(geom), GeoInterface.y(geom), GeoInterface.m(geom)) == (1, 2, 4)
+        end
+
         geom = (; A=0, X=1, Y=2, Z=3.0f0, M=4.0)
         @test GeoInterface.trait(geom) isa Nothing
         @test GeoInterface.geomtrait(geom) isa Nothing
