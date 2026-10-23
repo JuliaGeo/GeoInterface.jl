@@ -68,7 +68,7 @@ ncoord(::AbstractGeometryTrait, ::WrapperGeometry{Z, M}) where {Z, M} = 2 + Z + 
 Base.parent(geom::WrapperGeometry) = geom.geom
 
 function Base.:(==)(g1::WrapperGeometry, g2::WrapperGeometry)
-    all(((a, b),) -> a == b, zip(getgeom(g1), getgeom(g2)))
+    ngeom(g1) == ngeom(g2) && all(((a, b),) -> a == b, zip(getgeom(g1), getgeom(g2)))
 end
 
 # Interface methods

@@ -169,6 +169,8 @@ linestring = GI.LineString([(1, 2), (3, 4)])
 test_display(linestring, "LineString{false, false}([(1, 2), (3, 4)])", "LineString([(1,2),(3,4)])")
 @test @inferred(GI.extent(linestring)) == Extent(X=(1, 3), Y=(2, 4))
 @test_throws ArgumentError GI.LineString([(1, 2)])
+@test linestring != GI.LineString([(1, 2), (3, 4), (5, 6)])
+@test GI.LineString([(1, 2), (3, 4), (5, 6)]) != linestring
 linestring_crs = GI.LineString(linestring; crs=EPSG(4326))
 @test parent(linestring_crs) === parent(linestring)
 @test GI.crs(linestring_crs) === EPSG(4326)
