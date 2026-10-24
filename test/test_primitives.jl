@@ -30,6 +30,15 @@ GeoInterface.geomtrait(::MyPoint) = PointTrait()
 GeoInterface.ncoord(::PointTrait, geom::MyPoint) = 2
 GeoInterface.getcoord(::PointTrait, geom::MyPoint, i) = [1, 2][i]
 
+# A point where `ncoord` is only known at runtime
+struct MyVectorPoint
+    coords::Vector{Float64}
+end
+GeoInterface.isgeometry(::Type{MyVectorPoint}) = true
+GeoInterface.geomtrait(::MyVectorPoint) = PointTrait()
+GeoInterface.ncoord(::PointTrait, geom::MyVectorPoint) = length(geom.coords)
+GeoInterface.getcoord(::PointTrait, geom::MyVectorPoint, i) = geom.coords[i]
+
 GeoInterface.isgeometry(::Type{MyEmptyPoint}) = true
 GeoInterface.geomtrait(::MyEmptyPoint) = PointTrait()
 GeoInterface.ncoord(::PointTrait, geom::MyEmptyPoint) = 0
@@ -133,6 +142,23 @@ GeoInterface.crs(::RasterTrait, ::Raster) = GeoFormatTypes.EPSG(4326)
         @test GeoInterface.isempty(geom)
 
         @test isnothing(GeoInterface.crs(geom))
+
+        geom = MyVectorPoint([1.0, 2.0])
+        @test GeoInterface.x(geom) === 1.0
+        @test GeoInterface.y(geom) === 2.0
+        @test_throws ArgumentError GeoInterface.z(geom)
+        @test !GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
+        geom = MyVectorPoint([1.0, 2.0, 3.0])
+        @test GeoInterface.z(geom) === 3.0
+        @test GeoInterface.is3d(geom)
+        @test !GeoInterface.ismeasured(geom)
+        geom = MyVectorPoint([1.0, 2.0, 3.0, 4.0])
+        @test GeoInterface.z(geom) === 3.0
+        @test GeoInterface.m(geom) === 4.0
+        @test GeoInterface.is3d(geom)
+        @test GeoInterface.ismeasured(geom)
+        @test GeoInterface.extent(geom) == Extents.Extent(X=(1.0, 1.0), Y=(2.0, 2.0), Z=(3.0, 3.0))
     end
 
     @testset "LineString" begin

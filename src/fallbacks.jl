@@ -14,14 +14,31 @@ coordnames(t::AbstractGeometryTrait, geom) = default_coord_names[1:ncoord(t, geo
 @inline coordtype(::PointTrait, geom) = typeof(x(geom))
 
 # Maybe hardcode dimension order? At least for X and Y?
-x(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:X), coordnames(geom)))
-y(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Y), coordnames(geom)))
-z(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:Z), coordnames(geom)))
-m(t::AbstractPointTrait, geom) = getcoord(t, geom, findfirst(isequal(:M), coordnames(geom)))
+x(t::AbstractPointTrait, geom) = getcoord(t, geom, _coordindex(coordnames(geom), :X))
+y(t::AbstractPointTrait, geom) = getcoord(t, geom, _coordindex(coordnames(geom), :Y))
+z(t::AbstractPointTrait, geom) = getcoord(t, geom, _coordindex(coordnames(geom), :Z))
+m(t::AbstractPointTrait, geom) = getcoord(t, geom, _coordindex(coordnames(geom), :M))
 
-is3d(::AbstractGeometryTrait, geom) = :Z in coordnames(geom)
-ismeasured(::AbstractGeometryTrait, geom) = :M in coordnames(geom)
+is3d(::AbstractGeometryTrait, geom) = !isnothing(_coordindex(coordnames(geom), :Z))
+ismeasured(::AbstractGeometryTrait, geom) = !isnothing(_coordindex(coordnames(geom), :M))
 isempty(::AbstractGeometryTrait, geom) = false
+
+# Manual union splitting. When `ncoord` is only known at runtime, `coordnames` is
+# inferred as `Tuple` of unknown length, so `findfirst` on it is a slow runtime dispatch.
+# Inside each `isa` branch the tuple type is concrete, so `findfirst` is resolved at
+# compile time: the branches are identical on purpose. When `coordnames` is inferred,
+# only the matching branch is compiled.
+@inline function _coordindex(names, name::Symbol)
+    if names isa NTuple{2,Symbol}
+        findfirst(isequal(name), names)
+    elseif names isa NTuple{3,Symbol}
+        findfirst(isequal(name), names)
+    elseif names isa NTuple{4,Symbol}
+        findfirst(isequal(name), names)
+    else
+        findfirst(isequal(name), names)
+    end
+end
 
 ## Points
 ngeom(::AbstractPointTrait, geom) = 0
