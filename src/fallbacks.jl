@@ -146,19 +146,46 @@ function calc_extent(t::AbstractPointTrait, geom)
         return Extent(; X=(x, x), Y=(y, y))
     end
 end
-function calc_extent(t::AbstractGeometryTrait, geom)
+# Geometries made of points: a single pass over all points
+function calc_extent(t::Union{AbstractCurveTrait,AbstractMultiPointTrait}, geom)
     isempty(t, geom) && return nothing
     points = getpoint(t, geom)
-    X = extrema(p -> x(p), points)
-    Y = extrema(p -> y(p), points)
+    p1 = first(points)
+    xmin = xmax = x(p1)
+    ymin = ymax = y(p1)
     if is3d(geom)
-        Z = extrema(p -> z(p), points)
-        Extent(; X, Y, Z)
+        zmin = zmax = z(p1)
+        for p in points
+            px, py, pz = x(p), y(p), z(p)
+            xmin, xmax = min(xmin, px), max(xmax, px)
+            ymin, ymax = min(ymin, py), max(ymax, py)
+            zmin, zmax = min(zmin, pz), max(zmax, pz)
+        end
+        return Extent(; X=(xmin, xmax), Y=(ymin, ymax), Z=(zmin, zmax))
     else
-        Extent(; X, Y)
+        for p in points
+            px, py = x(p), y(p)
+            xmin, xmax = min(xmin, px), max(xmax, px)
+            ymin, ymax = min(ymin, py), max(ymax, py)
+        end
+        return Extent(; X=(xmin, xmax), Y=(ymin, ymax))
     end
 end
-calc_extent(t::GeometryCollectionTrait, geom) = reduce(Extents.union, (extent(f) for f in getgeom(t, geom)))
+# Geometries made of other geometries: the union of the extents of their parts.
+# This avoids `reduce`, `extent(g)` and helper functions, which all stop inference
+# for nested geometries.
+function calc_extent(t::AbstractGeometryTrait, geom)
+    isempty(t, geom) && return nothing
+    parts = getgeom(t, geom)
+    g1 = first(parts)
+    ext = extent(trait(g1), g1)
+    ext = isnothing(ext) ? calc_extent(trait(g1), g1) : ext
+    for g in Iterators.drop(parts, 1)
+        gext = extent(trait(g), g)
+        ext = Extents.union(ext, isnothing(gext) ? calc_extent(trait(g), g) : gext)
+    end
+    return ext
+end
 function calc_extent(::AbstractFeatureTrait, feature)
     geom = geometry(feature)
     isnothing(geom) ? nothing : extent(geom)

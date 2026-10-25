@@ -224,6 +224,11 @@ polygon3d = GI.Polygon([linearring3d, linearring3d])
 @test GI.is3d(polygon3d)
 @test GI.ncoord(polygon3d) == 3
 @test GI.extent(polygon3d) == Extents.Extent(X=(1, 5), Y=(2, 6), Z=(3, 7))
+# Polygon extents combine all rings, using stored ring extents
+polygon_outside_hole = GI.Polygon([linearring, GI.LinearRing([(10, 20), (30, 40), (50, 60), (10, 20)])])
+@test @inferred(GI.extent(polygon_outside_hole)) == Extent(X=(1, 50), Y=(2, 60))
+polygon_ring_extent = GI.Polygon([GI.LinearRing(parent(linearring); extent=Extent(X=(0, 10), Y=(0, 10)))])
+@test GI.extent(polygon_ring_extent) == Extent(X=(0, 10), Y=(0, 10))
 test_display(linearring3d, "LinearRing{true, false}([(1, 2, 3), (3, 4, 5), (5, 6, 7), (1, 2, 3)])", "LinearRing([(1,2,3),(3,4,5),(5,6,7),(1,2,3)])")
 
 # MultiPoint
