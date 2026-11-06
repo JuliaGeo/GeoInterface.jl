@@ -472,3 +472,71 @@ end
 # @test collect(GI.getpoint(tin)) == collect(GI.getpoint(triangle))
 # @test_throws ArgumentError GI.TIN([(1, 2), (3, 4), (3, 2), (1, 4), (7, 8), (9, 10)])
 # @test GI.testgeometry(tin)
+
+# A foreign geometry with indexed children and its own full display.
+struct CountedDisplayGeometry{T,G}
+    children::G
+    reads::Base.RefValue{Int}
+end
+CountedDisplayGeometry(t, children, reads) = CountedDisplayGeometry{typeof(t),typeof(children)}(children, reads)
+GI.isgeometry(::Type{<:CountedDisplayGeometry}) = true
+GI.geomtrait(::CountedDisplayGeometry{T}) where T = T()
+GI.ngeom(::GI.AbstractGeometryTrait, g::CountedDisplayGeometry) = length(g.children)
+function GI.getgeom(::GI.AbstractGeometryTrait, g::CountedDisplayGeometry, i)
+    g.reads[] += 1
+    return g.children[i]
+end
+GI.ncoord(::GI.AbstractGeometryTrait, ::CountedDisplayGeometry) = 2
+function Base.show(io::IO, ::MIME"text/plain", g::CountedDisplayGeometry)
+    print(io, "foreign(")
+    for child in GI.getgeom(g)
+        show(io, MIME"text/plain"(), child)
+    end
+    print(io, ")")
+end
+
+@testset "limited display of wrapped geometries" begin
+    reads = Ref(0)
+    display_with(g, props...) = sprint(io -> show(IOContext(io, props...), MIME"text/plain"(), g))
+    points = [(0, 0), (1, 0), (1, 1), (0, 0)]
+    makepolygon(points) = GI.Polygon(CountedDisplayGeometry(GI.PolygonTrait(),
+        [CountedDisplayGeometry(GI.LinearRingTrait(), points, reads)], reads))
+    small = makepolygon(points)
+    native = GI.Polygon([GI.LinearRing(points)])
+    for compact in (false, true)
+        props = (:displaysize => (24, 80), :limit => true, :compact => compact)
+        @test display_with(small, props...) == display_with(native, props...)
+    end
+    @test occursin("foreign(", display_with(small, :limit => false, :compact => false))
+
+    large = makepolygon(fill((1, 2), 10_000))
+    for props in ((:compact => true,), (:limit => true,), (:limit => true, :compact => false))
+        reads[] = 0
+        shown = display_with(large, :displaysize => (24, 32), props...)
+        @test occursin("…", shown)
+        @test 0 < reads[] < 16
+        @test length(shown) < 140
+    end
+    multi = GI.MultiPolygon(CountedDisplayGeometry(GI.MultiPolygonTrait(), [parent(large)], reads))
+    reads[] = 0
+    @test occursin("…", display_with(multi, :limit => true, :displaysize => (24, 8)))
+    @test 0 < reads[] < 16
+
+    for props in ((:compact => true,), (:limit => true,))
+        collection = display_with(GI.GeometryCollection([MyCollection()]), props...)
+        @test occursin("GeometryCollection([LineString(", collection)
+        @test occursin("MyEmptyPoint", display_with(GI.MultiPoint([MyEmptyPoint()]), props...))
+    end
+
+    tree = parent(large)
+    for _ in 1:12
+        tree = CountedDisplayGeometry(GI.GeometryCollectionTrait(), [tree, tree], reads)
+    end
+    nested = GI.GeometryCollection([tree])
+    reads[] = 0
+    @test occursin("…", display_with(nested, :limit => true, :displaysize => (24, 48)))
+    @test reads[] < 32
+
+    empty = GI.Polygon(CountedDisplayGeometry(GI.PolygonTrait(), [], reads))
+    @test endswith(display_with(empty, :limit => true), "([])")
+end

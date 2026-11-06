@@ -200,48 +200,17 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
                 str *= "{$Z,$(spacing)$M}"
             end
             str *= "("
-            this_geom = getgeom(trait(geom), geom)
+            limited = get(io, :limit, false)
+            indexed = (compact || limited) && isgeometry(T)
+            children = indexed ? nothing : getgeom(trait(geom), geom)
+            child(i) = indexed ? getgeom(geom, i) : children[i]
             # keep track of how much space we've used + make sure we give this info to any child geoms so they don't go over the limit
             currently_used_space = textwidth(str) + textwidth(extent_str) + textwidth(crs_str)
-            if this_geom isa AbstractVector
-                # check here if we have enough room to display the whole object or if we need to condense the string
-                str *= "["
-                currently_used_space += 2 # +2 for brackets
-                available_space = screen_ncols - currently_used_space
-
-                space_per_object = floor(Int, available_space / length(this_geom))
-
-                length_of_one_object_in_chars = textwidth(_nice_geom_str(this_geom[1], false, compact, space_per_object))
-
-                # this makes sure that if we have 1 or 2 geometries here, we show both, but any more and we skip them
-                num_objects_to_show = min(length(this_geom), max(2, floor(Int, (available_space - 1 #=triple dot character =#) / length_of_one_object_in_chars)))
-
-                # separately track how many objects to show to the left and right of the ...()...
-                num_objects_left = num_objects_to_show == 1 ? 0 : ceil(Int, num_objects_to_show/2)
-                num_objects_right = max(1, floor(Int, num_objects_to_show/2))
-                
-                # how many objects are we skipping?
-                num_missing = length(this_geom) - (num_objects_left + num_objects_right)
-                
-                for i ∈ 1:num_objects_left
-                    str *= "$(_nice_geom_str(this_geom[i], false, compact, space_per_object)),$(spacing)"
-                end
-                
-                if num_missing > 0
-                    # report how many geometries aren't shown here
-                    str *= "…$(spacing)($(num_missing))$(spacing)…$(spacing),$(spacing)"
-                end
-
-                for i ∈ 1:num_objects_right
-                    str *= _nice_geom_str(this_geom[end - num_objects_right + i], false, compact, space_per_object)
-                    if i != num_objects_right
-                        str *= ",$(spacing)"
-                    end
-                end
-                
-                str *= "]"
+            if indexed || children isa AbstractVector
+                n = indexed ? ngeom(geom) : length(children)
+                str *= _children_str(child, n, compact, limited, screen_ncols - currently_used_space)
             else
-                str *= _nice_geom_str(parent(geom), false, compact, screen_ncols - currently_used_space)
+                str *= _nice_geom_str(parent(geom), false, compact, screen_ncols - currently_used_space, limited)
             end
 
             str *= extent_str
@@ -315,27 +284,68 @@ for (geomtype, trait, childtype, child_trait, length_check, nesting) in (
     end
 end
 
-function _nice_geom_str(geom, ::Bool, ::Bool, ::Int) 
-    io = IOBuffer()
+function _children_str(child, n, compact, limited, width)
+    n == 0 && return "[]"
+    spacing = compact ? "" : " "
+    available = width - 2 # brackets
+    child_width = fld(available, n)
+    function render(i)
+        geom = child(i)
+        if (compact || limited) && !(geom isa WrapperGeometry) && isgeometry(geom)
+            t = geomtrait(geom)
+            if !(t isa PointTrait) && applicable(geointerface_geomtype, t)
+                name = string(geointerface_geomtype(t))
+                remaining = child_width - textwidth(name) - 2
+                nchildren = ngeom(t, geom)
+                nchildren == 0 && return name * "([])"
+                remaining <= 2 && return name * "(…)"
+                children = _children_str(k -> getgeom(t, geom, k), nchildren,
+                    compact, limited, remaining)
+                return name * "(" * children * ")"
+            end
+        end
+        return _nice_geom_str(geom, false, compact, child_width, limited)
+    end
+    first_child = render(1)
+    n == 1 && return "[" * first_child * "]"
+
+    visible = clamp(fld(available - 1, max(1, textwidth(first_child))), 2, n)
+    left, right = cld(visible, 2), fld(visible, 2)
+    parts = String[first_child]
+    for i in 2:left
+        push!(parts, render(i))
+    end
+    if visible < n
+        push!(parts, "…$(spacing)($(n - visible))$(spacing)…$(spacing)")
+    end
+    for i in (n - right + 1):n
+        push!(parts, render(i))
+    end
+    return "[" * join(parts, "," * spacing) * "]"
+end
+
+function _nice_geom_str(geom, show_mz::Bool, compact::Bool, width::Int, limited::Bool)
+    buf = IOBuffer()
+    io = compact || limited ? IOContext(buf, :compact => compact, :limit => limited, :displaysize => (24, max(1, width))) : buf
     show(io, MIME"text/plain"(), geom)
-    return String(take!(io))
+    return String(take!(buf))
 end
 # need a work around to pass the show_mz variable through - put string to a temp IOBuffer then read it
-function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, compact::Bool, screen_ncols::Int) 
+function _nice_geom_str(geom::WrapperGeometry, show_mz::Bool, compact::Bool, screen_ncols::Int, limited::Bool)
     buf = IOBuffer()
-    io = IOContext(IOContext(buf, :compact => compact))
+    io = IOContext(buf, :compact => compact, :limit => limited)
     show(io, MIME"text/plain"(), geom; show_mz = show_mz, screen_ncols = screen_ncols)
     return String(take!(buf))
 end
 # handle tuples/vectors explicitly
-function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool, ::Int)
+function _nice_geom_str(geom::AbstractVector, ::Bool, compact::Bool, ::Int, ::Bool)
     spacing = compact ? "" : " "
     str = "["
     str *= _add_elements_with_spacing(geom, spacing)
     str *= "]"
     return str
 end
-function _nice_geom_str(geom::Tuple, ::Bool, compact::Bool, ::Int)
+function _nice_geom_str(geom::Tuple, ::Bool, compact::Bool, ::Int, ::Bool)
     spacing = compact ? "" : " "
     str = "("
     str *= _add_elements_with_spacing(geom, spacing)
